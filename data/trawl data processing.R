@@ -91,35 +91,24 @@ trawl.data$mean.long <- mean.long[match(trawl.data$STATION, names(mean.long))]
 fit.1 <- gam(log(WTCPUE) ~ s(mean.lat, mean.long, k=60), data=filter(trawl.data, YEAR <= 2013))
 fit.2 <- gam(log(WTCPUE) ~ s(mean.lat, mean.long, k=60), data=filter(trawl.data, YEAR > 2013))
 
-
 dir.create("figs", showWarnings = FALSE)
 
-png("figs/cpue by decade.png", 8, 6, units="in", res=300)
+png("figs/cpue by decade.png", 8, 3, units="in", res=300)
 
-par(mfrow=c(2,2), mar=c(1,1,1,1))
-zlim <- range(fitted(fit.80s), fitted(fit.90s), fitted(fit.00s), fitted(fit.10s))
+par(mfrow=c(1,2), mar=c(2,2,1,1))
+zlim <- range(fitted(fit.1), fitted(fit.2))
 
 # 80s
-vis.gam(fit.80s, view = c("mean.long", "mean.lat"), n.grid=100, zlim=zlim,	plot.type="contour", color="topo", nlevels=8, labcex=0.8,
+vis.gam(fit.1, view = c("mean.long", "mean.lat"), n.grid=100, zlim=zlim,	plot.type="contour", color="topo", nlevels=8, labcex=0.8,
         too.far = 0.04, xlab = "", ylab = "", 	xlim=c(-180,-157), ylim=c(54,67), main="")  
 map('worldHires',fill=T,add=T)
-text(-160, 61, "1982-1990", col="white")
+text(-160, 61, "1982-2013", col="white")
 
 # 90s
-vis.gam(fit.90s, view = c("mean.long", "mean.lat"), n.grid=100, zlim=zlim,	plot.type="contour", color="topo", nlevels=8, labcex=0.8,
+vis.gam(fit.2, view = c("mean.long", "mean.lat"), n.grid=100, zlim=zlim,	plot.type="contour", color="topo", nlevels=8, labcex=0.8,
               too.far = 0.04, xlab = "", ylab = "", 	xlim=c(-180,-157), ylim=c(54,67), main="")  
 map('worldHires',fill=T,add=T)
-text(-160, 61, "1991-2000", col="white")
-
-vis.gam(fit.00s, view = c("mean.long", "mean.lat"), n.grid=100, zlim=zlim,	plot.type="contour", color="topo", nlevels=8, labcex=0.8,
-        too.far = 0.04, xlab = "", ylab = "", 	xlim=c(-180,-157), ylim=c(54,67), main="")  
-map('worldHires',fill=T,add=T)
-text(-160, 61, "2001-2010", col="white")
-
-vis.gam(fit.10s, view = c("mean.long", "mean.lat"), n.grid=100, zlim=zlim,	plot.type="contour", color="topo", nlevels=8, labcex=0.8,
-        too.far = 0.04, xlab = "", ylab = "", 	xlim=c(-180,-157), ylim=c(54,67), main="")  
-map('worldHires',fill=T,add=T)
-text(-160, 61, "2017-2019", col="white")
+text(-160, 61, "2014-2019", col="white")
 
 dev.off()
 
