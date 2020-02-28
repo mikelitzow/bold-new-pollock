@@ -1,4 +1,4 @@
-LATITUDE,LONGITUDE,STATION,STRATUM,YEAR,DATETIME,CPUE_KGHA,CPUE_NOHA,COMMON_NAME,SCIENTIFIC_NAME,SPECIES_CODE,BOTTOM_DEPTH,BOTTOM_TEMPERATURE,SURFACE_TEMPERATURE,VESSEL,CRUISE,HAUL
+LATITUDE,LONGITUDE,STATION,STRATUM,YEAR,DATETIME,WTCPUE,NUMCPUE,COMMON,SCIENTIFIC,SID,BOT_DEPTH,BOT_TEMP,SURF_TEMP,VESSEL,CRUISE,HAUL                                                                                                                                                                                                                                                                                                                                                                             
 62.31255,-175.27057,W-27,81,2010,8/4/2010 18:44,0.2579,6.032,Greenland turbot,Reinhardtius hippoglossoides,10115,78,-1.4,9.2,162,201002,1
 63.33627,-173.43953,ZZ-24,81,2010,8/6/2010 10:43,0.0561,2.5896,Greenland turbot,Reinhardtius hippoglossoides,10115,70,-0.2,8.8,162,201002,8
 62.32398,-174.53585,W-26,81,2010,8/5/2010 10:16,0.1865,2.7238,Greenland turbot,Reinhardtius hippoglossoides,10115,70,-1.4,9.1,162,201002,3
