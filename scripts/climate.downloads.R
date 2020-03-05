@@ -45,9 +45,9 @@ map('world2Hires', add=T, lwd=1)
 ####################
 # add ERSST v5
 
-download.file("https://coastwatch.pfeg.noaa.gov/erddap/griddap/nceiErsstv5.nc?sst[(1950-01-01):1:(2020-2-01)][(0.0):1:(0.0)][(54):1:(66)][(188):1:(202)]", "~temp")
+download.file("https://coastwatch.pfeg.noaa.gov/erddap/griddap/nceiErsstv5.nc?sst[(1950-01-01):1:(2020-2-01)][(0.0):1:(0.0)][(54):1:(66)][(188):1:(202)]", "data/ersst")
 # load and process SST data
-nc <- nc_open("~temp")
+nc <- nc_open("data/ersst")
 
 # extract dates
 
