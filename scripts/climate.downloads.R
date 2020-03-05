@@ -362,6 +362,21 @@ clim.dat$NW.wind.Oct.Apr <- winNW[names(winNW) %in% clim.dat$year]
 clim.dat$SE.wind.May.Sep <- sumSE[names(sumSE) %in% clim.dat$year]
 clim.dat$NW.wind.May.Sep <- sumNW[names(sumNW) %in% clim.dat$year]
 
+#############
+# now add summer bottom trawl temperatures and cold pool extent
+
+dat <- read.csv("data/annual.environmental.data.csv")
+
+head(dat) # note that these are only from 1988, when more stations in the northern EBS were added - could potentially add earlier years...
+# also note that we are not accounting for diferences in the seasonal timing of sampling in different years!!
+
+clim.dat$summer.bottom.temp <- clim.dat$summer.cold.pool.extent <- NA
+
+clim.dat$summer.bottom.temp <- dat$AVG_BT[match(clim.dat$year, dat$Year)]
+clim.dat$summer.cold.pool.extent <- dat$CP_EXTENT[match(clim.dat$year, dat$Year)]
+
 # save!
 
 write.csv(clim.dat, "data/climate data.csv", row.names = F)
+
+
