@@ -5,6 +5,8 @@ library(maptools)
 library(mapdata)
 library(fields)
 
+theme_set(theme_bw())
+
 # download various climate data sets!
 
 ################
@@ -183,7 +185,6 @@ plot.dat <- clim.dat %>%
 
 ggplot(plot.dat, aes(year, value)) +
   geom_line() +
-  theme_bw() +
   facet_wrap(~key, scales="free")
  # looks right!
 
@@ -374,6 +375,64 @@ clim.dat$summer.bottom.temp <- clim.dat$summer.cold.pool.extent <- NA
 
 clim.dat$summer.bottom.temp <- dat$AVG_BT[match(clim.dat$year, dat$Year)]
 clim.dat$summer.cold.pool.extent <- dat$CP_EXTENT[match(clim.dat$year, dat$Year)]
+
+###########################
+# and sea ice
+# will consider two different kinds of data here - 
+# March ice concentration at PMEL moorings data
+# and also...monthly Bering Sea ice-covered area anomalies from NSIDC: https://nsidc.org/data/NSIDC-0192/versions/3
+
+# open the area data (non-anomalies) and examine
+dat <- read.csv("data/gsfc.bootstrap.month.area.1978-2018.n.csv")
+
+head(dat)
+dat$dec.yr <- dat$Year+(dat$Mon-0.5)/12
+
+ggplot(dat, aes(dec.yr, Bering)) +
+  geom_line()
+
+# pretty wild!
+
+# now look at climatology
+mean.dat <- dat %>%
+  group_by(Mon) %>%
+  summarise(mean=mean(Bering))
+
+ggplot(mean.dat, aes(Mon, mean)) +
+  geom_line() +
+  geom_point()
+
+# so I think we'll average anomalies over JFMA - that's the highest extent period
+
+# load area data 
+dat <- read.csv("data/gsfc.bootstrap.month.anomaly.area.1978-2018.n.csv")
+
+head(dat)
+
+
+
+# restrict to JFMA
+dat <- dat %>%
+  filter(Mon %in% 1:4)
+
+# make sure there are no 0 ice months as that would read as average conditions!
+sum(dat$Bering==0) #a-ok!
+
+total.ice <- tapply(dat$Bering, dat$Year, mean)
+
+# plot to check
+plot(names(total.ice), total.ice, type="l")
+
+# add to clim.dat
+clim.dat$ice.area.jfma <- NA
+clim.dat$ice.area.jfma <- total.ice[match(clim.dat$year, names(total.ice))]
+
+# plot clim.dat to check
+
+plot.dat <- clim.dat %>%
+  pivot_longer(-year, names_to = "key", values_to = "value")
+
+
 
 # save!
 
