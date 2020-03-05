@@ -427,12 +427,17 @@ plot(names(total.ice), total.ice, type="l")
 clim.dat$ice.area.jfma <- NA
 clim.dat$ice.area.jfma <- total.ice[match(clim.dat$year, names(total.ice))]
 
+
 # plot clim.dat to check
 
 plot.dat <- clim.dat %>%
   pivot_longer(-year, names_to = "key", values_to = "value")
 
+ggplot(plot.dat, aes(year, value)) +
+  geom_line() +
+  facet_wrap(~key, scales="free_y")
 
+ggsave("figs/climate time series collected to date.png", width=10, height=8, units='in')
 
 # save!
 
