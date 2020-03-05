@@ -181,6 +181,80 @@ clim.dat <- data.frame(
 plot.dat <- clim.dat %>%
   pivot_longer(-year, names_to = "key", values_to = "value")
 
-ggplot(plot.dat, aes(year, value, color="key")) +
+ggplot(plot.dat, aes(year, value)) +
   geom_line() +
-  theme_bw()
+  theme_bw() +
+  facet_wrap(~key, scales="free")
+ # looks right!
+
+##################
+# add AO
+
+ao <- read.csv("data/ao.csv")
+head(ao)
+
+# restrict to JFM and get annual means
+ao <- ao %>%
+  filter(month <= 3)
+
+ao <- tapply(ao$value, ao$year, mean)
+
+# limit to 1951-2019
+ao <- ao[names(ao) %in% 1951:2019]
+
+clim.dat$AO.jfm <- ao
+
+########
+# now NCEP/NCAR winds
+# first U-wind (zonal / east-west winds)
+URL <- 
+  "http://apdrc.soest.hawaii.edu/erddap/griddap/hawaii_soest_e77d_1b03_9908.nc?uwnd[(1948-01-01):1:(2020-01-01T00:00:00Z)][(45):1:(75)][(150):1:(225)]"
+
+download.file(URL, "data/NCEP.NCAR.u-wind.nc")
+
+# and test
+test <- nc_open("data/NCEP.NCAR.u-wind.nc")
+test
+
+x <- ncvar_get(test, "longitude")
+y <- ncvar_get(test, "latitude")
+uwnd <- ncvar_get(test, "uwnd", verbose = F)
+
+# Change data into a matrix with months / cells for rows / columns
+uwnd <- aperm(uwnd, 3:1)  
+uwnd <- matrix(uwnd, nrow=dim(uwnd)[1], ncol=prod(dim(uwnd)[2:3]))  
+
+z <- colMeans(uwnd, na.rm=T) # mean value for each cell
+z <- t(matrix(z, length(y)))  # Convert vector to matrix and transpose for plotting
+image(x,y,z, col=tim.colors(64), xlab = "", ylab = "", yaxt="n", xaxt="n")
+
+contour(x,y,z, add=T, col="white",vfont=c("sans serif", "bold"))
+map('world2Hires', add=T, lwd=1)
+# looks good!
+
+# first V-wind (meridional / north-south winds)
+URL <- 
+  "http://apdrc.soest.hawaii.edu/erddap/griddap/hawaii_soest_aa14_316a_e154.nc?vwnd[(1948-01-01):1:(2020-01-01T00:00:00Z)][(45):1:(75)][(150):1:(225)]"
+
+download.file(URL, "data/NCEP.NCAR.v-wind.nc")
+
+# and test
+test <- nc_open("data/NCEP.NCAR.v-wind.nc")
+test
+
+x <- ncvar_get(test, "longitude")
+y <- ncvar_get(test, "latitude")
+vwnd <- ncvar_get(test, "vwnd", verbose = F)
+
+# Change data into a matrix with months / cells for rows / columns
+vwnd <- aperm(vwnd, 3:1)  
+vwnd <- matrix(vwnd, nrow=dim(vwnd)[1], ncol=prod(dim(vwnd)[2:3]))  
+
+z <- colMeans(vwnd, na.rm=T) # mean value for each cell
+z <- t(matrix(z, length(y)))  # Convert vector to matrix and transpose for plotting
+image(x,y,z, col=tim.colors(64), xlab = "", ylab = "", yaxt="n", xaxt="n")
+
+contour(x,y,z, add=T, col="white",vfont=c("sans serif", "bold"))
+map('world2Hires', add=T, lwd=1)
+# looks good!
+
