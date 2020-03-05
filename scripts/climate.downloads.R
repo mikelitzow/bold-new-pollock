@@ -1,3 +1,4 @@
+library(tidyverse)
 library(ncdf4)
 library(maps)
 library(maptools)
@@ -118,7 +119,6 @@ mu.north <- mu.north[rep(1:12, floor(length(d)/12)),]
 mu.north <- rbind(mu.north, mu.north[1:xtra,])
 
 anom.north <- rowMeans(sst.north - mu.north, na.rm=T)   # Compute matrix of anomalies!
-
 
 m <- as.numeric(months(d))
 
@@ -283,6 +283,7 @@ URL <- "http://apdrc.soest.hawaii.edu/erddap/griddap/hawaii_soest_3fcd_f037_d8fc
 download.file(URL, "data/NCEP.NCAR.daily.v-wind.nc")
 dat <- nc_open("data/NCEP.NCAR.daily.v-wind.nc")
 vwnd <- ncvar_get(dat, "vwnd", verbose = F)
+
 # check that the dates are identical between the two data sets
 raw <- ncvar_get(dat, "time") # seconds since 1-1-1970
 h <- raw/(24*60*60)
@@ -304,20 +305,20 @@ range(daily.wind$direction) # perfecto
 
 # now make columns of 1s and 0s to indicate if the wind is blowing NW or SE
 
-dat$NW <- dat$SE <- 0
+daily.wind$NW <- daily.wind$SE <- 0
 
-for(i in 1:nrow(dat)){
+for(i in 1:nrow(daily.wind)){
   # i <- 2
-  if(dat$dir[i] >=105 & dat$dir[i] <=165) dat$SE[i] <- 1
-  if(dat$dir[i] >=285 & dat$dir[i] <=345) dat$NW[i] <- 1
+  if(daily.wind$dir[i] >=105 & daily.wind$dir[i] <=165) daily.wind$SE[i] <- 1
+  if(daily.wind$dir[i] >=285 & daily.wind$dir[i] <=345) daily.wind$NW[i] <- 1
 }
 
 # function to calculate the proportion of days with a particular wind direction
 f <- function(x) sum(x)/sum(!is.na(x)) 
 
 # get monthly sums of proportion of days with wind from each direction
-prop.SE <- tapply(dat$SE, list(yr,m), f)
-prop.NW <- tapply(dat$NW, list(yr,m), f)
+prop.SE <- tapply(daily.wind$SE, list(yr,m), f)
+prop.NW <- tapply(daily.wind$NW, list(yr,m), f)
 
 # Danielson et al. 2012 GRL recommend seasons of Oct-Apr and May-Sept
 
@@ -348,3 +349,13 @@ colMeans(OctAprSE, na.rm=T) # check how the months compare - pretty similar
 # get means
 winSE <- rowMeans(OctAprSE)
 plot(names(winSE), winSE, type="o") 
+
+# very unusual proportions of winter proportions in recent years! should double-check these!
+
+# add to climate data
+
+clim.dat$SE.wind.Oct.Apr <- winSE[names(winSE) %in% clim.dat$year]
+clim.dat$NW.wind.Oct.Apr <- winNW[names(winNW) %in% clim.dat$year]
+
+
+
