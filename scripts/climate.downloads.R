@@ -357,5 +357,11 @@ plot(names(winSE), winSE, type="o")
 clim.dat$SE.wind.Oct.Apr <- winSE[names(winSE) %in% clim.dat$year]
 clim.dat$NW.wind.Oct.Apr <- winNW[names(winNW) %in% clim.dat$year]
 
+# and summer
 
+clim.dat$SE.wind.May.Sep <- sumSE[names(sumSE) %in% clim.dat$year]
+clim.dat$NW.wind.May.Sep <- sumNW[names(sumNW) %in% clim.dat$year]
 
+# save!
+
+write.csv(clim.dat, "data/climate data.csv", row.names = F)
