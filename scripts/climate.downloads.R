@@ -226,7 +226,7 @@ uwnd <- matrix(uwnd, nrow=dim(uwnd)[1], ncol=prod(dim(uwnd)[2:3]))
 
 z <- colMeans(uwnd, na.rm=T) # mean value for each cell
 z <- t(matrix(z, length(y)))  # Convert vector to matrix and transpose for plotting
-image(x,y,z, col=tim.colors(64), xlab = "", ylab = "", yaxt="n", xaxt="n")
+image(x,y,z, col=tim.colors(64), xlab = "", ylab = "")
 
 contour(x,y,z, add=T, col="white",vfont=c("sans serif", "bold"))
 map('world2Hires', add=T, lwd=1)
@@ -258,3 +258,93 @@ contour(x,y,z, add=T, col="white",vfont=c("sans serif", "bold"))
 map('world2Hires', add=T, lwd=1)
 # looks good!
 
+#####################
+# now we need daily winds for 60ºN 170ºW to calculate proportion of NW/SE winds
+
+URL <- "http://apdrc.soest.hawaii.edu/erddap/griddap/hawaii_soest_a66c_3524_57cf.nc?uwnd[(1948-01-01):1:(2019-12-31T00:00:00Z)][(60):1:(60)][(190):1:(190)]"
+
+download.file(URL, "data/NCEP.NCAR.daily.u-wind.nc")
+
+# and load
+dat <- nc_open("data/NCEP.NCAR.daily.u-wind.nc")
+
+uwnd <- ncvar_get(dat, "uwnd", verbose = F)
+
+# extract dates
+raw <- ncvar_get(dat, "time") # seconds since 1-1-1970
+h <- raw/(24*60*60)
+d <- dates(h, origin = c(1,1,1970))
+m <- months(d)
+yr <- as.numeric(as.character(years(d)))
+
+# add v-wind
+URL <- "http://apdrc.soest.hawaii.edu/erddap/griddap/hawaii_soest_3fcd_f037_d8fc.nc?vwnd[(1948-01-01):1:(2019-12-31T00:00:00Z)][(60):1:(60)][(190):1:(190)]"
+
+download.file(URL, "data/NCEP.NCAR.daily.v-wind.nc")
+dat <- nc_open("data/NCEP.NCAR.daily.v-wind.nc")
+vwnd <- ncvar_get(dat, "vwnd", verbose = F)
+# check that the dates are identical between the two data sets
+raw <- ncvar_get(dat, "time") # seconds since 1-1-1970
+h <- raw/(24*60*60)
+d.v <- dates(h, origin = c(1,1,1970))
+
+identical(d, d.v) # True!
+
+# now make a dataframe with date info and uwnd
+
+daily.wind <- data.frame(date=as.character(d),
+                         month=m,
+                         year=yr,
+                         uwnd=uwnd,
+                         vwnd=vwnd)
+
+# calculate daily direction from u- and v- vectors
+daily.wind$direction <-(180/pi * atan2(-daily.wind$uwnd, -daily.wind$vwnd))+180
+range(daily.wind$direction) # perfecto
+
+# now make columns of 1s and 0s to indicate if the wind is blowing NW or SE
+
+dat$NW <- dat$SE <- 0
+
+for(i in 1:nrow(dat)){
+  # i <- 2
+  if(dat$dir[i] >=105 & dat$dir[i] <=165) dat$SE[i] <- 1
+  if(dat$dir[i] >=285 & dat$dir[i] <=345) dat$NW[i] <- 1
+}
+
+# function to calculate the proportion of days with a particular wind direction
+f <- function(x) sum(x)/sum(!is.na(x)) 
+
+# get monthly sums of proportion of days with wind from each direction
+prop.SE <- tapply(dat$SE, list(yr,m), f)
+prop.NW <- tapply(dat$NW, list(yr,m), f)
+
+# Danielson et al. 2012 GRL recommend seasons of Oct-Apr and May-Sept
+
+MaySepNW <- prop.NW[,5:9] 
+MaySepSE <- prop.SE[,5:9]
+
+# now get summer means
+sumNW <- rowMeans(MaySepNW)
+plot(names(sumNW), sumNW, type="o")
+sumSE <- rowMeans(MaySepSE)
+plot(names(sumSE), sumSE, type="o")
+
+# and winter...
+OctAprNW <- prop.NW[2:nrow(prop.NW), 1:4]
+#add in Oct Nov Dec from previous year
+OctAprNW <- cbind(OctAprNW, prop.NW[1:(nrow(prop.NW)-1),10:12]) 
+colMeans(OctAprNW, na.rm=T) # check how the months compare - pretty similar
+
+# get means
+winNW <- rowMeans(OctAprNW)
+plot(names(winNW), winNW, type="o") # more of a coherent trend than the summer TS!
+
+OctAprSE <- prop.SE[2:nrow(prop.SE), 1:4]
+#add in Oct Nov Dec from previous year
+OctAprSE <- cbind(OctAprSE, prop.SE[1:(nrow(prop.SE)-1),10:12]) 
+colMeans(OctAprSE, na.rm=T) # check how the months compare - pretty similar
+
+# get means
+winSE <- rowMeans(OctAprSE)
+plot(names(winSE), winSE, type="o") 
