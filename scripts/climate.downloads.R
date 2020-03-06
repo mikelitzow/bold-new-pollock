@@ -410,7 +410,6 @@ dat <- read.csv("data/gsfc.bootstrap.month.anomaly.area.1978-2018.n.csv")
 head(dat)
 
 
-
 # restrict to JFMA
 dat <- dat %>%
   filter(Mon %in% 1:4)
@@ -427,6 +426,45 @@ plot(names(total.ice), total.ice, type="l")
 clim.dat$ice.area.jfma <- NA
 clim.dat$ice.area.jfma <- total.ice[match(clim.dat$year, names(total.ice))]
 
+# now add March % ice concentration at moorings sites
+dat <- read.csv("data/March mooring site ice concentration.csv")
+
+head(dat)
+names(dat)[2:4] <- c("M4", "M5", "M8")
+
+clim.dat$m4.march.ice <- clim.dat$m5.march.ice <- clim.dat$m8.march.ice <- NA
+
+clim.dat$m4.march.ice <- dat$M4[match(clim.dat$year, dat$Date)]
+clim.dat$m5.march.ice <- dat$M5[match(clim.dat$year, dat$Date)]
+clim.dat$m8.march.ice <- dat$M8[match(clim.dat$year, dat$Date)]
+
+# and maisie Bering Sea ice cover - it's a repeat of the ice area time series,
+# and only begins in 2006, so not as good, but is also updated in near-real time, 
+# so gives us more recent information...
+
+# downloaded from https://nsidc.org/data/masie/
+
+dat <- read.csv("data/maisie.csv")
+
+head(dat)
+dat$year <- floor(dat$yyyyddd/1000)
+dat$day <- 1000*(dat$yyyyddd/1000 - dat$year)
+
+# limit to day 1-90
+# and drop 2020, which isn't yet complete
+
+dat <- dat %>% 
+  filter(day <= 90, year <= 2019)
+
+names(dat)
+
+dat <- dat[,c(14,19)]
+
+maisie <- tapply(dat[,1], dat$year, mean)
+
+clim.dat$maisie.ice.extent.jfm <- NA
+
+clim.dat$maisie.ice.extent.jfm <- maisie[match(clim.dat$year, names(maisie))]
 
 # plot clim.dat to check
 
