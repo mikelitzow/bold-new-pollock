@@ -30,6 +30,12 @@ library(cowplot)
 # load environmental data
 dat <- read.csv("GOA environmental data.csv", row.names = 1)
 
+#OR
+library(RCurl)
+rawdat <- getURL("https://raw.githubusercontent.com/mikelitzow/diff-times-diff-climes/master/GOA%20environmental%20data.csv")
+dat <- read.csv(text = rawdat)
+
+
 # change names to plot-friendly labels
 colnames(dat)[c(3,5)] <- c("SLP gradient", "Wind stress")
 
