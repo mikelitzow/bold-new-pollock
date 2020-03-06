@@ -515,30 +515,89 @@ dimnames(uflx) <- list(as.character(d), paste("N", lat, "E", lon, sep=""))
 keep <- y > 54 & y < 67
 y <- y[keep]
 
-keep <- x > 187 & x < 204
+keep <- x > 187 & x < 202
 x <- x[keep]
 
 keep.lon <- lon %in% x
-lon <- lon[keep.lon]
 
 keep.lat <- lat %in% y
-lat <- lat[keep.lat]
 uflx <- uflx[,keep.lat & keep.lon]
+
+
+# now remove land and other cells we don't want
+uflx[,c(1,2,3,7,8,28,29,33,35,36,39,40,42,43,46:51,53:56)] <- NA 
 
 
 z <- colMeans(uflx, na.rm=T)
 z <- t(matrix(z, length(y)))  # Convert vector to matrix and transpose for plotting
-#image.plot(x,y,z, col=new.col, zlim=c(lim[1], -lim[1]), ylim=c(20,68),
-#           xlab = "", ylab = "", yaxt="n", xaxt="n", legend.mar=l.mar, legend.line=l.l, axis.args=list(cex.axis=l.cex, tcl=tc.l, mgp=c(3,0.3,0)))
 image(x,y,z, col=tim.colors(64), xlab = "", ylab = "")
 
 contour(x,y,z, add=T, col="white",vfont=c("sans serif", "bold"))
 map('world2Hires', add=T, lwd=1)
 
-# looks fine - now remove land and other cells we don't want
-colnames(uflx)
+# looks good - same routine for v-stress!
+dat <- nc_open("data/North.Pacific.NCEP.NCAR.vflx")
+dat
 
-uflx[,c(1,2,3,7,8,29)] <- NA
+x <- ncvar_get(dat, "longitude")
+y <- ncvar_get(dat, "latitude")
+vflx <- ncvar_get(dat, "vflx", verbose = F)
+
+# change to matrix
+vflx <- aperm(vflx, 3:1)  
+vflx <- matrix(vflx, nrow=dim(vflx)[1], ncol=prod(dim(vflx)[2:3]))  
+
+# make vectors of lat/long and add (with date) as dimnames
+lat <- rep(y, length(x))   
+lon <- rep(x, each = length(y)) 
+
+dimnames(vflx) <- list(as.character(d), paste("N", lat, "E", lon, sep=""))
+
+# now limit to area of interest!!
+keep <- y > 54 & y < 67
+y <- y[keep]
+
+keep <- x > 187 & x < 202
+x <- x[keep]
+
+keep.lon <- lon %in% x
+
+
+keep.lat <- lat %in% y
+lat <- lat[keep.lat & keep.lon]
+vflx <- vflx[,keep.lat & keep.lon]
+
+# now remove land and other cells we don't want
+vflx[,c(1,2,3,7,8,28,29,33,35,36,39,40,42,43,46:51,53:56)] <- NA 
+
+z <- colMeans(vflx, na.rm=T)
+z <- t(matrix(z, length(y)))  # Convert vector to matrix and transpose for plotting
+image(x,y,z, col=tim.colors(64), xlab = "", ylab = "")
+
+contour(x,y,z, add=T, col="white",vfont=c("sans serif", "bold"))
+map('world2Hires', add=T, lwd=1)
+
+# get total stress
+total.stress <- sqrt(uflx^2 + vflx^2)
+
+# limit to spring/summer - AMJ
+keep <- m %in% c("Apr", "May", "Jun")
+yr <- yr[keep]
+
+total.stress <- total.stress[keep,]
+
+# limit to north/south
+north.stress <- rowMeans(total.stress[,lat>60], na.rm=T)
+south.stress <- rowMeans(total.stress[,lat<60], na.rm=T)
+
+north.stress <- tapply(north.stress, yr, mean)
+plot(names(north.stress), north.stress, type="l")
+
+south.stress <- tapply(south.stress, yr, mean)
+plot(names(south.stress), south.stress, type="l")
+
+clim.dat$north.wind.stress.amj <- north.stress[match(clim.dat$year, names(north.stress))]
+clim.dat$south.wind.stress.amj <- south.stress[match(clim.dat$year, names(south.stress))]
 
 ########################
 # plot clim.dat to check
