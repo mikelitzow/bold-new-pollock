@@ -468,6 +468,79 @@ clim.dat$maisie.ice.extent.jfma <- NA
 
 clim.dat$maisie.ice.extent.jfma <- maisie[match(clim.dat$year, names(maisie))]
 
+########################
+# now! NCEP/NCAR wind stress
+
+# identify latest year and month needed
+year <- 2019
+month <- "12"
+query <- c("e025_be03_a4bb.nc?vflx",
+           "803d_41d9_b553.nc?uflx")
+
+variable <- c("vflx", "uflx")
+
+for(i in 1:length(query)){
+  URL <- paste("http://apdrc.soest.hawaii.edu/erddap/griddap/hawaii_soest_", query[i], "[(1948-01-01):1:(", year, "-",
+               month, "-01T00:00:00Z)][(19.99970054626):1:(69.52169799805)][(120):1:(249.375)]", sep="")
+  
+  download.file(URL, paste("data/North.Pacific.NCEP.NCAR.", variable[i], sep=""))
+}
+
+# and load/process
+dat <- nc_open("data/North.Pacific.NCEP.NCAR.uflx")
+dat
+
+x <- ncvar_get(dat, "longitude")
+y <- ncvar_get(dat, "latitude")
+uflx <- ncvar_get(dat, "uflx", verbose = F)
+
+# extract dates
+raw <- ncvar_get(dat, "time") # seconds since 1-1-1970
+h <- raw/(24*60*60)
+d <- dates(h, origin = c(1,1,1970))
+m <- months(d)
+yr <- as.numeric(as.character(years(d)))
+
+# change to matrix
+uflx <- aperm(uflx, 3:1)  
+uflx <- matrix(uflx, nrow=dim(uflx)[1], ncol=prod(dim(uflx)[2:3]))  
+
+# make vectors of lat/long and add (with date) as dimnames
+lat <- rep(y, length(x))   
+lon <- rep(x, each = length(y)) 
+
+dimnames(uflx) <- list(as.character(d), paste("N", lat, "E", lon, sep=""))
+
+# now limit to area of interest!!
+keep <- y > 54 & y < 67
+y <- y[keep]
+
+keep <- x > 187 & x < 204
+x <- x[keep]
+
+keep.lon <- lon %in% x
+lon <- lon[keep.lon]
+
+keep.lat <- lat %in% y
+lat <- lat[keep.lat]
+uflx <- uflx[,keep.lat & keep.lon]
+
+
+z <- colMeans(uflx, na.rm=T)
+z <- t(matrix(z, length(y)))  # Convert vector to matrix and transpose for plotting
+#image.plot(x,y,z, col=new.col, zlim=c(lim[1], -lim[1]), ylim=c(20,68),
+#           xlab = "", ylab = "", yaxt="n", xaxt="n", legend.mar=l.mar, legend.line=l.l, axis.args=list(cex.axis=l.cex, tcl=tc.l, mgp=c(3,0.3,0)))
+image(x,y,z, col=tim.colors(64), xlab = "", ylab = "")
+
+contour(x,y,z, add=T, col="white",vfont=c("sans serif", "bold"))
+map('world2Hires', add=T, lwd=1)
+
+# looks fine - now remove land and other cells we don't want
+colnames(uflx)
+
+uflx[,c(1,2,3,7,8,29)] <- NA
+
+########################
 # plot clim.dat to check
 
 plot.dat <- clim.dat %>%
