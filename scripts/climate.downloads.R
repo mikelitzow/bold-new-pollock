@@ -4,6 +4,7 @@ library(maps)
 library(maptools)
 library(mapdata)
 library(fields)
+library(chron)
 
 theme_set(theme_bw())
 
@@ -43,6 +44,7 @@ image(x,y,z, col=tim.colors(64), xlab = "", ylab = "", yaxt="n", xaxt="n")
 
 contour(x,y,z, add=T, col="white",vfont=c("sans serif", "bold"))
 map('world2Hires', add=T, lwd=1)
+
 # looks good!
 
 ####################
@@ -450,11 +452,11 @@ head(dat)
 dat$year <- floor(dat$yyyyddd/1000)
 dat$day <- 1000*(dat$yyyyddd/1000 - dat$year)
 
-# limit to day 1-90
+# limit to day 1-120
 # and drop 2020, which isn't yet complete
 
 dat <- dat %>% 
-  filter(day <= 90, year <= 2019)
+  filter(day <= 120, year <= 2019)
 
 names(dat)
 
@@ -462,9 +464,9 @@ dat <- dat[,c(14,19)]
 
 maisie <- tapply(dat[,1], dat$year, mean)
 
-clim.dat$maisie.ice.extent.jfm <- NA
+clim.dat$maisie.ice.extent.jfma <- NA
 
-clim.dat$maisie.ice.extent.jfm <- maisie[match(clim.dat$year, names(maisie))]
+clim.dat$maisie.ice.extent.jfma <- maisie[match(clim.dat$year, names(maisie))]
 
 # plot clim.dat to check
 
