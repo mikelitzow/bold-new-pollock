@@ -414,4 +414,15 @@ all.dat <- left_join(all.dat, JFMAM.temp)
 
 # next step - add summer 10-15m salinity, and also salinity at depth!
 
-write.csv(all.dat, "climate data.csv", row.names = F)
+write.csv(all.dat, "data/climate data.csv", row.names = F)
+
+plot.dat <- all.dat %>%
+  pivot_longer(-year, names_to = "key", values_to = "value")
+
+ggplot(plot.dat, aes(year, value)) +
+  geom_line() +
+  facet_wrap(~key, scales="free_y")
+
+ggsave("figs/climate time series collected to date.png", width=10, height=8, units='in')
+
+# Salinity doesn't look right!!
