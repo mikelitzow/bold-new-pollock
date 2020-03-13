@@ -324,3 +324,94 @@ names(JFMAM.temp)[2] <- "M2.JFMAM.60.72m.temp"
 
 all.dat <- left_join(all.dat, JFMAM.temp)
 
+##################
+# now check out salinity
+unique(month.mean$long.name) 
+unique(month.mean$depth)
+
+# ok!
+# add decimal year for plotting
+month.mean$decimal.year <- month.mean$year + (month.mean$month-0.5)/12
+
+# try to put together salinity and conductivity
+keep <- c(grep("CONDUCT", month.mean$long.name),
+          grep("SALIN", month.mean$long.name),
+          grep("Salin", month.mean$long.name))
+          
+
+temp <- month.mean[keep,]
+
+ggplot(temp, aes(decimal.year, n)) +
+  geom_line() +
+  facet_wrap(~depth) 
+
+# lots of missing depths!
+
+temp <- temp %>%
+  filter(depth != -9999)
+
+ggplot(temp, aes(decimal.year, n)) +
+  geom_line() +
+  facet_wrap(~depth)
+
+# limit to 10-15m
+deep.temp <- temp %>%
+  filter(depth %in% 10:15, mean < 50, mean >20) %>% # removing the NA flags!
+  group_by(year, month) %>%
+  summarise(mean=mean(mean), n=sum(n)) 
+
+
+ggplot(deep.temp, aes(mean)) +
+  geom_histogram() 
+# looks good!
+
+# now limit to months with at least 15 daily measurements!
+deep.temp <- deep.temp %>%
+  filter(n >=15) %>%
+  pivot_longer(-c(year, month), names_to = "key", values_to = "values")
+
+deep.temp$decimal.year <- deep.temp$year + (deep.temp$month-0.5)/12 
+
+ggplot(deep.temp, aes(decimal.year, values)) +
+  geom_line() + 
+  geom_point() +
+  facet_wrap(~key, scales="free_y") 
+
+# now remove n as we know they're all ok
+
+deep.temp <- deep.temp %>%
+  filter(key=="mean")
+
+# now get monthly climatology
+climatology <- deep.temp %>%
+  group_by(month) %>%
+  summarise(clim.mean=mean(values))
+
+ggplot(climatology, aes(month, clim.mean)) +
+  geom_line() +
+  geom_point()
+
+# now plug back into the df to calculate monthly anomalies
+deep.temp <- left_join(deep.temp, climatology)
+
+deep.temp$anomaly <- deep.temp$values-deep.temp$clim.mean
+
+# now get JFMAM means for each year
+JFMAM.temp <- deep.temp %>%
+  filter(month <=5) %>%
+  group_by(year) %>%
+  summarise(mean=mean(anomaly))
+
+ggplot(JFMAM.temp, aes(year, mean)) +
+  geom_line()
+
+# now add to the climate data file
+
+
+names(JFMAM.temp)[2] <- "M2.JFMAM.10.15m.salinity"
+
+all.dat <- left_join(all.dat, JFMAM.temp)
+
+# next step - add summer 10-15m salinity, and also salinity at depth!
+
+write.csv(all.dat, "climate data.csv", row.names = F)
