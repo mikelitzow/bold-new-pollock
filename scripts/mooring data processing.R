@@ -588,4 +588,3 @@ ggplot(plot.dat, aes(year, value)) +
 
 ggsave("figs/climate time series collected to date.png", width=10, height=8, units='in')
 
-# Salinity doesn't look right!!
