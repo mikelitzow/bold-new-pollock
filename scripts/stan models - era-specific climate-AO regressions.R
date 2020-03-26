@@ -61,7 +61,7 @@ scatter <- ggplot(dat.3.era, aes(AO.jfm, value, color=era)) +
   xlab("AO Index (Jan-Mar)") +
   theme(legend.title = element_blank(), axis.title.y = element_blank(), legend.position = 'top')
 
-ggsave("figs/AO vs climate scatter.png", width = 10, height = 10, units="in")
+ggsave("figs/AO vs climate scatter.png", width = 10, height = 8, units="in")
 
 
 # now fit models
@@ -218,7 +218,7 @@ int <- ggplot(mdf_indv_arm, aes(x = value, fill = variable)) +
   facet_wrap( ~ key, scales="free")
 print(int)
 
-ggsave("figs/era intercepts - climate variables on AO.png", width=10, height=10, units="in")
+ggsave("figs/era intercepts - climate variables on AO.png", width=10, height=8, units="in")
 
 # plot slopes
 slope <- ggplot(mdf_slope, aes(x = value, fill = variable)) +
@@ -232,6 +232,6 @@ slope <- ggplot(mdf_slope, aes(x = value, fill = variable)) +
   facet_wrap( ~ key, scales="free")
 print(slope)
 
-ggsave("figs/era slopes - climate variables on AO.png", width=10, height=10, units='in')
+ggsave("figs/era slopes - climate variables on AO.png", width=10, height=8, units='in')
 
 
