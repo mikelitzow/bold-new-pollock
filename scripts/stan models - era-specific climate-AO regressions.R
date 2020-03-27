@@ -234,4 +234,160 @@ print(slope)
 
 ggsave("figs/era slopes - climate variables on AO.png", width=10, height=8, units='in')
 
+#############################
+# new approach - fit DFA to the TS showing some relationship to the AO and calculate rolling correlations,
+# both with individual TS, and with AO
 
+keep <- c("south.sst.ndjfm",  "SE.wind.Oct.Apr", "m8.march.ice",
+  "m5.march.ice", "m4.march.ice", "south.wind.stress.amj")
+
+dfa.dat <- dat.3.era %>%
+  filter(name %in% keep)
+
+
+# spread and transpose
+
+dfa.dat <- dfa.dat %>%
+  pivot_wider(names_from = name, values_from = value) %>%
+  select(-AO.jfm, -era, -year)
+
+dfa.dat <- as.matrix(t(dfa.dat))
+
+colnames(dfa.dat) <- unique(dat.3.era$year)
+
+# find best error structure for 1-trend model
+
+library(MARSS)
+
+# set up forms of R matrices
+levels.R = c("diagonal and equal",
+             "diagonal and unequal",
+             "equalvarcov",
+             "unconstrained")
+model.data = data.frame()
+
+# fit models & store results
+for(R in levels.R) {
+  for(m in 1) {  # allowing up to 1 trends
+    dfa.model = list(A="zero", R=R, m=m)
+    kemz = MARSS(dfa.dat, model=dfa.model,
+                 form="dfa", z.score=TRUE)
+    model.data = rbind(model.data,
+                       data.frame(R=R,
+                                  m=m,
+                                  logLik=kemz$logLik,
+                                  K=kemz$num.params,
+                                  AICc=kemz$AICc,
+                                  stringsAsFactors=FALSE))
+    assign(paste("kemz", m, R, sep="."), kemz)
+  } # end m loop
+} # end R loop
+
+# calculate delta-AICc scores, sort in descending order, and compare
+model.data$dAICc <- model.data$AICc-min(model.data$AICc)
+model.data <- model.data %>%
+  arrange(dAICc)
+model.data
+# unconstrained error structure is far and away the best
+
+# fit best model, plot loadings and trend
+model.list = list(A="zero", m=1, R="unconstrained")
+mod = MARSS(dfa.dat, model=model.list, z.score=TRUE, form="dfa")
+
+# get CI and plot loadings...
+modCI <- MARSSparamCIs(mod)
+
+plot.CI <- data.frame(names=rownames(dfa.dat), mean=modCI$par$Z, upCI=modCI$par.upCI$Z,
+                           lowCI=modCI$par.lowCI$Z)
+
+plot.CI$names <- reorder(plot.CI$names, plot.CI$mean)
+dodge <- position_dodge(width=0.9)
+
+ggplot(plot.CI, aes(x=names, y=mean)) + 
+  geom_bar(position="dodge", stat="identity", fill=cb[2]) +
+  geom_errorbar(aes(ymax=upCI, ymin=lowCI), position=dodge, width=0.5) +
+  ylab("Loading") + 
+  xlab("") + 
+  theme_bw() + 
+  theme(axis.text.x  = element_text(angle=45, hjust=1,  size=12), axis.title.y = element_blank()) +
+  geom_hline(yintercept = 0) 
+
+# plot trend
+plot.trend <- data.frame(t=as.numeric(colnames(dfa.dat)),estimate=as.vector(mod$states),
+                         conf.low=as.vector(mod$states)-1.96*as.vector(mod$states.se),
+                         conf.high=as.vector(mod$states)+1.96*as.vector(mod$states.se))
+
+
+ggplot(plot.trend, aes(t, estimate)) +
+  geom_line() + 
+  geom_hline(yintercept = 0) +
+  geom_ribbon(aes(x=t, ymin=conf.low, ymax=conf.high), linetype=2, alpha=0.1) + xlab("") + ylab("Trend")
+
+# now fit the rolling correlations
+temp <- read.csv("data/climate data.csv")
+AO.jfm <- temp$AO.jfm[temp$year >= 1965]
+
+# load PDO/NPGO
+pdo.npgo <- read.csv("data/winter pdo-npgo.csv")
+
+pdo.ndjfm <- pdo.npgo$pdo.ndjfm[pdo.npgo$year %in% 1965:2019]
+npgo.ndjfm <- pdo.npgo$npgo.ndjfm[pdo.npgo$year %in% 1965:2019]
+
+
+cor.dat <- rbind(dfa.dat, AO.jfm, pdo.ndjfm, npgo.ndjfm)
+
+
+correlations <- as.data.frame(matrix(nrow=31, ncol=(nrow(cor.dat))))
+xx <- as.vector(mod$states)
+
+for(i in 1965:1995){
+ # i <- 1965
+  
+  temp <- cor.dat[,colnames(cor.dat) %in% i:(i+24)]
+  
+  for(ii in 1:nrow(cor.dat)){ # loop through each time series/variable
+    
+    correlations[(i-1964),ii] <- cor(temp[ii,], xx[(i-1964):(i-1964+24)], use="p")
+    
+  }}
+
+# now  plot
+colnames(correlations) <- rownames(cor.dat)
+correlations$year <- 1977:2007
+plot.cor <- pivot_longer(as.data.frame(correlations), -year, names_to = "key", values_to = "value") 
+
+ggplot(plot.cor, aes(year, value)) +
+  facet_wrap(~key) + geom_hline(yintercept = 0) + theme_bw() +
+  geom_line(color=cb[2]) + 
+  xlab("") + ylab("Correlation") + theme(axis.title.x = element_blank())
+
+ggsave("figs/rolling 25-yr correlations bering climate dfa.png", width=10, height=8, units='in')
+
+######################################
+# same thing, but 15-yr correlations #
+
+correlations <- as.data.frame(matrix(nrow=41, ncol=(nrow(cor.dat))))
+xx <- as.vector(mod$states)
+
+for(i in 1965:2005){
+  # i <- 1965
+  
+  temp <- cor.dat[,colnames(cor.dat) %in% i:(i+14)]
+  
+  for(ii in 1:nrow(cor.dat)){ # loop through each time series/variable
+    
+    correlations[(i-1964),ii] <- cor(temp[ii,], xx[(i-1964):(i-1964+14)], use="p")
+    
+  }}
+
+# now  plot
+colnames(correlations) <- rownames(cor.dat)
+correlations$year <- 1972:2012
+plot.cor <- pivot_longer(as.data.frame(correlations), -year, names_to = "key", values_to = "value") 
+
+ggplot(plot.cor, aes(year, value)) +
+  facet_wrap(~key) + geom_hline(yintercept = 0) + theme_bw() +
+  geom_line(color=cb[2]) + 
+  xlab("") + ylab("Correlation") + theme(axis.title.x = element_blank())
+
+ggsave("figs/rolling 15-yr correlations bering climate dfa.png", width=10, height=8, units='in')
