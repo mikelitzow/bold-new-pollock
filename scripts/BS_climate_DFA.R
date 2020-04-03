@@ -114,6 +114,7 @@ Z.rot$names <- rownames(all.clim.dat)
 #Z.rot$plot.names <- reorder(Z.rot$names, 1:14)
 
 
+
 #plot=========
 # get CI and plot loadings...
 modCI <- MARSSparamCIs(mod.best)
@@ -125,7 +126,71 @@ plot.CI <- data.frame(mean=modCI$par$Z, upCI=modCI$par.upCI$Z,
                       lowCI=modCI$par.lowCI$Z)
 
 plot.CI <- arrange(plot.CI, mean)
-#plot.CI$names.order <- reorder(plot.CI$names, plot.CI$mean)
+plot.CI$names.order <- reorder(plot.CI$names, plot.CI$mean)
 dodge <- position_dodge(width=0.9)
 
+clim.plot <- ggplot(Z.rot, aes(names, value, fill=key)) + geom_bar(stat="identity", position="dodge") #+
+  # theme_bw() + ylab("Loading") + xlab("") + 
+  # scale_fill_manual(values=c("Trend 1" = cb[2], "Trend 2" = cb[3])) +
+  # theme(legend.position = c(0.8,0.2), legend.title=element_blank()) + geom_hline(yintercept = 0) +
+  # theme(axis.text.x  = element_text(angle=45, hjust=1, size=12)) + ylim(-0.6, 0.8)
 
+#based on nwfsc-timeseries.github.io
+
+## get number of time series
+N_ts <- dim(dat_1980)[1]
+## get length of time series
+TT <- dim(dat_1980)[2]
+
+## get the estimated ZZ
+Z_est <- coef(mod.best, type = "matrix")$Z
+## get the inverse of the rotation matrix
+H_inv <- varimax(Z_est)$rotmat
+
+## rotate factor loadings
+Z_rot = Z_est %*% H_inv
+## rotate processes
+proc_rot = solve(H_inv) %*% mod.best$states
+
+mm <- 3 #3 processes
+
+# ylbl <- phytoplankton
+ w_ts <- seq(dim(all.clim.dat)[2])
+ layout(matrix(c(1, 2, 3, 4, 5, 6,7,8,9,10), mm, 2), widths = c(2, 1))
+## par(mfcol=c(mm,2), mai=c(0.5,0.5,0.5,0.1), omi=c(0,0,0,0))
+par(mai = c(0.5, 0.5, 0.5, 0.1), omi = c(0, 0, 0, 0))
+## plot the processes
+for (i in 1:mm) {
+  ylm <- c(-1, 1) * max(abs(proc_rot[i, ]))
+  ## set up plot area
+  plot(w_ts, proc_rot[i, ], type = "n", bty = "L", #ylim = ylm, 
+       xlab = "", ylab = "", xaxt = "n")
+  ## draw zero-line
+  abline(h = 0, col = "gray")
+  ## plot trend line
+  lines(w_ts, proc_rot[i, ], lwd = 2)
+  lines(w_ts, proc_rot[i, ], lwd = 2)
+  ## add panel labels
+  mtext(paste("State", i), side = 3, line = 0.5)
+ # axis(1, 12 * (0:dim(dat_1980)[2]) + 1, yr_frst + 0:dim(dat_1980)[2])
+}
+## plot the loadings
+minZ <- 0
+ylm <- c(-1, 1) * max(abs(Z_rot))
+for (i in 1:mm) {
+  plot(c(1:N_ts)[abs(Z_rot[, i]) > minZ], as.vector(Z_rot[abs(Z_rot[, 
+                                                                    i]) > minZ, i]), type = "h", lwd = 2, xlab = "", ylab = "", 
+       xaxt = "n", ylim = ylm, xlim = c(0.5, N_ts + 0.5), col = clr)
+  for (j in 1:N_ts) {
+    if (Z_rot[j, i] > minZ) {
+      text(j, -0.03, ylbl[j], srt = 90, adj = 1, cex = 1.2, 
+           col = clr[j])
+    }
+    if (Z_rot[j, i] < -minZ) {
+      text(j, 0.03, ylbl[j], srt = 90, adj = 0, cex = 1.2, 
+           col = clr[j])
+    }
+    abline(h = 0, lwd = 1.5, col = "gray")
+  }
+  mtext(paste("Factor loadings on state", i), side = 3, line = 0.5)
+}
