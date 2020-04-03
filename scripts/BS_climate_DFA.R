@@ -138,9 +138,9 @@ clim.plot <- ggplot(Z.rot, aes(names, value, fill=key)) + geom_bar(stat="identit
 #based on nwfsc-timeseries.github.io
 
 ## get number of time series
-N_ts <- dim(dat_1980)[1]
+N_ts <- dim(all.clim.dat)[1]
 ## get length of time series
-TT <- dim(dat_1980)[2]
+TT <- dim(all.clim.dat)[2]
 
 ## get the estimated ZZ
 Z_est <- coef(mod.best, type = "matrix")$Z
@@ -154,11 +154,12 @@ proc_rot = solve(H_inv) %*% mod.best$states
 
 mm <- 3 #3 processes
 
-# ylbl <- phytoplankton
+clim_names <- rownames(all.clim.dat)
+ ylbl <- clim_names
  w_ts <- seq(dim(all.clim.dat)[2])
- layout(matrix(c(1, 2, 3, 4, 5, 6,7,8,9,10), mm, 2), widths = c(2, 1))
+ layout(matrix(c(1, 2, 3, 4, 5, 6), mm, 2), widths = c(2, 1))
 ## par(mfcol=c(mm,2), mai=c(0.5,0.5,0.5,0.1), omi=c(0,0,0,0))
-par(mai = c(0.5, 0.5, 0.5, 0.1), omi = c(0, 0, 0, 0))
+par(mfcol=c(mm,2), mar = c(1,1,1,1), omi = c(0, 0, 0, 0))
 ## plot the processes
 for (i in 1:mm) {
   ylm <- c(-1, 1) * max(abs(proc_rot[i, ]))
@@ -175,20 +176,28 @@ for (i in 1:mm) {
  # axis(1, 12 * (0:dim(dat_1980)[2]) + 1, yr_frst + 0:dim(dat_1980)[2])
 }
 ## plot the loadings
+clr <- c("brown", "brown", "brown", "brown", 
+         "blue", 
+         "darkgreen", "darkgreen", "darkgreen", "darkgreen", 
+         "darkred", 
+         "purple", 
+         "darkorange",
+         "red",  "red",  "red",  "red", 
+         "green",  "green",
+         "darkblue", 
+         "pink", "pink","pink","pink","pink")
 minZ <- 0
 ylm <- c(-1, 1) * max(abs(Z_rot))
 for (i in 1:mm) {
-  plot(c(1:N_ts)[abs(Z_rot[, i]) > minZ], as.vector(Z_rot[abs(Z_rot[, 
-                                                                    i]) > minZ, i]), type = "h", lwd = 2, xlab = "", ylab = "", 
-       xaxt = "n", ylim = ylm, xlim = c(0.5, N_ts + 0.5), col = clr)
+  plot(c(1:N_ts)[abs(Z_rot[, i]) > minZ], as.vector(Z_rot[abs(Z_rot[, i]) > minZ, i]), 
+       type = "h", lwd = 2, xlab = "", ylab = "", 
+       xaxt = "n", ylim = ylm, xlim = c(0.5, N_ts + 0.5), col=clr)
   for (j in 1:N_ts) {
     if (Z_rot[j, i] > minZ) {
-      text(j, -0.03, ylbl[j], srt = 90, adj = 1, cex = 1.2, 
-           col = clr[j])
+      text(j, -0.03, ylbl[j], srt = 90, adj = 1, cex = 1.2, col=clr[j])
     }
     if (Z_rot[j, i] < -minZ) {
-      text(j, 0.03, ylbl[j], srt = 90, adj = 0, cex = 1.2, 
-           col = clr[j])
+      text(j, 0.03, ylbl[j], srt = 90, adj = 0, cex = 1.2, col=clr[j])
     }
     abline(h = 0, lwd = 1.5, col = "gray")
   }
