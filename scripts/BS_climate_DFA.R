@@ -137,6 +137,8 @@ clim.plot <- ggplot(Z.rot, aes(names, value, fill=key)) + geom_bar(stat="identit
 
 #based on nwfsc-timeseries.github.io
 
+yr_frst <- 1951
+
 ## get number of time series
 N_ts <- dim(all.clim.dat)[1]
 ## get length of time series
@@ -173,7 +175,8 @@ for (i in 1:mm) {
   lines(w_ts, proc_rot[i, ], lwd = 2)
   ## add panel labels
   mtext(paste("State", i), side = 3, line = 0.5)
- # axis(1, 12 * (0:dim(dat_1980)[2]) + 1, yr_frst + 0:dim(dat_1980)[2])
+  #axis(1, 12 * (0:dim(all.clim.dat)[2]) + 1, yr_frst + 0:dim(all.clim.dat)[2])
+  axis(1, 1:70, yr_frst + 0:dim(all.clim.dat)[2])
 }
 ## plot the loadings
 clr <- c("brown", "brown", "brown", "brown", 
