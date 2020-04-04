@@ -42,3 +42,130 @@ ggplot(correlations, aes(year, value)) +
 
 ggsave("figs/rolling 25-yr correlations pdo npgo ao.png", width=6, height=6, units='in')
 # PDO-NPGO doesn't look right! need to check
+
+# another tack here - let's look at correlations between monthly AL & AO
+
+# load monthly ao 
+ao <- read.csv("data/ao.csv")
+names(ao)[1] <- "year"
+
+# now load SLP and calculate NPI!
+library(ncdf4)
+library(zoo)
+library(gplots)
+library(dplyr)
+library(maps)
+library(mapdata)
+library(chron)
+library(fields)
+library(tidyr)
+library(nlme)
+library(ggplot2)
+
+# using monthly NCEP/NCAR!
+nc.slp <- nc_open("data/NCEP.NCAR.slp.nc")
+
+# now process SLP data - first, extract dates
+raw <- ncvar_get(nc.slp, "time")  # seconds since 1-1-1970
+h <- raw/(24*60*60)
+slp.d <- dates(h, origin = c(1,1,1970))
+
+slp.x <- ncvar_get(nc.slp, "longitude")
+slp.y <- ncvar_get(nc.slp, "latitude")
+
+SLP <- ncvar_get(nc.slp, "slp", verbose = F)
+# Change data from a 3-D array to a matrix of monthly data by grid point:
+# First, reverse order of dimensions ("transpose" array)
+SLP <- aperm(SLP, 3:1)  
+
+# reverse latitude to plot
+slp.y <- rev(slp.y)
+SLP <- SLP[,29:1,]
+
+# Change to matrix with column for each grid point, rows for monthly means
+SLP <- matrix(SLP, nrow=dim(SLP)[1], ncol=prod(dim(SLP)[2:3]))  
+
+# Keep track of corresponding latitudes and longitudes of each column:
+slp.lat <- rep(slp.y, length(slp.x))   
+slp.lon <- rep(slp.x, each = length(slp.y))   
+dimnames(SLP) <- list(as.character(slp.d), paste("N", slp.lat, "E", slp.lon, sep=""))
+
+# plot to check
+SLP.mean <- colMeans(SLP)
+z <- t(matrix(SLP.mean,length(slp.y)))  # Re-shape to a matrix with latitudes in columns, longitudes in rows
+image(slp.x,slp.y,z, col=tim.colors(64))
+contour(slp.x, slp.y, z, add=T) 
+map('world2Hires',fill=F,add=T, lwd=2)
+
+# get month and year
+slp.m <- months(slp.d)
+slp.yr <- as.numeric(as.character(years(slp.d)))
+
+# calculate NPI - 
+# 30º-65ºN, 160ºE-140ºW 
+
+NPI <- SLP
+
+drop <- slp.lat < 30
+NPI[,drop] <- NA
+
+drop <- slp.lat > 65
+NPI[,drop] <- NA
+
+drop <- slp.lon < 160
+NPI[,drop] <- NA
+
+drop <- slp.lon > 220
+NPI[,drop] <- NA
+
+# plot to check
+NPI.mean <- colMeans(NPI)
+z <- t(matrix(NPI.mean,length(slp.y)))  # Re-shape to a matrix with latitudes in columns, longitudes in rows
+image(slp.x,slp.y,z, col=tim.colors(64))
+contour(slp.x, slp.y, z, add=T) 
+map('world2Hires',fill=F,add=T, lwd=2)
+
+# now weight by latitude
+weight <- sqrt(cos(slp.lat*pi/180))
+ff <- function(x) weighted.mean(x, w=weight, na.rm=T)
+
+NPI <- apply(NPI, 1, ff)
+
+NPI <- data.frame(year=slp.yr, month=as.numeric(slp.m), NPI=NPI)
+
+dat <- left_join(NPI, ao)
+names(dat)[4] <- "AO"
+
+# get 11-month rolling means
+dat$NPI.11 <- rollapply(dat$NPI, 11, mean, na.rm=T, fill=NA)
+dat$AO.11 <- rollapply(dat$AO, 11, mean, na.rm=T, fill=NA)
+
+plot <- dat %>%
+  pivot_longer(cols=c(-year, -month)) %>%
+  mutate(decimal.yr=year + (month-0.5)/12)
+
+ggplot(plot, aes(decimal.yr, value)) +
+  theme_bw() + 
+  geom_line() +
+  facet_wrap(~name, scales="free_y")
+
+dat$cor.11 <- dat$cor <- NA
+
+for(i in 1:(nrow(dat)-132)){
+  # i <- 1
+  
+  dat$cor[(i+67)] <- cor(dat$NPI[i:(i+132)], dat$AO[i:(i+132)])
+  dat$cor.11[(i+67)] <- cor(dat$NPI.11[i:(i+132)], dat$AO.11[i:(i+132)])  
+
+}
+
+
+cor.plot <- dat %>%
+  select(year, month, cor, cor.11) %>%
+  pivot_longer(cols=c(-year, -month)) %>%
+  mutate(decimal.yr=year + (month-0.5)/12)
+
+ggplot(cor.plot, aes(decimal.yr, value)) +
+  theme_bw() + 
+  geom_line() +
+  facet_wrap(~name)
