@@ -104,6 +104,8 @@ Z.est = coef(mod.best, type="matrix")$Z
 H.inv = varimax(coef(mod.best, type="matrix")$Z)$rotmat
 Z.rot = as.data.frame(Z.est %*% H.inv)
 
+proc_rot = solve(H_inv) %*% mod.best$states
+
 # reverse trend 2 to plot
 Z.rot[,2] <- -Z.rot[,2]
 
@@ -161,6 +163,7 @@ clim_names <- rownames(all.clim.dat)
  w_ts <- seq(dim(all.clim.dat)[2])
  layout(matrix(c(1, 2, 3, 4, 5, 6), mm, 2), widths = c(2, 1))
 ## par(mfcol=c(mm,2), mai=c(0.5,0.5,0.5,0.1), omi=c(0,0,0,0))
+ jpeg("ugly_DFA_trends_loadings.jpg")
 par(mfcol=c(mm,2), mar = c(1,1,1,1), omi = c(0, 0, 0, 0))
 ## plot the processes
 for (i in 1:mm) {
@@ -206,3 +209,7 @@ for (i in 1:mm) {
   }
   mtext(paste("Factor loadings on state", i), side = 3, line = 0.5)
 }
+dev.off()
+
+par(mai = c(0.9, 0.9, 0.1, 0.1))
+ccf(proc_rot[1, ], proc_rot[2, ], lag.max = 12, main = "")
