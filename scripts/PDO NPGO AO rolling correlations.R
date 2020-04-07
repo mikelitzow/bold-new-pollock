@@ -169,3 +169,105 @@ ggplot(cor.plot, aes(decimal.yr, value)) +
   theme_bw() + 
   geom_line() +
   facet_wrap(~name)
+
+# look at ccf by era for smoothed observations
+dat <- dat %>%
+  select(-cor, -cor.11)
+
+dat <- na.omit(dat)
+  
+dat$era <- ifelse(dat$year <= 1988, "1951-1988",
+                         ifelse(dat$year %in% 1989:2013, "1989-2013", "2014-2019"))
+
+era1 <- dat %>%
+  filter(era=="1951-1988")
+
+x1 <- ccf(era1$NPI.11, era1$AO.11)
+
+era2 <- dat %>%
+  filter(era=="1989-2013")
+
+x2 <- ccf(era2$NPI.11, era2$AO.11)
+
+era3 <- dat %>%
+  filter(era=="2014-2019")
+
+x3 <- ccf(era3$NPI.11, era3$AO.11)
+
+era.cors <- data.frame(lag=-23:23,
+                       era1=x1$acf,
+                       era2=c(NA, NA, x2$acf, NA, NA),
+                       era3=c(rep(NA,8), x3$acf, rep(NA,8)))
+
+era.cors <- era.cors %>%
+  pivot_longer(cols=-lag)
+
+ggplot(era.cors, aes(lag, value, fill=name)) +
+  theme_bw() + 
+  geom_bar(position="dodge", stat = "identity") +
+  xlim(-18,18) +
+  ggtitle("Data smoothed with 11-month rolling mean")
+
+# now raw / unsmoothed underlying data
+x1 <- ccf(era1$NPI, era1$AO)
+
+x2 <- ccf(era2$NPI, era2$AO)
+
+x3 <- ccf(era3$NPI, era3$AO)
+
+era.cors <- data.frame(lag=-23:23,
+                       era1=x1$acf,
+                       era2=c(NA, NA, x2$acf, NA, NA),
+                       era3=c(rep(NA,8), x3$acf, rep(NA,8)))
+
+era.cors <- era.cors %>%
+  pivot_longer(cols=-lag)
+
+ggplot(era.cors, aes(lag, value, fill=name)) +
+  theme_bw() + 
+  geom_bar(position="dodge", stat = "identity") +
+  xlim(-18,18) +
+  ggtitle("Raw data")
+
+ggsave("figs/AO NPI cross-correlation by era.png", width=6.5, height=3, units='in')
+
+# so...these are a little confusing (the difference between the raw/unsmoothed)
+# will look at winter as I think that is more relevant!
+
+# start by cleaning up...
+dat <- dat %>%
+  select(year, month, NPI, AO)
+
+dat$winter.year <- ifelse(dat$month %in% 11:12, dat$year+1, dat$year)
+
+winter.dat <- dat %>%
+  filter(month %in% c(11,12,1:3)) %>%
+  pivot_longer(cols=c(NPI,AO)) %>%
+  group_by(name, winter.year) %>%
+  summarise(winter.mean=mean(value))
+
+ggplot(winter.dat, aes(winter.year, winter.mean)) +
+  theme_bw() +
+  geom_line() +
+  facet_wrap(~name, scales="free_y", nrow=2)
+
+winter.dat$era <- ifelse(winter.dat$winter.year <= 1988, "1951-1988",
+                         ifelse(winter.dat$winter.year %in% 1989:2013, "1989-2013", "2014-2019"))
+
+cor.dat <- winter.dat %>%
+  filter(winter.year <= 2019) %>%
+  pivot_wider(names_from = name, values_from = winter.mean)
+
+cor.dat <- na.omit(cor.dat)
+
+era1 <- cor.dat %>%
+  filter(era=="1951-1988")
+
+ccf(era1$NPI, era1$AO, xlim=c(-2,2))
+
+era2 <- cor.dat %>%
+  filter(era=="1989-2013")
+
+ccf(era2$NPI, era2$AO, xlim=c(-2,2))
+
+
