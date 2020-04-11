@@ -324,7 +324,6 @@ mod = MARSS(dfa.dat[,colnames(dfa.dat) %in% 1965:2013], model=model.list, z.scor
 library(tidyverse)
 library(rstan)
 library(ggplot2)
-library(plyr)
 library(rstanarm)
 library(bayesplot)
 
@@ -336,13 +335,13 @@ stan.data <- data.frame(year=1965:2013,
 
 stan.data$era <- ifelse(stan.data$year %in% 1965:1988, "1965-1988", "1989-2013")
 
-AO.stan <- stan_glm(trend ~ era + AO.jfm + AO.jfm:era,
-                            data = stan.data,
-                            chains = 4, cores = 4, thin = 1, seed=421,
-                            warmup = 1000, iter = 4000, refresh = 0,
-                            prior = normal(location = 0, scale = 5, autoscale = FALSE),
-                            prior_intercept = normal(location = 0, scale = 5, autoscale = FALSE),
-                            prior_aux = student_t(df = 3, location = 0, scale = 5, autoscale = FALSE))
+# AO.stan <- stan_glm(trend ~ era + AO.jfm + AO.jfm:era,
+                            # data = stan.data,
+                            # chains = 4, cores = 4, thin = 1, seed=421,
+                            # warmup = 1000, iter = 4000, refresh = 0,
+                            # prior = normal(location = 0, scale = 5, autoscale = FALSE),
+                            # prior_intercept = normal(location = 0, scale = 5, autoscale = FALSE),
+                            # prior_aux = student_t(df = 3, location = 0, scale = 5, autoscale = FALSE))
 
 scatter <- ggplot(stan.data, aes(AO.jfm, trend, color=era)) +
   theme_bw() +
@@ -372,6 +371,15 @@ dat3 <- read.csv("data/winter.NPI.csv")
 
 stan.data <- left_join(stan.data, dat3)
 
+# add ALBSA
+dat4 <- read.csv("data/monthly albsa.csv")
+stan.data <- left_join(stan.data, dat4)
+
+# add mean Arctic SLP
+dat5 <- read.csv("data/mean winter arctic slp.csv")
+stan.data <- left_join(stan.data, dat5)
+
+
 plot <- stan.data %>%
   select(-year) %>%
   pivot_longer(cols=c(-trend, -era))
@@ -386,4 +394,239 @@ scatter <- ggplot(plot, aes(value, trend, color=era)) +
   ylab("Climate trend value") +
   theme(legend.title = element_blank(), axis.title.y = element_blank(), legend.position = 'top')
 
-ggsave("figs/AO NPGO NPI PDO vs climate dfa scatter.png", width = 6, height = 6, units="in")
+ggsave("figs/ALBSA AO Arctic SLP NPGO NPI PDO vs climate dfa scatter.png", width = 10, height = 8, units="in")
+
+# scale albsa, arctic.slp, NPI
+stan.data$albsa.djf <- scale(stan.data$albsa.djf)
+stan.data$arctic.slp.ndjfm <- scale(stan.data$arctic.slp.ndjfm)
+stan.data$NPI.ndjfm <- scale(stan.data$NPI.ndjfm)
+
+stan.this <- stan.data %>%
+select(-year, -AO.jfm, -npgo.ndjfm, -albsa.mam) %>%
+  pivot_longer(cols=c(-trend, -era))
+
+# stan era-specific regressions
+albsa.djf.stan <- stan_glm(trend ~ era + value + value:era,
+                    data = stan.this[stan.this$name=="albsa.djf",],
+                    chains = 4, cores = 4, thin = 1,
+                    warmup = 1000, iter = 4000, refresh = 0,
+                    prior = normal(location = 0, scale = 5, autoscale = FALSE),
+                    prior_intercept = normal(location = 0, scale = 5, autoscale = FALSE),
+                    prior_aux = student_t(df = 3, location = 0, scale = 5, autoscale = FALSE))
+
+arctic.slp.ndjfm.stan <- stan_glm(trend ~ era + value + value:era,
+                                  data = stan.this[stan.this$name=="arctic.slp.ndjfm",],
+                           chains = 4, cores = 4, thin = 1,
+                           warmup = 1000, iter = 4000, refresh = 0,
+                           prior = normal(location = 0, scale = 5, autoscale = FALSE),
+                           prior_intercept = normal(location = 0, scale = 5, autoscale = FALSE),
+                           prior_aux = student_t(df = 3, location = 0, scale = 5, autoscale = FALSE))
+
+NPI.ndjfm.stan <- stan_glm(trend ~ era + value + value:era,
+                           data = stan.this[stan.this$name=="NPI.ndjfm",],
+                                  chains = 4, cores = 4, thin = 1,
+                                  warmup = 1000, iter = 4000, refresh = 0,
+                                  prior = normal(location = 0, scale = 5, autoscale = FALSE),
+                                  prior_intercept = normal(location = 0, scale = 5, autoscale = FALSE),
+                                  prior_aux = student_t(df = 3, location = 0, scale = 5, autoscale = FALSE))
+
+pdo.ndjfm.stan <- stan_glm(trend ~ era + value + value:era,
+                           data = stan.this[stan.this$name=="pdo.ndjfm",],
+                           chains = 4, cores = 4, thin = 1,
+                           warmup = 1000, iter = 4000, refresh = 0,
+                           prior = normal(location = 0, scale = 5, autoscale = FALSE),
+                           prior_intercept = normal(location = 0, scale = 5, autoscale = FALSE),
+                           prior_aux = student_t(df = 3, location = 0, scale = 5, autoscale = FALSE))
+
+##############
+# and plot!
+
+lst <- list(albsa.djf.stan, arctic.slp.ndjfm.stan, NPI.ndjfm.stan, pdo.ndjfm.stan)
+
+
+# extract intercepts
+lst.int <- lapply(lst, function(x) {
+  beta <- as.matrix(x, pars = c("(Intercept)", "era1989-2013"))
+  data.frame(key = unique(x$data$name),
+             era1 = beta[ , 1],
+             era2 = beta[ , 1] + beta[ , 2])
+})
+coef_indv_arm <- plyr::rbind.fill(lst.int)
+
+mdf_indv_arm <- reshape2::melt(coef_indv_arm, id.vars = "key")
+
+## extract slopes
+lst.slope <- lapply(lst, function(x) {
+  beta <- as.matrix(x, pars = c("value", "era1989-2013:value"))
+  data.frame(key = unique(x$data$name),
+             era1 = beta[ , 1],
+             era2 = beta[ , 1] + beta[ , 2])
+})
+coef_slope <- plyr::rbind.fill(lst.slope)
+mdf_slope <- reshape2::melt(coef_slope, id.vars = "key")
+
+
+# plot intercepts
+int <- ggplot(mdf_indv_arm, aes(x = value, fill = variable)) +
+  theme_bw() +
+  geom_density(alpha = 0.7) +
+  scale_fill_manual(values = c(cb[2], cb[3], cb[4]), labels=c("1965-1988", "1989-2013")) +
+  theme(legend.title = element_blank(), legend.position = 'top') +
+  geom_vline(xintercept = 0, lty = 2) +
+  labs(x = "Intercept (scaled anomaly)",
+       y = "Posterior density") +
+  facet_wrap( ~ key, scales="free")
+print(int)
+
+ggsave("figs/era intercepts - large-scale modes on Bering climate DFA.png", width=10, height=8, units="in")
+
+# plot slopes
+slope <- ggplot(mdf_slope, aes(x = value, fill = variable)) +
+  theme_bw() +
+  geom_density(alpha = 0.7) +
+  scale_fill_manual(values = c(cb[2], cb[3], cb[4]), labels=c("1964-1988", "1989-2013", "2014-2019")) +
+  theme(legend.title = element_blank(), legend.position = 'top') +
+  geom_vline(xintercept = 0, lty = 2) +
+  labs(x = "Slope (scaled anomaly)",
+       y = "Posterior density") +
+  facet_wrap( ~ key, scales="free")
+print(slope)
+
+ggsave("figs/era slopes - climate variables on AO.png", width=10, height=8, units='in')
+
+######################
+# hmmmm....rolling regressions on PDO-trend relationship?
+
+roll.dat <- stan.data %>%
+  select(year, trend, pdo.ndjfm)
+
+roll.dat$slope <- roll.dat$intercept <- NA
+
+# 25-yr windows
+for(i in 1977:2001){
+  # i <- 1977
+  temp <- roll.dat %>%
+    filter(year %in% (i-12):(i+12))
+  
+  mod <- lm(temp$trend ~ temp$pdo.ndjfm)
+  roll.dat$intercept[roll.dat$year==i] <- mod$coefficients[1]
+  roll.dat$slope[roll.dat$year==i] <- mod$coefficients[2]  
+}
+
+plot <- roll.dat %>%
+  select(year, intercept, slope) %>%
+  pivot_longer(cols=-year)
+
+plot <- na.omit(plot)
+  
+ggplot(plot, aes(year, value, color=name)) +
+  theme_bw() +
+  geom_line() +
+  geom_vline(xintercept = 1988.5, lty=2)
+
+# and AICc!
+library(MuMIn)
+roll.dat$AICc <- NA
+
+# 25-yr windows
+ for(i in 1977:2001){
+    # i <- 1977
+  temp <- roll.dat %>%
+    filter(year %in% (i-12):(i+12))
+  
+  mod <- lm(temp$trend ~ temp$pdo.ndjfm)
+  roll.dat$AICc[roll.dat$year==i] <- AICc(mod)
+}
+
+plot <- roll.dat %>%
+  select(year, AICc)
+
+plot <- na.omit(plot)
+
+ggplot(plot, aes(year, AICc)) +
+  theme_bw() +
+  geom_line() +
+  geom_vline(xintercept = 1988.5, lty=2) +
+  ggtitle("PDO")
+
+# other variables!
+roll.dat <- stan.data %>%
+  select(year, trend, AO.jfm)
+
+roll.dat$AICc <- NA
+
+# 25-yr windows
+for(i in 1977:2001){
+  # i <- 1977
+  temp <- roll.dat %>%
+    filter(year %in% (i-12):(i+12))
+  
+  mod <- lm(temp$trend ~ temp$AO.jfm)
+  roll.dat$AICc[roll.dat$year==i] <- AICc(mod)
+}
+
+plot <- roll.dat %>%
+  select(year, AICc)
+
+plot <- na.omit(plot)
+
+ggplot(plot, aes(year, AICc)) +
+  theme_bw() +
+  geom_line() +
+  geom_vline(xintercept = 1988.5, lty=2) +
+  ggtitle("AO")
+
+# 
+roll.dat <- stan.data %>%
+  select(year, trend, albsa.djf)
+
+roll.dat$AICc <- NA
+
+# 25-yr windows
+for(i in 1977:2001){
+  # i <- 1977
+  temp <- roll.dat %>%
+    filter(year %in% (i-12):(i+12))
+  
+  mod <- lm(temp$trend ~ temp$albsa.djf)
+  roll.dat$AICc[roll.dat$year==i] <- AICc(mod)
+}
+
+plot <- roll.dat %>%
+  select(year, AICc)
+
+plot <- na.omit(plot)
+
+ggplot(plot, aes(year, AICc)) +
+  theme_bw() +
+  geom_line() +
+  geom_vline(xintercept = 1988.5, lty=2) + 
+  ggtitle("ALBSA")
+
+# 
+roll.dat <- stan.data %>%
+  select(year, trend, arctic.slp.ndjfm)
+
+roll.dat$AICc <- NA
+
+# 25-yr windows
+for(i in 1977:2001){
+  # i <- 1977
+  temp <- roll.dat %>%
+    filter(year %in% (i-12):(i+12))
+  
+  mod <- lm(temp$trend ~ temp$arctic.slp.ndjfm)
+  roll.dat$AICc[roll.dat$year==i] <- AICc(mod)
+}
+
+plot <- roll.dat %>%
+  select(year, AICc)
+
+plot <- na.omit(plot)
+
+ggplot(plot, aes(year, AICc)) +
+  theme_bw() +
+  geom_line() +
+  geom_vline(xintercept = 1988.5, lty=2) + 
+  ggtitle("Arctic SLP")
+

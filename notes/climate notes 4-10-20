@@ -1,0 +1,13 @@
+climate analysis notes 4/10/20
+
+AICc plots show strong evidence of changing relationships between large-scale modes and Bering climate (DFA)
+
+Correlation between DFA trend and Arctic SLP shows weakening post-88/89 (maps)
+
+BUT! no real change in relationships among the regional variables!!
+
+Stan fits show changing relationships (mostly intercepts!) with DFA
+
+Need to fit stan models to large-scale modes and leading regional variables (those loading most strongly on DFA trend)
+
+Then! Fit DFA to biology TS...
