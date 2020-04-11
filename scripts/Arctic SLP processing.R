@@ -81,4 +81,6 @@ arctic <- arctic %>%
   summarise(arctic.slp.ndjfm=mean(arctic)) %>%
   filter(winter.year %in% 1949:2019)
 
+names(arctic)[1] <- "year"
+
 write.csv(arctic, "data/mean winter arctic slp.csv", row.names = F)
