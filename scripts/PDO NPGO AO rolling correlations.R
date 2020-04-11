@@ -244,7 +244,23 @@ winter.dat <- dat %>%
   filter(month %in% c(11,12,1:3)) %>%
   pivot_longer(cols=c(NPI,AO)) %>%
   group_by(name, winter.year) %>%
-  summarise(winter.mean=mean(value))
+  summarise(winter.mean=mean(value)) # something is wrong here, need to figure out later!
+
+# summarise winter NPI and save
+sum.dat <- dat %>%
+  filter(month %in% c(11,12,1:3)) %>%
+  select(winter.year, month, NPI) %>%
+  group_by(winter.year)
+
+export <- data.frame(year=unique(sum.dat$winter.year),
+                     NPI.ndjfm=tapply(sum.dat$NPI, sum.dat$winter.year, mean))
+
+ggplot(export, aes(year, NPI.ndjfm)) +
+  theme_bw() +
+  geom_line()
+
+write.csv(export[2:nrow(export),], "data/winter.NPI.csv", row.names = F)
+
 
 ggplot(winter.dat, aes(winter.year, winter.mean)) +
   theme_bw() +
