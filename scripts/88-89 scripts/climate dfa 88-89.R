@@ -526,18 +526,568 @@ ggplot(plot, aes(year, value, color=name)) +
 
 # and AICc!
 library(MuMIn)
-roll.dat$AICc <- NA
+
+roll.dat <- stan.data %>%
+  select(-era) %>%
+  pivot_longer(cols=c(-year, -trend))
+  
+vars <- unique(roll.dat$name)
+AICc.out <- data.frame()
 
 # 25-yr windows
- for(i in 1977:2001){
-    # i <- 1977
-  temp <- roll.dat %>%
-    filter(year %in% (i-12):(i+12))
+for(j in 1:length(vars)){
+  # j <- 1
   
-  mod <- lm(temp$trend ~ temp$pdo.ndjfm)
-  roll.dat$AICc[roll.dat$year==i] <- AICc(mod)
+  temp <- roll.dat %>%
+    filter(name == vars[j])
+  
+ for(i in 1977:2001){
+     # i <- 1977
+
+  temp$era <- ifelse(temp$year <= i, "era1", "era2")
+  
+  mod <- lm(temp$trend ~ temp$value * temp$era)
+  AICc.out <- rbind(AICc.out,
+                    data.frame(variable=vars[j],
+                               year=i,
+                               AICc=AICc(mod)))
+  
+}
 }
 
+ggplot(AICc.out, aes(year, AICc)) +
+  theme_bw() +
+  geom_line() +
+  facet_wrap(~variable, scales = "free_y")
+
+# non-interaction model...
+AICc.out <- data.frame()
+
+# 25-yr windows
+for(j in 1:length(vars)){
+  # j <- 1
+  
+  temp <- roll.dat %>%
+    filter(name == vars[j])
+  
+  for(i in 1977:2001){
+    # i <- 1977
+    
+    temp$era <- ifelse(temp$year <= i, "era1", "era2")
+    
+    mod <- lm(temp$trend ~ temp$value + temp$era)
+    AICc.out <- rbind(AICc.out,
+                      data.frame(variable=vars[j],
+                                 year=i,
+                                 AICc=AICc(mod)))
+    
+  }
+}
+
+ggplot(AICc.out, aes(year, AICc)) +
+  theme_bw() +
+  geom_line() +
+  facet_wrap(~variable, scales = "free_y")
+
+# now! just fit a single model to 25-year periods..
+AICc.out <- data.frame()
+
+# 25-yr windows
+for(j in 1:length(vars)){
+  # j <- 1
+  
+  temp <- roll.dat %>%
+    filter(name == vars[j])
+  
+  for(i in 1977:2001){
+    # i <- 1977
+    temp2 <- temp %>%
+      filter(year %in% (i-12):(i+12))
+    mod <- lm(scale(temp2$trend) ~ temp2$value)
+    
+    AICc.out <- rbind(AICc.out,
+                      data.frame(variable=vars[j],
+                                 year=i,
+                                 AICc=AICc(mod)))
+    
+  }
+}
+
+ggplot(AICc.out, aes(year, AICc)) +
+  theme_bw() +
+  geom_line() +
+  facet_wrap(~variable, scales = "free_y")
+#################################
+# add more years to the rolling AICc analysis
+
+# find best model for 1950-2013
+model.data = data.frame()
+
+# fit models & store results
+for(R in levels.R) {
+  for(m in 1) {  # allowing up to 1 trends
+    dfa.model = list(A="zero", R=R, m=m)
+    kemz = MARSS(dfa.dat[,colnames(dfa.dat) %in% 1950:2013], model=dfa.model, control=cntl.list, 
+                 form="dfa", z.score=TRUE)
+    model.data = rbind(model.data,
+                       data.frame(R=R,
+                                  m=m,
+                                  logLik=kemz$logLik,
+                                  K=kemz$num.params,
+                                  AICc=kemz$AICc,
+                                  stringsAsFactors=FALSE))
+    assign(paste("kemz", m, R, sep="."), kemz)
+  } # end m loop
+} # end R loop
+
+# calculate delta-AICc scores, sort in descending order, and compare
+model.data$dAICc <- model.data$AICc-min(model.data$AICc)
+model.data <- model.data %>%
+  arrange(dAICc)
+
+model.data
+
+# unconstrained!
+model.list = list(A="zero", m=1, R="unconstrained")
+mod = MARSS(dfa.dat[,colnames(dfa.dat) %in% 1951:2013], model=model.list, z.score=TRUE, form="dfa", control=cntl.list)
+
+stan.data <- data.frame(year=1951:2013,
+                        trend=as.vector(mod$states),
+                        AO.jfm=dat$AO.jfm[dat$year %in% 1951:2013])
+# load pdo/npgo and run the same analysis
+dat2 <- read.csv("data/winter pdo-npgo.csv")
+
+# plot to check
+check <- dat2 %>%
+  pivot_longer(cols=-year)
+
+ggplot(check, aes(year, value, color=name)) + 
+  theme_bw() +
+  geom_line()
+
+stan.data <- left_join(stan.data, dat2)
+
+# an NPI!
+dat3 <- read.csv("data/winter.NPI.csv")
+
+stan.data <- left_join(stan.data, dat3)
+
+# add ALBSA
+dat4 <- read.csv("data/monthly albsa.csv")
+stan.data <- left_join(stan.data, dat4)
+
+# add mean Arctic SLP
+dat5 <- read.csv("data/mean winter arctic slp.csv")
+stan.data <- left_join(stan.data, dat5)
+
+
+roll.dat <- stan.data %>%
+  pivot_longer(cols=c(-year, -trend))
+
+vars <- unique(roll.dat$name)
+AICc.out <- data.frame()
+
+# 25-yr windows
+for(j in 1:length(vars)){
+  # j <- 1
+  
+  temp <- roll.dat %>%
+    filter(name == vars[j])
+  
+  for(i in 1963:2001){
+    # i <- 1977
+    
+    temp$era <- ifelse(temp$year <= i, "era1", "era2")
+    
+    mod <- lm(temp$trend ~ temp$value * temp$era)
+    AICc.out <- rbind(AICc.out,
+                      data.frame(variable=vars[j],
+                                 year=i,
+                                 AICc=AICc(mod)))
+    
+  }
+}
+
+ggplot(AICc.out, aes(year, AICc)) +
+  theme_bw() +
+  geom_line() +
+  facet_wrap(~variable, scales = "free_y")
+
+ggsave("figs/large-scale modes and bering climate dfa AICc.png", width=8, height=7, units='in')
+
+#################################
+# for comparison, look at the same analysis for GOA!!
+dat <- read.csv("data/GOA data/GOA.climate.csv", row.names=1)
+
+unique(dat$key)
+# subset
+keep <- c("NDJ.grad", "FMA.FW", "FMA.WS", "MJJ.UW", "FMA.SST", "FMA.SSH")
+
+dfa.dat <- dat %>%
+  filter(key %in% keep) %>% 
+  pivot_wider(names_from="key", values_from = "value")
+
+years <- dfa.dat$year
+
+dfa.dat <- dfa.dat %>%
+  select(-year)
+
+dfa.dat <- as.matrix(t(dfa.dat))
+colnames(dfa.dat) <- years
+View(dfa.dat)
+
+# find best error structure for 1-trend model
+
+# changing convergence criterion to ensure convergence
+cntl.list = list(minit=200, maxit=20000, allow.degen=FALSE, conv.test.slope.tol=0.1, abstol=0.0001)
+
+# set up forms of R matrices
+levels.R = c("diagonal and equal",
+             "diagonal and unequal",
+             "equalvarcov",
+             "unconstrained")
+model.data = data.frame()
+
+# fit models & store results
+for(R in levels.R) {
+  for(m in 1) {  # allowing up to 1 trends
+    dfa.model = list(A="zero", R=R, m=m)
+    kemz = MARSS(dfa.dat, model=dfa.model, control=cntl.list, 
+                 form="dfa", z.score=TRUE)
+    model.data = rbind(model.data,
+                       data.frame(R=R,
+                                  m=m,
+                                  logLik=kemz$logLik,
+                                  K=kemz$num.params,
+                                  AICc=kemz$AICc,
+                                  stringsAsFactors=FALSE))
+    assign(paste("kemz", m, R, sep="."), kemz)
+  } # end m loop
+} # end R loop
+
+# calculate delta-AICc scores, sort in descending order, and compare
+model.data$dAICc <- model.data$AICc-min(model.data$AICc)
+model.data <- model.data %>%
+  arrange(dAICc)
+
+model.data
+
+# unconstrained!
+model.list = list(A="zero", m=1, R="unconstrained")
+mod = MARSS(dfa.dat, model=model.list, z.score=TRUE, form="dfa", control=cntl.list)
+
+stan.data <- data.frame(year=1950:2012,
+                        trend=as.vector(mod$states))
+# load pdo/npgo and run the same analysis
+dat2 <- read.csv("data/winter pdo-npgo.csv")
+
+# plot to check
+check <- dat2 %>%
+  pivot_longer(cols=-year)
+
+ggplot(check, aes(year, value, color=name)) + 
+  theme_bw() +
+  geom_line()
+
+stan.data <- left_join(stan.data, dat2)
+
+# an NPI!
+dat3 <- read.csv("data/winter.NPI.csv")
+
+stan.data <- left_join(stan.data, dat3)
+
+
+roll.dat <- stan.data %>%
+  pivot_longer(cols=c(-year, -trend))
+
+vars <- unique(roll.dat$name)
+AICc.out <- data.frame()
+
+# 25-yr windows
+for(j in 1:length(vars)){
+  # j <- 1
+  
+  temp <- roll.dat %>%
+    filter(name == vars[j])
+  
+  for(i in 1962:2000){
+    # i <- 1977
+    
+    temp$era <- ifelse(temp$year <= i, "era1", "era2")
+    
+    mod <- lm(temp$trend ~ temp$value * temp$era)
+    AICc.out <- rbind(AICc.out,
+                      data.frame(variable=vars[j],
+                                 year=i,
+                                 AICc=AICc(mod)))
+    
+  }
+}
+
+ggplot(AICc.out, aes(year, AICc)) +
+  theme_bw() +
+  geom_line() +
+  facet_wrap(~variable, scales = "free_y")
+
+ggsave("figs/large-scale modes and GOA climate dfa AICc.png", width=8, height=7, units='in')
+
+# still quite confusing!
+
+# try the simplest approach - 25 yr rolling correlations between PDO and individual
+# time series in each ecosystem!
+
+# for GOA, restrict to the time series known to show changing associations with PDO
+dat <- read.csv("data/GOA data/GOA.climate.csv", row.names=1)
+keep <- c("NDJ.grad", "FMA.FW", "FMA.WS", "FMA.SSH", "Papa")
+
+dfa.dat <- dat %>%
+  filter(key %in% keep) %>% 
+  pivot_wider(names_from="key", values_from = "value")
+
+dat2 <- read.csv("data/winter pdo-npgo.csv")
+
+dat2 <- dat2 %>%
+  select(-npgo.ndjfm)
+
+dfa.dat <- left_join(dfa.dat, dat2)
+
+dfa.dat <- dfa.dat %>%
+  pivot_longer(cols=c(-year, -pdo.ndjfm))
+
+# get rolling 25-yr correlations
+
+goa.cor <- data.frame()
+vars <- unique(dfa.dat$name)
+
+for(j in 1:length(vars)){
+  # j <- 1
+  temp <- dfa.dat %>%
+    filter(name==vars[j])
+
+for(i in 1963:2000){
+  # i <- 1990
+  goa.cor <- rbind(goa.cor,
+                   data.frame(year=i,
+                              var=vars[j],
+                              cor=cor(temp$pdo.ndjfm[temp$year %in% (i-12):(i+12)],
+                                      temp$value[temp$year %in% (i-12):(i+12)])))
+  
+  
+}}
+
+
+ggplot(goa.cor, aes(year, cor)) +
+  theme_bw() +
+  geom_line() +
+  facet_wrap(~var, scales="free_y") +
+  ggtitle("Rolling 25-year correlations")
+
+ggsave("figs/rolling correlations - GOA climate vars and PDO.png", width=8, height=5, units='in')
+
+# ok - that's a good example to compare with...now how about the Bering TS?
+# load climate data 
+dat <- read.csv("data/climate data.csv")
+
+names(dat)
+
+# subset
+keep <- c("year", "m4.march.ice", "m5.march.ice", "NW.wind.May.Sep",
+          "NW.wind.Oct.Apr", "SE.wind.May.Sep", "SE.wind.Oct.Apr", "south.sst.amj",
+          "south.sst.ndjfm", "south.wind.stress.amj")
+
+dfa.dat <- dat %>%
+  select(keep) %>%
+  pivot_longer(cols=-year)
+
+
+dat2 <- read.csv("data/winter pdo-npgo.csv")
+
+dat2 <- dat2 %>%
+  select(-npgo.ndjfm)
+
+dfa.dat <- left_join(dfa.dat, dat2)
+
+# limit to 2013 and earlier
+dfa.dat <- dfa.dat %>%
+  filter(year <= 2013)
+
+# get rolling 25-yr correlations
+
+ebs.cor <- data.frame()
+vars <- unique(dfa.dat$name)
+
+for(j in 1:length(vars)){
+  # j <- 1
+  temp <- dfa.dat %>%
+    filter(name==vars[j])
+  
+  for(i in 1963:2001){
+    # i <- 1990
+    ebs.cor <- rbind(ebs.cor,
+                     data.frame(year=i,
+                                var=vars[j],
+                                cor=cor(temp$pdo.ndjfm[temp$year %in% (i-12):(i+12)],
+                                        temp$value[temp$year %in% (i-12):(i+12)])))
+    
+    
+  }}
+
+
+ggplot(ebs.cor, aes(year, cor)) +
+  theme_bw() +
+  geom_line() +
+  facet_wrap(~var, scales="free_y") +
+  ggtitle("Rolling 25-year correlations with PDO")
+
+ggsave("figs/rolling correlations - EBS climate vars and PDO.png", width=8, height=6, units='in')
+
+# add other large-scale modes!
+
+dat3 <- read.csv("data/climate data.csv")
+dat3 <- dat3 %>%
+  select(year, AO.jfm)
+dfa.dat <- left_join(dfa.dat, dat3)
+
+# add ALBSA
+dat4 <- read.csv("data/monthly albsa.csv")
+dfa.dat <- left_join(dfa.dat, dat4)
+
+# add mean Arctic SLP
+dat5 <- read.csv("data/mean winter arctic slp.csv")
+dfa.dat <- left_join(dfa.dat, dat5)
+
+# now rolling AO corrs
+# get rolling 25-yr correlations
+
+ebs.cor <- data.frame()
+vars <- unique(dfa.dat$name)
+
+for(j in 1:length(vars)){
+  # j <- 1
+  temp <- dfa.dat %>%
+    filter(name==vars[j])
+  
+  for(i in 1963:2001){
+    # i <- 1990
+    ebs.cor <- rbind(ebs.cor,
+                     data.frame(year=i,
+                                var=vars[j],
+                                cor=cor(temp$AO.jfm[temp$year %in% (i-12):(i+12)],
+                                        temp$value[temp$year %in% (i-12):(i+12)])))
+    
+    
+  }}
+
+
+ggplot(ebs.cor, aes(year, cor)) +
+  theme_bw() +
+  geom_line() +
+  facet_wrap(~var, scales="free_y") +
+  ggtitle("Rolling 25-year correlations with AO")
+
+ggsave("figs/rolling correlations - EBS climate vars and AO.png", width=8, height=6, units='in')
+
+
+############
+# now rolling spring ALBSA corrs
+# get rolling 25-yr correlations
+
+ebs.cor <- data.frame()
+vars <- unique(dfa.dat$name)
+
+for(j in 1:length(vars)){
+  # j <- 1
+  temp <- dfa.dat %>%
+    filter(name==vars[j])
+  
+  for(i in 1963:2001){
+    # i <- 1990
+    ebs.cor <- rbind(ebs.cor,
+                     data.frame(year=i,
+                                var=vars[j],
+                                cor=cor(temp$albsa.mam[temp$year %in% (i-12):(i+12)],
+                                        temp$value[temp$year %in% (i-12):(i+12)])))
+    
+    
+  }}
+
+
+ggplot(ebs.cor, aes(year, cor)) +
+  theme_bw() +
+  geom_line() +
+  facet_wrap(~var, scales="free_y") +
+  ggtitle("Rolling 25-year correlations with spring ALBSA") # these are totally weak!!
+
+ggsave("figs/rolling correlations - EBS climate vars and spring ALBSA.png", width=8, height=6, units='in')
+
+############
+# now rolling winter ALBSA corrs
+# get rolling 25-yr correlations
+
+ebs.cor <- data.frame()
+vars <- unique(dfa.dat$name)
+
+for(j in 1:length(vars)){
+  # j <- 1
+  temp <- dfa.dat %>%
+    filter(name==vars[j])
+  
+  for(i in 1963:2001){
+    # i <- 1990
+    ebs.cor <- rbind(ebs.cor,
+                     data.frame(year=i,
+                                var=vars[j],
+                                cor=cor(temp$albsa.djf[temp$year %in% (i-12):(i+12)],
+                                        temp$value[temp$year %in% (i-12):(i+12)])))
+    
+    
+  }}
+
+
+ggplot(ebs.cor, aes(year, cor)) +
+  theme_bw() +
+  geom_line() +
+  facet_wrap(~var, scales="free_y") +
+  ggtitle("Rolling 25-year correlations with winter ALBSA") # these are stronger than spring...
+
+ggsave("figs/rolling correlations - EBS climate vars and winter ALBSA.png", width=8, height=6, units='in')
+
+
+############
+# now Arctic SLP
+# get rolling 25-yr correlations
+
+ebs.cor <- data.frame()
+vars <- unique(dfa.dat$name)
+
+for(j in 1:length(vars)){
+  # j <- 1
+  temp <- dfa.dat %>%
+    filter(name==vars[j])
+  
+  for(i in 1963:2001){
+    # i <- 1990
+    ebs.cor <- rbind(ebs.cor,
+                     data.frame(year=i,
+                                var=vars[j],
+                                cor=cor(temp$arctic.slp.ndjfm[temp$year %in% (i-12):(i+12)],
+                                        temp$value[temp$year %in% (i-12):(i+12)])))
+    
+    
+  }}
+
+
+ggplot(ebs.cor, aes(year, cor)) +
+  theme_bw() +
+  geom_line() +
+  facet_wrap(~var, scales="free_y") +
+  ggtitle("Rolling 25-year correlations with winter Artic SLP") # these are totally weak!!
+
+ggsave("figs/rolling correlations - EBS climate vars and winter Arctic SLP.png", width=8, height=6, units='in')
+
+#################################
+# old stuff below!
+#################################
 plot <- roll.dat %>%
   select(year, AICc)
 
@@ -554,6 +1104,7 @@ roll.dat <- stan.data %>%
   select(year, trend, AO.jfm)
 
 roll.dat$AICc <- NA
+roll.dat$era <- as.factor(ifelse(roll.dat$year <=1988, "era1", "era2"))
 
 # 25-yr windows
 for(i in 1977:2001){
@@ -561,7 +1112,7 @@ for(i in 1977:2001){
   temp <- roll.dat %>%
     filter(year %in% (i-12):(i+12))
   
-  mod <- lm(temp$trend ~ temp$AO.jfm)
+  mod <- lm(temp$trend ~ temp$AO.jfm*temp$era)
   roll.dat$AICc[roll.dat$year==i] <- AICc(mod)
 }
 
@@ -581,6 +1132,7 @@ roll.dat <- stan.data %>%
   select(year, trend, albsa.djf)
 
 roll.dat$AICc <- NA
+roll.dat$era <- as.factor(ifelse(roll.dat$year <=1988, "era1", "era2"))
 
 # 25-yr windows
 for(i in 1977:2001){
@@ -588,7 +1140,7 @@ for(i in 1977:2001){
   temp <- roll.dat %>%
     filter(year %in% (i-12):(i+12))
   
-  mod <- lm(temp$trend ~ temp$albsa.djf)
+  mod <- lm(temp$trend ~ temp$albsa.djf*temp$era)
   roll.dat$AICc[roll.dat$year==i] <- AICc(mod)
 }
 
@@ -608,6 +1160,7 @@ roll.dat <- stan.data %>%
   select(year, trend, arctic.slp.ndjfm)
 
 roll.dat$AICc <- NA
+roll.dat$era <- as.factor(ifelse(roll.dat$year <=1988, "era1", "era2"))
 
 # 25-yr windows
 for(i in 1977:2001){
@@ -615,7 +1168,7 @@ for(i in 1977:2001){
   temp <- roll.dat %>%
     filter(year %in% (i-12):(i+12))
   
-  mod <- lm(temp$trend ~ temp$arctic.slp.ndjfm)
+  mod <- lm(temp$trend ~ temp$arctic.slp.ndjfm*temp$era)
   roll.dat$AICc[roll.dat$year==i] <- AICc(mod)
 }
 
