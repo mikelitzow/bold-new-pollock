@@ -846,13 +846,11 @@ dfa.dat <- dat %>%
 
 dat2 <- read.csv("data/winter pdo-npgo.csv")
 
-dat2 <- dat2 %>%
-  select(-npgo.ndjfm)
 
 dfa.dat <- left_join(dfa.dat, dat2)
 
 dfa.dat <- dfa.dat %>%
-  pivot_longer(cols=c(-year, -pdo.ndjfm))
+  pivot_longer(cols=c(-year, -pdo.ndjfm, -npgo.ndjfm))
 
 # get rolling 25-yr correlations
 
@@ -869,20 +867,51 @@ for(i in 1963:2000){
   goa.cor <- rbind(goa.cor,
                    data.frame(year=i,
                               var=vars[j],
+                              mode="pdo.ndjfm",
                               cor=cor(temp$pdo.ndjfm[temp$year %in% (i-12):(i+12)],
                                       temp$value[temp$year %in% (i-12):(i+12)])))
   
   
 }}
 
+# and npgo
+for(j in 1:length(vars)){
+  # j <- 1
+  temp <- dfa.dat %>%
+    filter(name==vars[j])
+  
+  for(i in 1963:2000){
+    # i <- 1990
+    goa.cor <- rbind(goa.cor,
+                     data.frame(year=i,
+                                var=vars[j],
+                                mode="npgo.ndjfm",
+                                cor=cor(temp$npgo.ndjfm[temp$year %in% (i-12):(i+12)],
+                                        temp$value[temp$year %in% (i-12):(i+12)])))
+    
+    
+  }}
 
-ggplot(goa.cor, aes(year, cor)) +
+# now, restrict to correlation time series with 
+# absolute values >= 0.5 for at least 1 25-yr window!
+
+ff <- function(x) max(abs(x), na.rm=T)>=0.5
+
+goa.cor$var.mode <- paste(goa.cor$var, goa.cor$mode, sep=".")
+
+goa.cor <- plyr::ddply(goa.cor, "var.mode", mutate, keep = ff(cor))
+
+
+ggplot(filter(goa.cor, keep==TRUE), aes(year, cor, color=mode)) +
   theme_bw() +
   geom_line() +
   facet_wrap(~var, scales="free_y") +
-  ggtitle("Rolling 25-year correlations")
+  ggtitle("Rolling 25-year correlations") +
+  geom_vline(xintercept = 1988.5, lty=1) +
+  geom_vline(xintercept = 1976.5, lty=3)
 
-ggsave("figs/rolling correlations - GOA climate vars and PDO.png", width=8, height=5, units='in')
+
+ggsave("figs/rolling correlations - GOA climate vars and PDO.png", width=8, height=4, units='in')
 
 # ok - that's a good example to compare with...now how about the Bering TS?
 # load climate data 
@@ -902,8 +931,6 @@ dfa.dat <- dat %>%
 
 dat2 <- read.csv("data/winter pdo-npgo.csv")
 
-dat2 <- dat2 %>%
-  select(-npgo.ndjfm)
 
 dfa.dat <- left_join(dfa.dat, dat2)
 
@@ -926,20 +953,30 @@ for(j in 1:length(vars)){
     ebs.cor <- rbind(ebs.cor,
                      data.frame(year=i,
                                 var=vars[j],
+                                mode="pdo.ndjfm",
                                 cor=cor(temp$pdo.ndjfm[temp$year %in% (i-12):(i+12)],
+                                        temp$value[temp$year %in% (i-12):(i+12)])))
+    
+  }}
+
+# now npgo
+for(j in 1:length(vars)){
+  # j <- 1
+  temp <- dfa.dat %>%
+    filter(name==vars[j])
+  
+  for(i in 1963:2001){
+    # i <- 1990
+    ebs.cor <- rbind(ebs.cor,
+                     data.frame(year=i,
+                                var=vars[j],
+                                mode="npgo.ndjfm",
+                                cor=cor(temp$npgo.ndjfm[temp$year %in% (i-12):(i+12)],
                                         temp$value[temp$year %in% (i-12):(i+12)])))
     
     
   }}
 
-
-ggplot(ebs.cor, aes(year, cor)) +
-  theme_bw() +
-  geom_line() +
-  facet_wrap(~var, scales="free_y") +
-  ggtitle("Rolling 25-year correlations with PDO")
-
-ggsave("figs/rolling correlations - EBS climate vars and PDO.png", width=8, height=6, units='in')
 
 # add other large-scale modes!
 
@@ -959,9 +996,6 @@ dfa.dat <- left_join(dfa.dat, dat5)
 # now rolling AO corrs
 # get rolling 25-yr correlations
 
-ebs.cor <- data.frame()
-vars <- unique(dfa.dat$name)
-
 for(j in 1:length(vars)){
   # j <- 1
   temp <- dfa.dat %>%
@@ -972,6 +1006,7 @@ for(j in 1:length(vars)){
     ebs.cor <- rbind(ebs.cor,
                      data.frame(year=i,
                                 var=vars[j],
+                                mode="AO.jfm",
                                 cor=cor(temp$AO.jfm[temp$year %in% (i-12):(i+12)],
                                         temp$value[temp$year %in% (i-12):(i+12)])))
     
@@ -979,21 +1014,9 @@ for(j in 1:length(vars)){
   }}
 
 
-ggplot(ebs.cor, aes(year, cor)) +
-  theme_bw() +
-  geom_line() +
-  facet_wrap(~var, scales="free_y") +
-  ggtitle("Rolling 25-year correlations with AO")
-
-ggsave("figs/rolling correlations - EBS climate vars and AO.png", width=8, height=6, units='in')
-
-
 ############
 # now rolling spring ALBSA corrs
 # get rolling 25-yr correlations
-
-ebs.cor <- data.frame()
-vars <- unique(dfa.dat$name)
 
 for(j in 1:length(vars)){
   # j <- 1
@@ -1005,6 +1028,7 @@ for(j in 1:length(vars)){
     ebs.cor <- rbind(ebs.cor,
                      data.frame(year=i,
                                 var=vars[j],
+                                mode="albsa.mam",
                                 cor=cor(temp$albsa.mam[temp$year %in% (i-12):(i+12)],
                                         temp$value[temp$year %in% (i-12):(i+12)])))
     
@@ -1012,20 +1036,9 @@ for(j in 1:length(vars)){
   }}
 
 
-ggplot(ebs.cor, aes(year, cor)) +
-  theme_bw() +
-  geom_line() +
-  facet_wrap(~var, scales="free_y") +
-  ggtitle("Rolling 25-year correlations with spring ALBSA") # these are totally weak!!
-
-ggsave("figs/rolling correlations - EBS climate vars and spring ALBSA.png", width=8, height=6, units='in')
-
 ############
 # now rolling winter ALBSA corrs
 # get rolling 25-yr correlations
-
-ebs.cor <- data.frame()
-vars <- unique(dfa.dat$name)
 
 for(j in 1:length(vars)){
   # j <- 1
@@ -1037,6 +1050,7 @@ for(j in 1:length(vars)){
     ebs.cor <- rbind(ebs.cor,
                      data.frame(year=i,
                                 var=vars[j],
+                                mode="albsa.djf",
                                 cor=cor(temp$albsa.djf[temp$year %in% (i-12):(i+12)],
                                         temp$value[temp$year %in% (i-12):(i+12)])))
     
@@ -1044,17 +1058,105 @@ for(j in 1:length(vars)){
   }}
 
 
-ggplot(ebs.cor, aes(year, cor)) +
+############
+# # now Arctic SLP
+# # get rolling 25-yr correlations
+## Removing as these are generally weak!!
+# 
+# for(j in 1:length(vars)){
+#   # j <- 1
+#   temp <- dfa.dat %>%
+#     filter(name==vars[j])
+#   
+#   for(i in 1963:2001){
+#     # i <- 1990
+#     ebs.cor <- rbind(ebs.cor,
+#                      data.frame(year=i,
+#                                 var=vars[j],
+#                                 mode="Arctic.slp.ndjfm",
+#                                 cor=cor(temp$arctic.slp.ndjfm[temp$year %in% (i-12):(i+12)],
+#                                         temp$value[temp$year %in% (i-12):(i+12)])))
+#     
+#     
+#   }}
+
+ebs.cor$var.mode <- paste(ebs.cor$var, ebs.cor$mode, sep=".")
+
+ebs.cor <- plyr::ddply(ebs.cor, "var.mode", mutate, keep = ff(cor))
+
+
+ggplot(filter(ebs.cor, keep==TRUE), aes(year, cor, color=var)) +
   theme_bw() +
   geom_line() +
-  facet_wrap(~var, scales="free_y") +
-  ggtitle("Rolling 25-year correlations with winter ALBSA") # these are stronger than spring...
+  facet_wrap(~mode, scales="free_y") +
+  ggtitle("Rolling 25-year correlations") +
+  geom_vline(xintercept = 1988.5, lty=2) +
+  geom_hline(yintercept = 0, color="gray")
 
-ggsave("figs/rolling correlations - EBS climate vars and winter ALBSA.png", width=8, height=6, units='in')
+ggsave("figs/rolling correlations - EBS climate vars and large-scale modes.png", width=6, height=5, units='in')
 
 
-############
-# now Arctic SLP
+### rolling correlations between TS and DFA trend
+
+# set up dfa dat again
+dfa.dat <- dat %>%
+  select(keep)
+
+years <- dfa.dat$year
+
+dfa.dat <- dfa.dat %>%
+  select(-year)
+
+dfa.dat <- as.matrix((t(dfa.dat)))
+colnames(dfa.dat) <- years
+
+# limit to 2013
+dfa.dat <- dfa.dat[,colnames(dfa.dat) <= 2013]
+
+cntl.list = list(minit=200, maxit=20000, allow.degen=FALSE, conv.test.slope.tol=0.1, abstol=0.0001)
+
+# set up forms of R matrices
+levels.R = c("diagonal and equal",
+             "diagonal and unequal",
+             "equalvarcov",
+             "unconstrained")
+model.data = data.frame()
+
+# fit models & store results
+for(R in levels.R) {
+  for(m in 1) {  # allowing up to 1 trends
+    dfa.model = list(A="zero", R=R, m=m)
+    kemz = MARSS(dfa.dat, model=dfa.model, control=cntl.list, 
+                 form="dfa", z.score=TRUE)
+    model.data = rbind(model.data,
+                       data.frame(R=R,
+                                  m=m,
+                                  logLik=kemz$logLik,
+                                  K=kemz$num.params,
+                                  AICc=kemz$AICc,
+                                  stringsAsFactors=FALSE))
+    assign(paste("kemz", m, R, sep="."), kemz)
+  } # end m loop
+} # end R loop
+
+# calculate delta-AICc scores, sort in descending order, and compare
+model.data$dAICc <- model.data$AICc-min(model.data$AICc)
+model.data <- model.data %>%
+  arrange(dAICc)
+
+model.data # unconstrained is the best
+
+model.list = list(A="zero", m=1, R="unconstrained")
+mod = MARSS(dfa.dat, model=model.list, z.score=TRUE, form="dfa", control=cntl.list)
+
+# now add trend back to data and calculate rolling correlations
+dfa.dat <- as.data.frame((t(dfa.dat)))
+dfa.dat$year <- 1951:2013
+dfa.dat$trend <- as.vector(mod$states)
+
+dfa.dat <- dfa.dat %>%
+  pivot_longer(cols=c(-year, -trend))
+
 # get rolling 25-yr correlations
 
 ebs.cor <- data.frame()
@@ -1070,20 +1172,77 @@ for(j in 1:length(vars)){
     ebs.cor <- rbind(ebs.cor,
                      data.frame(year=i,
                                 var=vars[j],
-                                cor=cor(temp$arctic.slp.ndjfm[temp$year %in% (i-12):(i+12)],
+                                cor=cor(temp$trend[temp$year %in% (i-12):(i+12)],
                                         temp$value[temp$year %in% (i-12):(i+12)])))
     
-    
   }}
-
 
 ggplot(ebs.cor, aes(year, cor)) +
   theme_bw() +
   geom_line() +
   facet_wrap(~var, scales="free_y") +
-  ggtitle("Rolling 25-year correlations with winter Artic SLP") # these are totally weak!!
+  ggtitle("Rolling 25-year correlations with shared DFA trend") +
+  geom_vline(xintercept = 1988.5, lty=1) +
+  geom_vline(xintercept = 1976.5, lty=3)
 
-ggsave("figs/rolling correlations - EBS climate vars and winter Arctic SLP.png", width=8, height=6, units='in')
+# now...look at rolling cors with SST
+dfa.dat <- dfa.dat %>%
+  select(-trend) %>%
+  pivot_wider(names_from = name, values_from = value)
+
+dfa.dat <- dfa.dat %>%
+  pivot_longer(cols=c(-year, -south.sst.ndjfm))
+  
+  
+ebs.cor <- data.frame()
+vars <- unique(dfa.dat$name)
+
+for(j in 1:length(vars)){
+  # j <- 1
+  temp <- dfa.dat %>%
+    filter(name==vars[j])
+  
+  for(i in 1963:2001){
+    # i <- 1990
+    ebs.cor <- rbind(ebs.cor,
+                     data.frame(year=i,
+                                var=vars[j],
+                                cor=cor(temp$south.sst.ndjfm[temp$year %in% (i-12):(i+12)],
+                                        temp$value[temp$year %in% (i-12):(i+12)])))
+    
+  }}
+
+ggplot(ebs.cor, aes(year, cor)) +
+  theme_bw() +
+  geom_line() +
+  facet_wrap(~var, scales="free_y") +
+  ggtitle("Rolling 25-year correlations with NDJFM south SST") +
+  geom_vline(xintercept = 1988.5, lty=1) +
+  geom_vline(xintercept = 1976.5, lty=3)
+
+
+head(dfa.dat)
+
+## look at time series (values) plotted out against year...
+
+# # align and plot time series with similar patterns...
+# drop <- c("NW.wind.Oct.Apr", "south.wind.stress.amj")
+# drop <- ebs.cor$var %in% drop
+# ebs.cor <- ebs.cor[!drop,]
+# 
+# # reverse some ts...
+# ebs.cor$cor[ebs.cor$var=="south.sst.amj"] = -ebs.cor$cor[ebs.cor$var=="south.sst.amj"]
+# ebs.cor$cor[ebs.cor$var=="south.sst.ndjfm"] = -ebs.cor$cor[ebs.cor$var=="south.sst.ndjfm"]
+# 
+# 
+# ggplot(ebs.cor, aes(year, cor, color=var)) +
+#   theme_bw() +
+#   geom_line() +
+#   ggtitle("Rolling 25-year correlations") +
+#   geom_vline(xintercept = 1988.5, lty=1) +
+#   geom_vline(xintercept = 1976.5, lty=3)
+
+
 
 #################################
 # old stuff below!
