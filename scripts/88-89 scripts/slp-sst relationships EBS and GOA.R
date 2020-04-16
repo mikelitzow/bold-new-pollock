@@ -125,9 +125,6 @@ diff.lim <- range(era1.diff, era2.diff) # limit for plotting
 
 
 ######################################
-# define projection details
-my.proj <- "orthographic"
-my.orien <- c(45,180,180)
 
 
 map('world2Hires', 'usa', fill=T, add=T, 
@@ -226,6 +223,11 @@ dev.off()
 # and a combined plot
 # tiff("figs/Fig 2.tiff", 11,7, units="cm", res=300)
 
+# define projection details
+my.proj <- "orthographic"
+my.orien <- c(45,180,0)
+
+
 png("figs/goa-ebs slp-sst.png", 8, 6, units="in", res=300)
 # setup the layout
 mt.cex <- 1.1
@@ -234,17 +236,33 @@ l.cex <- 0.6
 l.l <- 0.2
 tc.l <- -0.2
 
+
+par(mar=c(0,0,0,0),  tcl=tc.l, mgp=c(1.5,0.3,0), 
+    las=1, mfrow=c(3,2), cex.axis=0.8, cex.lab=0.8) # , oma=c(0,1,1,0)
+
 ylim <- c(40,90)
 
 cb <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
 
 new.col <- oce.colorsPalette(64)
 
-par(mar=c(0.5,0.2,1,1),  tcl=tc.l, mgp=c(1.5,0.3,0), 
-    las=1, mfrow=c(3,2), cex.axis=0.8, cex.lab=0.8) # , oma=c(0,1,1,0)
+
+map("world2Hires", 
+    proj=my.proj, parameters = NULL, orient=my.orien,
+    xlim=c(0,350), ylim=c(20,90),
+    fill=FALSE, lforce="e")
+
+z <- GOA.regr1  # replace elements NOT corresponding to land with loadings!
+z <- t(matrix(z, length(y)))
+polys <- matrixPoly(x, y, z)
+COLS <- val2col(z, col = new.col)
+for(i in seq(polys)){
+  tmp <- mapproject(polys[[i]],
+                    proj=my.proj, parameters = NULL, orient=my.orien)
+  polygon(tmp$x, tmp$y, col=COLS[i], border=COLS[i], lwd=0.1)
+}
 
 
-lim <- range(GOA.regr1, GOA.regr2, EBS.regr1, EBS.regr2)
 
 # GOA first era
 z <- GOA.regr1  # replace elements NOT corresponding to land with loadings!
