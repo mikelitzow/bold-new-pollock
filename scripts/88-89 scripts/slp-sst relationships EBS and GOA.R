@@ -242,7 +242,6 @@ par(mar=c(0,0,0,0),  tcl=tc.l, mgp=c(1.5,0.3,0),
 
 ylim <- c(40,90)
 
-cb <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
 
 new.col <- oce.colorsPalette(64)
 
@@ -255,15 +254,125 @@ map("world2Hires",
 z <- GOA.regr1  # replace elements NOT corresponding to land with loadings!
 z <- t(matrix(z, length(y)))
 polys <- matrixPoly(x, y, z)
-COLS <- val2col(z, col = new.col)
+COLS <- val2col(z, col = new.col, zlim=c(lim[1], -lim[1]))
 for(i in seq(polys)){
   tmp <- mapproject(polys[[i]],
                     proj=my.proj, parameters = NULL, orient=my.orien)
   polygon(tmp$x, tmp$y, col=COLS[i], border=COLS[i], lwd=0.1)
 }
 
+map('world2Lores', c('Canada', 'usa', 'USSR', 'Mexico', 'China', 'Mongolia', 'Greenland',
+                     'South Korea', 'North Korea', 'Japan'), 
+    fill=T,add=T, lwd=0.5, col="darkgoldenrod3", proj=my.proj, parameters = NULL, orient=my.orien)
+
+map('world2Hires', 'usa', fill=T, add=T, 
+    lwd=0.5, col="lightyellow3", proj=my.proj, parameters = NULL, orient=my.orien)
+
+mtext("SLP vs. GOA SST 1950-1988", adj=0.5, cex=0.8, side=1)
+# GOA first era
+z <- GOA.regr1  # replace elements NOT corresponding to land with loadings!
+z <- t(matrix(z, length(y)))  # Convert vector to matrix and transpose for plotting
+image.plot(x,y,z, col=new.col, zlim=c(lim[1], -lim[1]), ylim=ylim,
+           xlab = "", ylab = "",yaxt="n", xaxt="n", legend.mar=l.mar, legend.line=l.l, axis.args=list(cex.axis=l.cex, tcl=tc.l, mgp=c(3,0.3,0)))
+
+contour(x,y,z, add=T, col="grey", drawlabels=F, lwd=0.5)
+
+map('world2Lores', c('Canada', 'usa', 'USSR', 'Mexico', 'China', 'Mongolia', 'Greenland',
+                     'South Korea', 'North Korea', 'Japan'), 
+    fill=T,add=T, lwd=0.5, col="darkgoldenrod3", proj=my.proj, parameters = NULL, orient=my.orien)
 
 
+
+# GOA second era
+z <- GOA.regr2  # replace elements NOT corresponding to land with loadings!
+z <- t(matrix(z, length(y)))  # Convert vector to matrix and transpose for plotting
+image.plot(x,y,z, col=new.col, zlim=c(lim[1], -lim[1]), ylim=ylim,
+           xlab = "", ylab = "",yaxt="n", xaxt="n", legend.mar=l.mar, legend.line=l.l, axis.args=list(cex.axis=l.cex, tcl=tc.l, mgp=c(3,0.3,0)))
+
+contour(x,y,z, add=T, col="grey", drawlabels=F, lwd=0.5)
+
+map('world2Lores', c('Canada', 'usa', 'USSR', 'Mexico', 'China', 'Mongolia', 'Greenland',
+                     'South Korea', 'North Korea', 'Japan'), 
+    fill=T,add=T, lwd=0.5, col="darkgoldenrod3")
+
+mtext("SLP vs. GOA SST 1989-2013", adj=0.5, cex=0.8)
+
+# EBS first era
+z <- EBS.regr1  # replace elements NOT corresponding to land with loadings!
+z <- t(matrix(z, length(y)))  # Convert vector to matrix and transpose for plotting
+image.plot(x,y,z, col=new.col, zlim=c(lim[1], -lim[1]), ylim=ylim,
+           xlab = "", ylab = "",yaxt="n", xaxt="n", legend.mar=l.mar, legend.line=l.l, axis.args=list(cex.axis=l.cex, tcl=tc.l, mgp=c(3,0.3,0)))
+
+contour(x,y,z, add=T, col="grey", drawlabels=F, lwd=0.5)
+
+map('world2Lores', c('Canada', 'usa', 'USSR', 'Mexico', 'China', 'Mongolia', 'Greenland',
+                     'South Korea', 'North Korea', 'Japan'), 
+    fill=T,add=T, lwd=0.5, col="darkgoldenrod3")
+
+mtext("SLP vs. EBS SST 1950-1988", adj=0.5, cex=0.8)
+
+# EBS second era
+z <- EBS.regr2  # replace elements NOT corresponding to land with loadings!
+z <- t(matrix(z, length(y)))  # Convert vector to matrix and transpose for plotting
+image.plot(x,y,z, col=new.col, zlim=c(lim[1], -lim[1]), ylim=ylim,
+           xlab = "", ylab = "",yaxt="n", xaxt="n", legend.mar=l.mar, legend.line=l.l, axis.args=list(cex.axis=l.cex, tcl=tc.l, mgp=c(3,0.3,0)))
+
+contour(x,y,z, add=T, col="grey", drawlabels=F, lwd=0.5)
+
+map('world2Lores', c('Canada', 'usa', 'USSR', 'Mexico', 'China', 'Mongolia', 'Greenland',
+                     'South Korea', 'North Korea', 'Japan'), 
+    fill=T,add=T, lwd=0.5, col="darkgoldenrod3")
+
+mtext("SLP vs. EBS SST 1989-2013", adj=0.5, cex=0.8)
+
+# difference first era
+z <- era1.diff  # replace elements NOT corresponding to land with loadings!
+z <- t(matrix(z, length(y)))  # Convert vector to matrix and transpose for plotting
+image.plot(x,y,z, col=new.col, zlim=c(-1.7,1.7), ylim=ylim,
+           xlab = "", ylab = "",yaxt="n", xaxt="n", legend.mar=l.mar, legend.line=l.l, axis.args=list(cex.axis=l.cex, tcl=tc.l, mgp=c(3,0.3,0)))
+
+contour(x,y,z, add=T, col="grey", drawlabels=F, lwd=0.5)
+
+map('world2Lores', c('Canada', 'usa', 'USSR', 'Mexico', 'China', 'Mongolia', 'Greenland',
+                     'South Korea', 'North Korea', 'Japan'), 
+    fill=T,add=T, lwd=0.5, col="darkgoldenrod3")
+
+mtext("GOA-EBS 1950-1988", adj=0.5, cex=0.8)
+
+# difference second era
+z <- era2.diff  # replace elements NOT corresponding to land with loadings!
+z <- t(matrix(z, length(y)))  # Convert vector to matrix and transpose for plotting
+image.plot(x,y,z, col=new.col, zlim=c(-1.7,1.7), ylim=ylim,
+           xlab = "", ylab = "",yaxt="n", xaxt="n", legend.mar=l.mar, legend.line=l.l, axis.args=list(cex.axis=l.cex, tcl=tc.l, mgp=c(3,0.3,0)))
+
+contour(x,y,z, add=T, col="grey", drawlabels=F, lwd=0.5)
+
+map('world2Lores', c('Canada', 'usa', 'USSR', 'Mexico', 'China', 'Mongolia', 'Greenland',
+                     'South Korea', 'North Korea', 'Japan', 'Finland', 'Norway', 'Denmark', 'Sweden', 'Ukraine'), 
+    fill=T,add=T, lwd=0.5, col="darkgoldenrod3")
+
+mtext("GOA-EBS 1989-2013", adj=0.5, cex=0.8)
+
+dev.off()
+
+#################
+# old 'square' version
+png("figs/goa-ebs slp-sst.png", 8, 6, units="in", res=300)
+# setup the layout
+mt.cex <- 1.1
+l.mar <- 3
+l.cex <- 0.6
+l.l <- 0.2
+tc.l <- -0.2
+
+
+par(mar=c(0.5,0.5,1,2),  tcl=tc.l, mgp=c(1.5,0.3,0), 
+    las=1, mfrow=c(3,2), cex.axis=0.8, cex.lab=0.8) # , oma=c(0,1,1,0)
+
+ylim <- c(40,90)
+
+
+new.col <- oce.colorsPalette(64)
 # GOA first era
 z <- GOA.regr1  # replace elements NOT corresponding to land with loadings!
 z <- t(matrix(z, length(y)))  # Convert vector to matrix and transpose for plotting
