@@ -35,7 +35,7 @@ plot.dat <- gather(do.dat)
 plot.dat$year <- 1951:2019
 
 
-ggplot(plot.dat, aes(x=year, y=value)) + geom_bar(position="dodge", stat="identity", fill=cb[2]) + facet_wrap(~key) +
+ggplot(plot.dat, aes(x=year, y=value)) + geom_bar(position="dodge", stat="identity") + facet_wrap(~key) +
   ylab("Standard anomaly") + xlab("") + theme_bw() + geom_hline(yintercept = 0)
 
 # check
@@ -70,7 +70,7 @@ model.data = data.frame()
 
 # fit models & store results
 for(R in levels.R) {
-  for(m in 1:3) {  # allowing up to 3 trends
+  for(m in 1:4) {  # allowing up to 3 trends
     dfa.model = list(A="zero", R=R, m=m)
     kemz = MARSS(all.clim.dat, model=dfa.model, control=cntl.list,
                  form="dfa", z.score=TRUE)
