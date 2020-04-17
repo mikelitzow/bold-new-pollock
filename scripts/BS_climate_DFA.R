@@ -163,7 +163,7 @@ clim_names <- rownames(all.clim.dat)
  w_ts <- seq(dim(all.clim.dat)[2])
  layout(matrix(c(1, 2, 3, 4, 5, 6), mm, 2), widths = c(2, 1))
 ## par(mfcol=c(mm,2), mai=c(0.5,0.5,0.5,0.1), omi=c(0,0,0,0))
- jpeg("ugly_DFA_trends_loadings.jpg")
+# jpeg("figs/ugly_DFA_trends_loadings.jpg")
 par(mfcol=c(mm,2), mar = c(1,1,1,1), omi = c(0, 0, 0, 0))
 ## plot the processes
 for (i in 1:mm) {
@@ -209,7 +209,147 @@ for (i in 1:mm) {
   }
   mtext(paste("Factor loadings on state", i), side = 3, line = 0.5)
 }
-dev.off()
+#dev.off()
 
 par(mai = c(0.9, 0.9, 0.1, 0.1))
 ccf(proc_rot[1, ], proc_rot[2, ], lag.max = 12, main = "")
+
+
+#refit best model w AR=====
+
+# HAVING TROUBLE with the below, going to copy and do just for best model below
+
+# object for model data
+model.data = data.frame()
+
+# object for residual autocorrelation results
+res.ar <- matrix(nrow=1, ncol=27)
+
+# fit models
+for(R in levels.R) {
+  for(m in 1:3) {
+    dfa.model = list(A="zero", R=R, m=m)
+    kemz = MARSS(all.clim.dat, model=dfa.model, control=cntl.list,
+                 form="dfa", z.score=TRUE)
+    model.data = rbind(model.data,
+                       data.frame(R=R,
+                                  m=m,
+                                  logLik=kemz$logLik,
+                                  K=kemz$num.params,
+                                  AICc=kemz$AICc,
+                                  stringsAsFactors=FALSE))
+    assign(paste("kemz", m, R, sep="."), kemz)
+    
+    # add in calculation of residual AR(1) values!
+    dw.p <- NA
+    res <- residuals(kemz)$residuals
+    
+    # drop the 0s - these should be NAs!
+    
+    drop <- res==0
+    res[drop] <- NA
+    
+    for(ii in 1:nrow(res)){
+      
+      dw.p[ii] <- dwtest(res[ii,] ~ 1)$p.value
+      
+    }
+    
+    # pad to the correct length for 1- and 2-trend models
+    if(length(dw.p)==8) {dw.p <- c(dw.p, NA, NA)}
+    if(length(dw.p)==9) {dw.p <- c(dw.p, NA)}
+    
+    res.ar <- rbind(res.ar, dw.p)
+    
+  } # end m loop
+} # end R loop
+
+res.ar
+colnames(res.ar) <- rownames(res) # make sure this case of "res" is a full case, i.e., three shared trends
+res.ar <- res.ar[2:nrow(res.ar),] # drop first row of NAs
+
+model.res.table <- as.data.frame(res.ar)
+model.res.table$R <- model.data$R
+model.res.table$m <- model.data$m
+
+write.csv(model.res.table, ".csv")
+
+#refit only best model w AR=====
+
+# HAVING TROUBLE with the below, going to copy and do just for best model below
+model.list = list(A="zero", m=3, R="diagonal and unequal") # best model
+mod.best = MARSS(all.clim.dat, model=model.list, z.score=TRUE, form="dfa", control=cntl.list)
+
+# object for model data
+model.data = data.frame()
+
+# object for residual autocorrelation results
+res.ar <- matrix(nrow=1, ncol=27)
+
+# fit models
+
+
+    dfa.model = list(A="zero", m=3, R="diagonal and unequal")
+    kemzar = MARSS(all.clim.dat, model=dfa.model, control=cntl.list,
+                 form="dfa", z.score=TRUE)
+    model.data = rbind(model.data,
+                       data.frame(R=R,
+                                  m=m,
+                                  logLik=kemzar$logLik,
+                                  K=kemzar$num.params,
+                                  AICc=kemzar$AICc,
+                                  stringsAsFactors=FALSE))
+    assign(paste("kemzar", m, R, sep="."), kemzar)
+    
+    # add in calculation of residual AR(1) values!
+    dw.p <- NA
+    res <- residuals(kemzar)$residuals
+    
+    # drop the 0s - these should be NAs!
+    
+    drop <- res==0
+    res[drop] <- NA
+    
+    for(ii in 1:nrow(res)){     #NOT WORKING
+      
+      dw.p[ii] <- dwtest(res[ii,] ~ 1)$p.value
+      
+    
+    
+    # pad to the correct length for 1- and 2-trend models
+    if(length(dw.p)==8) {dw.p <- c(dw.p, NA, NA)}
+    if(length(dw.p)==9) {dw.p <- c(dw.p, NA)}
+    
+    res.ar <- rbind(res.ar, dw.p)
+    
+    }
+
+
+res
+#colnames(res.ar) <- rownames(res) # make sure this case of "res" is a full case, i.e., three shared trends
+#res <- res[2:nrow(res),] # drop first row of NAs
+
+model.res.table <- as.data.frame(res)
+#model.res.table$R <- model.data$R
+#model.res.table$m <- model.data$m
+
+write.csv(model.res.table, ".csv")
+
+
+
+
+#model diagnostics=======
+par(mfrow = c(1, 2))
+resids <- residuals(kemzar)
+plot(resids$model.residuals[1, ], ylab = "model residual", xlab = "", 
+     main = "flat level")
+abline(h = 0)
+plot(resids$state.residuals[1, ], ylab = "state residual", xlab = "", 
+     main = "flat level")
+abline(h = 0)
+
+acf(resids$model.residuals[1, ])
+acf(resids$state.residuals[1, ], na.action=na.pass)
+acf(resids$model.residuals, na.action=na.pass)
+
+
