@@ -849,8 +849,14 @@ dat2 <- read.csv("data/winter pdo-npgo.csv")
 
 dfa.dat <- left_join(dfa.dat, dat2)
 
+dat3 <- read.csv("data/climate data.csv")
+dat3 <- dat3 %>%
+  select(year, AO.jfm)
+
+dfa.dat <- left_join(dfa.dat, dat3)
+
 dfa.dat <- dfa.dat %>%
-  pivot_longer(cols=c(-year, -pdo.ndjfm, -npgo.ndjfm))
+  pivot_longer(cols=c(-year, -pdo.ndjfm, -npgo.ndjfm, -AO.jfm))
 
 # get rolling 25-yr correlations
 
@@ -892,6 +898,25 @@ for(j in 1:length(vars)){
     
   }}
 
+# and ao!
+for(j in 1:length(vars)){
+  # j <- 1
+  temp <- dfa.dat %>%
+    filter(name==vars[j])
+  
+  for(i in 1963:2000){
+    # i <- 1990
+    goa.cor <- rbind(goa.cor,
+                     data.frame(year=i,
+                                var=vars[j],
+                                mode="AO.jfm",
+                                cor=cor(temp$AO.jfm[temp$year %in% (i-12):(i+12)],
+                                        temp$value[temp$year %in% (i-12):(i+12)])))
+    
+    
+  }}
+
+
 # now, restrict to correlation time series with 
 # absolute values >= 0.5 for at least 1 25-yr window!
 
@@ -902,16 +927,16 @@ goa.cor$var.mode <- paste(goa.cor$var, goa.cor$mode, sep=".")
 goa.cor <- plyr::ddply(goa.cor, "var.mode", mutate, keep = ff(cor))
 
 
-ggplot(filter(goa.cor, keep==TRUE), aes(year, cor, color=mode)) +
+ggplot(filter(goa.cor, keep==TRUE), aes(year, cor, color=var)) +
   theme_bw() +
   geom_line() +
-  facet_wrap(~var, scales="free_y") +
+  facet_wrap(~mode, scales="free_y") +
   ggtitle("Rolling 25-year correlations") +
   geom_vline(xintercept = 1988.5, lty=1) +
   geom_vline(xintercept = 1976.5, lty=3)
 
 
-ggsave("figs/rolling correlations - GOA climate vars and PDO.png", width=8, height=4, units='in')
+ggsave("figs/rolling correlations - GOA climate vars and modes.png", width=8, height=4, units='in')
 
 # ok - that's a good example to compare with...now how about the Bering TS?
 # load climate data 

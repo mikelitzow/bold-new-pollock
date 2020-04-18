@@ -118,10 +118,10 @@ for(i in 1:ncol(win.slp1)){
 
 
 # calculate differences for each era
-era1.diff <- GOA.regr1 - EBS.regr1
-era2.diff <- GOA.regr2 - EBS.regr2
+GOA.diff <- GOA.regr2 - GOA.regr1
+EBS.diff <- EBS.regr2 - EBS.regr1
 
-diff.lim <- range(era1.diff, era2.diff) # limit for plotting
+diff.lim <- range(GOA.diff, EBS.diff) # limit for plotting
 
 
 ######################################
@@ -220,31 +220,20 @@ mtext("d) SST data", adj=0)
 dev.off()
 
 ######################################
-# and a combined plot
-# tiff("figs/Fig 2.tiff", 11,7, units="cm", res=300)
+# and a series of plots
 
 # define projection details
 my.proj <- "orthographic"
 my.orien <- c(45,180,0)
 
+png("figs/goa era1 slp-sst.png", 3, 3, units="in", res=300)
 
-png("figs/goa-ebs slp-sst.png", 8, 6, units="in", res=300)
-# setup the layout
-mt.cex <- 1.1
-l.mar <- 3
-l.cex <- 0.6
-l.l <- 0.2
-tc.l <- -0.2
-
-
-par(mar=c(0,0,0,0),  tcl=tc.l, mgp=c(1.5,0.3,0), 
-    las=1, mfrow=c(3,2), cex.axis=0.8, cex.lab=0.8) # , oma=c(0,1,1,0)
+par(mar=c(1,0,0,0),  tcl=tc.l, mgp=c(1.5,0.3,0), 
+    las=1, cex.axis=0.8, cex.lab=0.8) # , oma=c(0,1,1,0)
 
 ylim <- c(40,90)
 
-
 new.col <- oce.colorsPalette(64)
-
 
 map("world2Hires", 
     proj=my.proj, parameters = NULL, orient=my.orien,
@@ -262,96 +251,184 @@ for(i in seq(polys)){
 }
 
 map('world2Lores', c('Canada', 'usa', 'USSR', 'Mexico', 'China', 'Mongolia', 'Greenland',
-                     'South Korea', 'North Korea', 'Japan'), 
+                     'South Korea', 'North Korea', 'Japan', 'Norway', 'Finland', 'Sweden', 'Denmark',
+                     'India', 'Nepal', 'Vietnam', 'Iceland', 'Taiwan'), 
     fill=T,add=T, lwd=0.5, col="darkgoldenrod3", proj=my.proj, parameters = NULL, orient=my.orien)
-
-map('world2Hires', 'usa', fill=T, add=T, 
-    lwd=0.5, col="lightyellow3", proj=my.proj, parameters = NULL, orient=my.orien)
 
 mtext("SLP vs. GOA SST 1950-1988", adj=0.5, cex=0.8, side=1)
-# GOA first era
-z <- GOA.regr1  # replace elements NOT corresponding to land with loadings!
-z <- t(matrix(z, length(y)))  # Convert vector to matrix and transpose for plotting
-image.plot(x,y,z, col=new.col, zlim=c(lim[1], -lim[1]), ylim=ylim,
-           xlab = "", ylab = "",yaxt="n", xaxt="n", legend.mar=l.mar, legend.line=l.l, axis.args=list(cex.axis=l.cex, tcl=tc.l, mgp=c(3,0.3,0)))
 
-contour(x,y,z, add=T, col="grey", drawlabels=F, lwd=0.5)
+dev.off()
+
+####
+png("figs/goa era2 slp-sst.png", 3, 3, units="in", res=300)
+
+par(mar=c(1,0,0,0),  tcl=tc.l, mgp=c(1.5,0.3,0), 
+    las=1, cex.axis=0.8, cex.lab=0.8) # , oma=c(0,1,1,0)
+
+ylim <- c(40,90)
+
+new.col <- oce.colorsPalette(64)
+
+map("world2Hires", 
+    proj=my.proj, parameters = NULL, orient=my.orien,
+    xlim=c(0,350), ylim=c(20,90),
+    fill=FALSE, lforce="e")
+
+z <- GOA.regr2  # replace elements NOT corresponding to land with loadings!
+z <- t(matrix(z, length(y)))
+polys <- matrixPoly(x, y, z)
+COLS <- val2col(z, col = new.col, zlim=c(lim[1], -lim[1]))
+for(i in seq(polys)){
+  tmp <- mapproject(polys[[i]],
+                    proj=my.proj, parameters = NULL, orient=my.orien)
+  polygon(tmp$x, tmp$y, col=COLS[i], border=COLS[i], lwd=0.1)
+}
 
 map('world2Lores', c('Canada', 'usa', 'USSR', 'Mexico', 'China', 'Mongolia', 'Greenland',
-                     'South Korea', 'North Korea', 'Japan'), 
+                     'South Korea', 'North Korea', 'Japan', 'Norway', 'Finland', 'Sweden', 'Denmark',
+                     'India', 'Nepal', 'Vietnam', 'Iceland', 'Taiwan'), 
     fill=T,add=T, lwd=0.5, col="darkgoldenrod3", proj=my.proj, parameters = NULL, orient=my.orien)
 
+mtext("SLP vs. GOA SST 1989-2013", adj=0.5, cex=0.8, side=1)
 
+dev.off()
 
-# GOA second era
-z <- GOA.regr2  # replace elements NOT corresponding to land with loadings!
-z <- t(matrix(z, length(y)))  # Convert vector to matrix and transpose for plotting
-image.plot(x,y,z, col=new.col, zlim=c(lim[1], -lim[1]), ylim=ylim,
-           xlab = "", ylab = "",yaxt="n", xaxt="n", legend.mar=l.mar, legend.line=l.l, axis.args=list(cex.axis=l.cex, tcl=tc.l, mgp=c(3,0.3,0)))
+###########
 
-contour(x,y,z, add=T, col="grey", drawlabels=F, lwd=0.5)
+png("figs/ebs era1 slp-sst.png", 3, 3, units="in", res=300)
 
-map('world2Lores', c('Canada', 'usa', 'USSR', 'Mexico', 'China', 'Mongolia', 'Greenland',
-                     'South Korea', 'North Korea', 'Japan'), 
-    fill=T,add=T, lwd=0.5, col="darkgoldenrod3")
+par(mar=c(1,0,0,0),  tcl=tc.l, mgp=c(1.5,0.3,0), 
+    las=1, cex.axis=0.8, cex.lab=0.8) # , oma=c(0,1,1,0)
 
-mtext("SLP vs. GOA SST 1989-2013", adj=0.5, cex=0.8)
+ylim <- c(40,90)
 
-# EBS first era
+new.col <- oce.colorsPalette(64)
+
+map("world2Hires", 
+    proj=my.proj, parameters = NULL, orient=my.orien,
+    xlim=c(0,350), ylim=c(20,90),
+    fill=FALSE, lforce="e")
+
 z <- EBS.regr1  # replace elements NOT corresponding to land with loadings!
-z <- t(matrix(z, length(y)))  # Convert vector to matrix and transpose for plotting
-image.plot(x,y,z, col=new.col, zlim=c(lim[1], -lim[1]), ylim=ylim,
-           xlab = "", ylab = "",yaxt="n", xaxt="n", legend.mar=l.mar, legend.line=l.l, axis.args=list(cex.axis=l.cex, tcl=tc.l, mgp=c(3,0.3,0)))
-
-contour(x,y,z, add=T, col="grey", drawlabels=F, lwd=0.5)
+z <- t(matrix(z, length(y)))
+polys <- matrixPoly(x, y, z)
+COLS <- val2col(z, col = new.col, zlim=c(lim[1], -lim[1]))
+for(i in seq(polys)){
+  tmp <- mapproject(polys[[i]],
+                    proj=my.proj, parameters = NULL, orient=my.orien)
+  polygon(tmp$x, tmp$y, col=COLS[i], border=COLS[i], lwd=0.1)
+}
 
 map('world2Lores', c('Canada', 'usa', 'USSR', 'Mexico', 'China', 'Mongolia', 'Greenland',
-                     'South Korea', 'North Korea', 'Japan'), 
-    fill=T,add=T, lwd=0.5, col="darkgoldenrod3")
+                     'South Korea', 'North Korea', 'Japan', 'Norway', 'Finland', 'Sweden', 'Denmark',
+                     'India', 'Nepal', 'Vietnam', 'Iceland', 'Taiwan'), 
+    fill=T,add=T, lwd=0.5, col="darkgoldenrod3", proj=my.proj, parameters = NULL, orient=my.orien)
 
-mtext("SLP vs. EBS SST 1950-1988", adj=0.5, cex=0.8)
+mtext("SLP vs. EBS SST 1950-1988", adj=0.5, cex=0.8, side=1)
 
-# EBS second era
+dev.off()
+
+#######
+png("figs/ebs era2 slp-sst.png", 3, 3, units="in", res=300)
+
+par(mar=c(1,0,0,0),  tcl=tc.l, mgp=c(1.5,0.3,0), 
+    las=1, cex.axis=0.8, cex.lab=0.8) # , oma=c(0,1,1,0)
+
+ylim <- c(40,90)
+
+new.col <- oce.colorsPalette(64)
+
+map("world2Hires", 
+    proj=my.proj, parameters = NULL, orient=my.orien,
+    xlim=c(0,350), ylim=c(20,90),
+    fill=FALSE, lforce="e")
+
 z <- EBS.regr2  # replace elements NOT corresponding to land with loadings!
-z <- t(matrix(z, length(y)))  # Convert vector to matrix and transpose for plotting
-image.plot(x,y,z, col=new.col, zlim=c(lim[1], -lim[1]), ylim=ylim,
-           xlab = "", ylab = "",yaxt="n", xaxt="n", legend.mar=l.mar, legend.line=l.l, axis.args=list(cex.axis=l.cex, tcl=tc.l, mgp=c(3,0.3,0)))
-
-contour(x,y,z, add=T, col="grey", drawlabels=F, lwd=0.5)
-
-map('world2Lores', c('Canada', 'usa', 'USSR', 'Mexico', 'China', 'Mongolia', 'Greenland',
-                     'South Korea', 'North Korea', 'Japan'), 
-    fill=T,add=T, lwd=0.5, col="darkgoldenrod3")
-
-mtext("SLP vs. EBS SST 1989-2013", adj=0.5, cex=0.8)
-
-# difference first era
-z <- era1.diff  # replace elements NOT corresponding to land with loadings!
-z <- t(matrix(z, length(y)))  # Convert vector to matrix and transpose for plotting
-image.plot(x,y,z, col=new.col, zlim=c(-1.7,1.7), ylim=ylim,
-           xlab = "", ylab = "",yaxt="n", xaxt="n", legend.mar=l.mar, legend.line=l.l, axis.args=list(cex.axis=l.cex, tcl=tc.l, mgp=c(3,0.3,0)))
-
-contour(x,y,z, add=T, col="grey", drawlabels=F, lwd=0.5)
+z <- t(matrix(z, length(y)))
+polys <- matrixPoly(x, y, z)
+COLS <- val2col(z, col = new.col, zlim=c(lim[1], -lim[1]))
+for(i in seq(polys)){
+  tmp <- mapproject(polys[[i]],
+                    proj=my.proj, parameters = NULL, orient=my.orien)
+  polygon(tmp$x, tmp$y, col=COLS[i], border=COLS[i], lwd=0.1)
+}
 
 map('world2Lores', c('Canada', 'usa', 'USSR', 'Mexico', 'China', 'Mongolia', 'Greenland',
-                     'South Korea', 'North Korea', 'Japan'), 
-    fill=T,add=T, lwd=0.5, col="darkgoldenrod3")
+                     'South Korea', 'North Korea', 'Japan', 'Norway', 'Finland', 'Sweden', 'Denmark',
+                     'India', 'Nepal', 'Vietnam', 'Iceland', 'Taiwan'), 
+    fill=T,add=T, lwd=0.5, col="darkgoldenrod3", proj=my.proj, parameters = NULL, orient=my.orien)
 
-mtext("GOA-EBS 1950-1988", adj=0.5, cex=0.8)
+mtext("SLP vs. EBS SST 1989-2013", adj=0.5, cex=0.8, side=1)
 
-# difference second era
-z <- era2.diff  # replace elements NOT corresponding to land with loadings!
-z <- t(matrix(z, length(y)))  # Convert vector to matrix and transpose for plotting
-image.plot(x,y,z, col=new.col, zlim=c(-1.7,1.7), ylim=ylim,
-           xlab = "", ylab = "",yaxt="n", xaxt="n", legend.mar=l.mar, legend.line=l.l, axis.args=list(cex.axis=l.cex, tcl=tc.l, mgp=c(3,0.3,0)))
+dev.off()
 
-contour(x,y,z, add=T, col="grey", drawlabels=F, lwd=0.5)
+##
+# GOA diff
+png("figs/GOA era diff slp-sst.png", 3, 3, units="in", res=300)
+
+par(mar=c(1,0,0,0),  tcl=tc.l, mgp=c(1.5,0.3,0), 
+    las=1, cex.axis=0.8, cex.lab=0.8) # , oma=c(0,1,1,0)
+
+ylim <- c(40,90)
+
+new.col <- oce.colorsPalette(64)
+
+map("world2Hires", 
+    proj=my.proj, parameters = NULL, orient=my.orien,
+    xlim=c(0,350), ylim=c(20,90),
+    fill=FALSE, lforce="e")
+
+z <- GOA.diff  # replace elements NOT corresponding to land with loadings!
+z <- t(matrix(z, length(y)))
+polys <- matrixPoly(x, y, z)
+COLS <- val2col(z, col = new.col, zlim=c(-diff.lim[2], diff.lim[2]))
+for(i in seq(polys)){
+  tmp <- mapproject(polys[[i]],
+                    proj=my.proj, parameters = NULL, orient=my.orien)
+  polygon(tmp$x, tmp$y, col=COLS[i], border=COLS[i], lwd=0.1)
+}
+
 
 map('world2Lores', c('Canada', 'usa', 'USSR', 'Mexico', 'China', 'Mongolia', 'Greenland',
-                     'South Korea', 'North Korea', 'Japan', 'Finland', 'Norway', 'Denmark', 'Sweden', 'Ukraine'), 
-    fill=T,add=T, lwd=0.5, col="darkgoldenrod3")
+                     'South Korea', 'North Korea', 'Japan', 'Norway', 'Finland', 'Sweden', 'Denmark',
+                     'India', 'Nepal', 'Vietnam', 'Iceland', 'Taiwan'), 
+    fill=T,add=T, lwd=0.5, col="darkgoldenrod3", proj=my.proj, parameters = NULL, orient=my.orien)
 
-mtext("GOA-EBS 1989-2013", adj=0.5, cex=0.8)
+mtext("GOA: (1989-2013)-(1951-1988)", adj=0.5, cex=0.8, side=1)
+
+dev.off()
+##
+# EBS diff
+png("figs/EBS era diff slp-sst.png", 3, 3, units="in", res=300)
+
+par(mar=c(1,0,0,0),  tcl=tc.l, mgp=c(1.5,0.3,0), 
+    las=1, cex.axis=0.8, cex.lab=0.8) # , oma=c(0,1,1,0)
+
+ylim <- c(40,90)
+
+new.col <- oce.colorsPalette(64)
+
+map("world2Hires", 
+    proj=my.proj, parameters = NULL, orient=my.orien,
+    xlim=c(0,350), ylim=c(20,90),
+    fill=FALSE, lforce="e")
+
+z <- EBS.diff  # replace elements NOT corresponding to land with loadings!
+z <- t(matrix(z, length(y)))
+polys <- matrixPoly(x, y, z)
+COLS <- val2col(z, col = new.col, zlim=c(-diff.lim[2], diff.lim[2]))
+for(i in seq(polys)){
+  tmp <- mapproject(polys[[i]],
+                    proj=my.proj, parameters = NULL, orient=my.orien)
+  polygon(tmp$x, tmp$y, col=COLS[i], border=COLS[i], lwd=0.1)
+}
+
+map('world2Lores', c('Canada', 'usa', 'USSR', 'Mexico', 'China', 'Mongolia', 'Greenland',
+                     'South Korea', 'North Korea', 'Japan', 'Norway', 'Finland', 'Sweden', 'Denmark',
+                     'India', 'Nepal', 'Vietnam', 'Iceland', 'Taiwan'), 
+    fill=T,add=T, lwd=0.5, col="darkgoldenrod3", proj=my.proj, parameters = NULL, orient=my.orien)
+
+mtext("EBS: (1989-2013)-(1951-1988)", adj=0.5, cex=0.8, side=1)
 
 dev.off()
 
