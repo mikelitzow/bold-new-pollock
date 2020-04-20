@@ -318,8 +318,8 @@ for (i in 1:N_ts) {
 model.list = list(A="zero", m=3, R="diagonal and unequal") # best model
 mod.best = MARSS(all.clim.dat, model=model.list, z.score=TRUE, form="dfa", control=cntl.list)
 
-# object for model data
-model.data = data.frame()
+# # object for model data
+# model.data = data.frame()
 
 # object for residual autocorrelation results
 #res.ar <- matrix(nrow=1, ncol=27)
@@ -328,22 +328,22 @@ res.ar <- data.frame()
 # fit models
 
 
-    dfa.model = list(A="zero", m=3, R="diagonal and unequal")
-    kemzar = MARSS(all.clim.dat, model=dfa.model, control=cntl.list,
-                 form="dfa", z.score=TRUE)
-    model.data = rbind(model.data,
-                       data.frame(R=R,
-                                  m=m,
-                                  logLik=kemzar$logLik,
-                                  K=kemzar$num.params,
-                                  AICc=kemzar$AICc,
-                                  stringsAsFactors=FALSE))
-    assign(paste("kemzar", m, R, sep="."), kemzar)
+    # dfa.model = list(A="zero", m=3, R="diagonal and unequal")
+    # kemzar = MARSS(all.clim.dat, model=dfa.model, control=cntl.list,
+    #              form="dfa", z.score=TRUE)
+    # model.data = rbind(model.data,
+    #                    data.frame(R=R,
+    #                               m=m,
+    #                               logLik=kemzar$logLik,
+    #                               K=kemzar$num.params,
+    #                               AICc=kemzar$AICc,
+    #                               stringsAsFactors=FALSE))
+    # assign(paste("kemzar", m, R, sep="."), kemzar)
     
     # add in calculation of residual AR(1) values!
     dw.p <- NA
-    res <- residuals(kemzar)$residuals
-    
+    # res <- residuals(kemzar)$residuals # maybe this is the error - getting residuals from kemzar rather than mod.best??
+    res <- residuals(mod.best)$residuals
     # drop the 0s - these should be NAs!
     
     drop <- res==0
@@ -359,14 +359,15 @@ res.ar <- data.frame()
   #  if(length(dw.p)==8) {dw.p <- c(dw.p, NA, NA)}
   #  if(length(dw.p)==9) {dw.p <- c(dw.p, NA)}
     
+    # problem was in this line - didn't select only a single time series name! fixxing that here 
     res.ar <- rbind(res.ar,
-                    data.frame(time.series=row.names(all.clim.dat),
+                    data.frame(time.series=row.names(all.clim.dat)[ii], 
                                p=dw.p)) #I am getting an rbind error for unequal lengths here
     
     }
 
 
-res
+res.ar
 #colnames(res.ar) <- rownames(res) # make sure this case of "res" is a full case, i.e., three shared trends
 #res <- res[2:nrow(res),] # drop first row of NAs
 
