@@ -282,7 +282,7 @@ dat <- all.clim.dat.std
 driv <- rownames(all.clim.dat)
 #clr <- c("brown", "blue", "darkgreen", "darkred", "purple")
 cnt <- 1
-par(mfrow = c(N_ts/4, 4), mar = c(1, 1,1,1), omi = c(0.1, 
+par(mfrow = c(N_ts/4, 4), mar = c(1, 1,1.5,1), omi = c(0.1, 
                                                              0.1, 0.1, 0.1))
 for (i in driv) {
   plot(dat[i, ], xlab = "", ylab = "", bty = "L", 
@@ -295,7 +295,7 @@ for (i in driv) {
 ## get model fits & CI's
 mod_fit <- get_DFA_fits(mod.best)
 ## plot the fits
-par(mfrow = c(N_ts/4, 4), mar = c(0.5, 0.7, 0.1, 0.1), omi = c(0, 
+par(mfrow = c(N_ts/4, 4), mar = c(1, 1, 1, 1), omi = c(0, 
                                                              0, 0, 0))
 for (i in 1:N_ts) {
   up <- mod_fit$up[i, ]
@@ -348,17 +348,19 @@ res.ar <- matrix(nrow=1, ncol=27)
     drop <- res==0
     res[drop] <- NA
     
-    for(ii in 1:nrow(res)){     #NOT WORKING
+    for(ii in 1:nrow(res)){     #for each i in length (climate variables)
       
-      dw.p[ii] <- dwtest(res[ii,] ~ 1)$p.value #durbin-watson test for autocorrelation of disturbance
+      dw.p[ii] <- dwtest(res[ii,] ~ 1)$p.value #durbin-watson test for autocorrelation of disturbance on
+                                                #that climate variable's row - one value each year
       
     
     
     # pad to the correct length for 1- and 2-trend models
-    if(length(dw.p)==8) {dw.p <- c(dw.p, NA, NA)}
-    if(length(dw.p)==9) {dw.p <- c(dw.p, NA)}
+      #I removed this because we are not looping through multiple models now
+  #  if(length(dw.p)==8) {dw.p <- c(dw.p, NA, NA)}
+  #  if(length(dw.p)==9) {dw.p <- c(dw.p, NA)}
     
-    res.ar <- rbind(res.ar, dw.p)
+    res.ar <- rbind(res.ar, dw.p) #I am getting an rbind error for unequal lengths here
     
     }
 
