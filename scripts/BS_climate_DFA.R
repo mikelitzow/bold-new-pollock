@@ -322,7 +322,8 @@ mod.best = MARSS(all.clim.dat, model=model.list, z.score=TRUE, form="dfa", contr
 model.data = data.frame()
 
 # object for residual autocorrelation results
-res.ar <- matrix(nrow=1, ncol=27)
+#res.ar <- matrix(nrow=1, ncol=27)
+res.ar <- data.frame()
 
 # fit models
 
@@ -349,18 +350,18 @@ res.ar <- matrix(nrow=1, ncol=27)
     res[drop] <- NA
     
     for(ii in 1:nrow(res)){     #for each i in length (climate variables)
-      
-      dw.p[ii] <- dwtest(res[ii,] ~ 1)$p.value #durbin-watson test for autocorrelation of disturbance on
+     # ii<-1
+      dw.p <- dwtest(res[ii,] ~ 1)$p.value #durbin-watson test for autocorrelation of disturbance on
                                                 #that climate variable's row - one value each year
       
-    
-    
     # pad to the correct length for 1- and 2-trend models
       #I removed this because we are not looping through multiple models now
   #  if(length(dw.p)==8) {dw.p <- c(dw.p, NA, NA)}
   #  if(length(dw.p)==9) {dw.p <- c(dw.p, NA)}
     
-    res.ar <- rbind(res.ar, dw.p) #I am getting an rbind error for unequal lengths here
+    res.ar <- rbind(res.ar,
+                    data.frame(time.series=row.names(all.clim.dat),
+                               p=dw.p)) #I am getting an rbind error for unequal lengths here
     
     }
 
