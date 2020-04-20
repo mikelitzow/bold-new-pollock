@@ -215,64 +215,102 @@ par(mai = c(0.9, 0.9, 0.1, 0.1))
 ccf(proc_rot[1, ], proc_rot[2, ], lag.max = 12, main = "")
 
 
-#refit best model w AR=====
+#plot obs vs fitted========
 
-# HAVING TROUBLE with the below, going to copy and do just for best model below
+#from online course "nwfsc-timeseries.github.io"
 
-# object for model data
-model.data = data.frame()
+get_DFA_fits <- function(MLEobj, dd = NULL, alpha = 0.05) {
+  ## empty list for results
+  fits <- list()
+  ## extra stuff for var() calcs
+  Ey <- MARSS:::MARSShatyt(MLEobj)
+  ## model params
+  ZZ <- coef(MLEobj, type = "matrix")$Z
+  ## number of obs ts
+  nn <- dim(Ey$ytT)[1]
+  ## number of time steps
+  TT <- dim(Ey$ytT)[2]
+  ## get the inverse of the rotation matrix
+  H_inv <- varimax(ZZ)$rotmat
+  ## check for covars
+  if (!is.null(dd)) {
+    DD <- coef(MLEobj, type = "matrix")$D
+    ## model expectation
+    fits$ex <- ZZ %*% H_inv %*% MLEobj$states + DD %*% dd
+  } else {
+    ## model expectation
+    fits$ex <- ZZ %*% H_inv %*% MLEobj$states
+  }
+  ## Var in model fits
+  VtT <- MARSSkfss(MLEobj)$VtT
+  VV <- NULL
+  for (tt in 1:TT) {
+    RZVZ <- coef(MLEobj, type = "matrix")$R - ZZ %*% VtT[, 
+                                                         , tt] %*% t(ZZ)
+    SS <- Ey$yxtT[, , tt] - Ey$ytT[, tt, drop = FALSE] %*% 
+      t(MLEobj$states[, tt, drop = FALSE])
+    VV <- cbind(VV, diag(RZVZ + SS %*% t(ZZ) + ZZ %*% t(SS)))
+  }
+  SE <- sqrt(VV)
+  ## upper & lower (1-alpha)% CI
+  fits$up <- qnorm(1 - alpha/2) * SE + fits$ex
+  fits$lo <- qnorm(alpha/2) * SE + fits$ex
+  return(fits)
+}
 
-# object for residual autocorrelation results
-res.ar <- matrix(nrow=1, ncol=27)
+#demean data
+# y_bar <- apply(all.clim.dat, 1, mean, na.rm = TRUE)
+# dat <- all.clim.dat - y_bar
+# rownames(dat) <- rownames(all.clim.dat)
 
-# fit models
-for(R in levels.R) {
-  for(m in 1:3) {
-    dfa.model = list(A="zero", R=R, m=m)
-    kemz = MARSS(all.clim.dat, model=dfa.model, control=cntl.list,
-                 form="dfa", z.score=TRUE)
-    model.data = rbind(model.data,
-                       data.frame(R=R,
-                                  m=m,
-                                  logLik=kemz$logLik,
-                                  K=kemz$num.params,
-                                  AICc=kemz$AICc,
-                                  stringsAsFactors=FALSE))
-    assign(paste("kemz", m, R, sep="."), kemz)
-    
-    # add in calculation of residual AR(1) values!
-    dw.p <- NA
-    res <- residuals(kemz)$residuals
-    
-    # drop the 0s - these should be NAs!
-    
-    drop <- res==0
-    res[drop] <- NA
-    
-    for(ii in 1:nrow(res)){
-      
-      dw.p[ii] <- dwtest(res[ii,] ~ 1)$p.value
-      
-    }
-    
-    # pad to the correct length for 1- and 2-trend models
-    if(length(dw.p)==8) {dw.p <- c(dw.p, NA, NA)}
-    if(length(dw.p)==9) {dw.p <- c(dw.p, NA)}
-    
-    res.ar <- rbind(res.ar, dw.p)
-    
-  } # end m loop
-} # end R loop
+dat <- scale(all.clim.dat)
 
-res.ar
-colnames(res.ar) <- rownames(res) # make sure this case of "res" is a full case, i.e., three shared trends
-res.ar <- res.ar[2:nrow(res.ar),] # drop first row of NAs
+head(all.clim.dat)
 
-model.res.table <- as.data.frame(res.ar)
-model.res.table$R <- model.data$R
-model.res.table$m <- model.data$m
+all.clim.dat.std <- all.clim.dat
 
-write.csv(model.res.table, ".csv")
+i <- 1
+for(i in 1:nrow(all.clim.dat)) {
+  all.clim.dat.std[i,] <- (all.clim.dat[i,]-mean(all.clim.dat[i,], na.rm=TRUE))/sd(all.clim.dat[i,], na.rm=TRUE)  
+}
+#Double checking
+apply(all.clim.dat.std, 1, mean, na.rm=TRUE)
+apply(all.clim.dat.std, 1, sd, na.rm=TRUE)
+dat <- all.clim.dat.std
+#plot demeaned data
+
+driv <- rownames(all.clim.dat)
+#clr <- c("brown", "blue", "darkgreen", "darkred", "purple")
+cnt <- 1
+par(mfrow = c(N_ts/4, 4), mar = c(1, 1,1,1), omi = c(0.1, 
+                                                             0.1, 0.1, 0.1))
+for (i in driv) {
+  plot(dat[i, ], xlab = "", ylab = "", bty = "L", 
+       xaxt = "n", pch = 16, col = clr[cnt], type = "b")
+  axis(1,  (0:dim(all.clim.dat)[2]) + 1, yr_frst + 0:dim(all.clim.dat)[2])
+  title(i)
+  cnt <- cnt + 1
+}
+
+## get model fits & CI's
+mod_fit <- get_DFA_fits(mod.best)
+## plot the fits
+par(mfrow = c(N_ts/4, 4), mar = c(0.5, 0.7, 0.1, 0.1), omi = c(0, 
+                                                             0, 0, 0))
+for (i in 1:N_ts) {
+  up <- mod_fit$up[i, ]
+  mn <- mod_fit$ex[i, ]
+  lo <- mod_fit$lo[i, ]
+  plot(w_ts, mn, xlab = "", xaxt = "n", type = "n", 
+       cex.lab = 1.2, ylim = c(min(lo), max(up)))
+  axis(1,  (0:dim(all.clim.dat)[2]) + 1, yr_frst + 0:dim(all.clim.dat)[2])
+  points(w_ts, dat[i, ], pch = 16, col = clr[i])
+  lines(w_ts, up, col = "darkgray")
+  lines(w_ts, mn, col = "black", lwd = 2)
+  lines(w_ts, lo, col = "darkgray")
+}
+
+
 
 #refit only best model w AR=====
 
@@ -312,7 +350,7 @@ res.ar <- matrix(nrow=1, ncol=27)
     
     for(ii in 1:nrow(res)){     #NOT WORKING
       
-      dw.p[ii] <- dwtest(res[ii,] ~ 1)$p.value
+      dw.p[ii] <- dwtest(res[ii,] ~ 1)$p.value #durbin-watson test for autocorrelation of disturbance
       
     
     
