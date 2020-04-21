@@ -314,7 +314,6 @@ for (i in 1:N_ts) {
 
 #refit only best model w AR=====
 
-# HAVING TROUBLE with the below, going to copy and do just for best model below
 model.list = list(A="zero", m=3, R="diagonal and unequal") # best model
 mod.best = MARSS(all.clim.dat, model=model.list, z.score=TRUE, form="dfa", control=cntl.list)
 
@@ -322,7 +321,6 @@ mod.best = MARSS(all.clim.dat, model=model.list, z.score=TRUE, form="dfa", contr
 # model.data = data.frame()
 
 # object for residual autocorrelation results
-#res.ar <- matrix(nrow=1, ncol=27)
 res.ar <- data.frame()
 
 # fit models
@@ -342,34 +340,27 @@ res.ar <- data.frame()
     
     # add in calculation of residual AR(1) values!
     dw.p <- NA
-    # res <- residuals(kemzar)$residuals # maybe this is the error - getting residuals from kemzar rather than mod.best??
     res <- residuals(mod.best)$residuals
+   # res <- residuals(kemzar)$residuals
     # drop the 0s - these should be NAs!
     
     drop <- res==0
     res[drop] <- NA
     
     for(ii in 1:nrow(res)){     #for each i in length (climate variables)
-     # ii<-1
+
       dw.p <- dwtest(res[ii,] ~ 1)$p.value #durbin-watson test for autocorrelation of disturbance on
                                                 #that climate variable's row - one value each year
       
-    # pad to the correct length for 1- and 2-trend models
-      #I removed this because we are not looping through multiple models now
-  #  if(length(dw.p)==8) {dw.p <- c(dw.p, NA, NA)}
-  #  if(length(dw.p)==9) {dw.p <- c(dw.p, NA)}
-    
-    # problem was in this line - didn't select only a single time series name! fixxing that here 
+
     res.ar <- rbind(res.ar,
                     data.frame(time.series=row.names(all.clim.dat)[ii], 
-                               p=dw.p)) #I am getting an rbind error for unequal lengths here
+                               p=dw.p)) 
     
     }
 
 
 res.ar
-#colnames(res.ar) <- rownames(res) # make sure this case of "res" is a full case, i.e., three shared trends
-#res <- res[2:nrow(res),] # drop first row of NAs
 
 model.res.table <- as.data.frame(res)
 #model.res.table$R <- model.data$R
