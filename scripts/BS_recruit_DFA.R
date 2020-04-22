@@ -36,7 +36,15 @@ plot.rec.dat <- gather(do.rec.dat, key=key, value=value, -year)
 ggplot(plot.rec.dat, aes(x=year, y=value)) + geom_bar(position="dodge", stat="identity") + facet_wrap(~key) +
   ylab("Standard anomaly") + xlab("") + theme_bw() + geom_hline(yintercept = 0)
 
+raw.rec.dat <- gather(rec_dat, key=species, value=recruitment, -year)
 
+ggplot(raw.rec.dat, aes(x=year, y=recruitment)) + geom_point() + geom_line() +
+  facet_wrap(~species, scales="free") +
+  ylab("Recruitment") + xlab("") + theme_bw()
+
+ggplot(raw.rec.dat, aes(x=year, y=recruitment)) + geom_point() + geom_smooth() +
+  facet_wrap(~species, scales="free") +
+  ylab("Recruitment") + xlab("") + theme_bw() 
 
 
 
