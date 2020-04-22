@@ -1258,7 +1258,734 @@ png("figs/GOA and EBS sst - modes rolling corr.png", width=6, height=3, units='i
 ggpubr::ggarrange(goa.sst,  ebs.sst, nrow=1)
 dev.off()
 
+###################################
+# use Bayesian regression to compare predictive skill of SST for other variables pre/post 1988/89
+# fit stan models to AO-trend 1 relationship
+library(tidyverse)
+library(rstan)
+library(ggplot2)
+library(rstanarm)
+library(bayesplot)
 
+# for GOA, restrict to the time series known to show changing associations with PDO
+dat <- read.csv("data/GOA data/GOA.climate.csv", row.names=1)
+keep <- c("NDJ.grad", "FMA.FW", "FMA.WS", "FMA.SSH", "Papa")
+
+stan.data <- dat %>%
+  filter(key %in% keep) %>% 
+  pivot_wider(names_from="key", values_from = "value")
+
+dat <- read.csv("data/GOA data/goa.winter.sst.csv", row.names=1)
+dat <- dat %>%
+  mutate(year=as.numeric(row.names(dat)))
+
+stan.data <- left_join(stan.data, dat) %>%
+  filter(year <= 2013) %>%
+  pivot_longer(cols=c(-year, -ndjfm.sst))
+
+stan.data$era <- ifelse(stan.data$year %in% 1950:1988, "1950-1988", "1989-2012")
+
+# AO.stan <- stan_glm(trend ~ era + AO.jfm + AO.jfm:era,
+                            # data = stan.data,
+                            # chains = 4, cores = 4, thin = 1, seed=421,
+                            # warmup = 1000, iter = 4000, refresh = 0,
+                            # prior = normal(location = 0, scale = 5, autoscale = FALSE),
+                            # prior_intercept = normal(location = 0, scale = 5, autoscale = FALSE),
+                            # prior_aux = student_t(df = 3, location = 0, scale = 5, autoscale = FALSE))
+
+scatter <- ggplot(stan.data, aes(ndjfm.sst, value, color=era)) +
+  theme_bw() +
+  geom_point() +
+  scale_color_manual(values=cb[2:4]) +
+  geom_smooth(method="lm", se=F) +
+  xlab("SST (NDJFM)") +
+  facet_wrap(~name, scales="free_y") +
+  theme(legend.title = element_blank(), axis.title.y = element_blank(), legend.position = 'top')
+
+ggsave("figs/GOA sst vs climate scatter.png", width = 7, height = 4, units="in")
+
+# scale values!
+stan.data <- plyr::ddply(stan.data, "name", mutate, scale.value = scale(value))
+
+ggplot(stan.data, aes(scale.value)) +
+  geom_histogram() +
+  facet_wrap(~name)
+
+# stan era-specific regressions
+FMA.FW <- stan_glm(scale.value ~ era + ndjfm.sst + ndjfm.sst:era,
+                    data = stan.data[stan.data$name=="FMA.FW",],
+                    chains = 4, cores = 4, thin = 1,
+                    warmup = 1000, iter = 4000, refresh = 0,
+                    prior = normal(location = 0, scale = 5, autoscale = FALSE),
+                    prior_intercept = normal(location = 0, scale = 5, autoscale = FALSE),
+                    prior_aux = student_t(df = 3, location = 0, scale = 5, autoscale = FALSE))
+
+FMA.SSH <- stan_glm(scale.value ~ era + ndjfm.sst + ndjfm.sst:era,
+                   data = stan.data[stan.data$name=="FMA.SSH",],
+                   chains = 4, cores = 4, thin = 1,
+                   warmup = 1000, iter = 4000, refresh = 0,
+                   prior = normal(location = 0, scale = 5, autoscale = FALSE),
+                   prior_intercept = normal(location = 0, scale = 5, autoscale = FALSE),
+                   prior_aux = student_t(df = 3, location = 0, scale = 5, autoscale = FALSE))
+
+FMA.WS <- stan_glm(scale.value ~ era + ndjfm.sst + ndjfm.sst:era,
+                   data = stan.data[stan.data$name=="FMA.WS",],
+                   chains = 4, cores = 4, thin = 1,
+                   warmup = 1000, iter = 4000, refresh = 0,
+                   prior = normal(location = 0, scale = 5, autoscale = FALSE),
+                   prior_intercept = normal(location = 0, scale = 5, autoscale = FALSE),
+                   prior_aux = student_t(df = 3, location = 0, scale = 5, autoscale = FALSE))
+
+NDJ.grad <- stan_glm(scale.value ~ era + ndjfm.sst + ndjfm.sst:era,
+                    data = stan.data[stan.data$name=="NDJ.grad",],
+                    chains = 4, cores = 4, thin = 1,
+                    warmup = 1000, iter = 4000, refresh = 0,
+                    prior = normal(location = 0, scale = 5, autoscale = FALSE),
+                    prior_intercept = normal(location = 0, scale = 5, autoscale = FALSE),
+                    prior_aux = student_t(df = 3, location = 0, scale = 5, autoscale = FALSE))
+
+Papa <- stan_glm(scale.value ~ era + ndjfm.sst + ndjfm.sst:era,
+                     data = stan.data[stan.data$name=="Papa",],
+                     chains = 4, cores = 4, thin = 1,
+                     warmup = 1000, iter = 4000, refresh = 0,
+                     prior = normal(location = 0, scale = 5, autoscale = FALSE),
+                     prior_intercept = normal(location = 0, scale = 5, autoscale = FALSE),
+                     prior_aux = student_t(df = 3, location = 0, scale = 5, autoscale = FALSE))
+##############
+# and plot!
+
+lst <- list(FMA.FW, FMA.SSH, FMA.WS, NDJ.grad, Papa)
+
+
+# extract intercepts
+lst.int <- lapply(lst, function(x) {
+  beta <- as.matrix(x, pars = c("(Intercept)", "era1989-2013"))
+  data.frame(key = unique(x$data$name),
+             era1 = beta[ , 1],
+             era2 = beta[ , 1] + beta[ , 2])
+})
+coef_indv_arm <- plyr::rbind.fill(lst.int)
+
+mdf_indv_arm <- reshape2::melt(coef_indv_arm, id.vars = "key")
+
+## extract slopes
+lst.slope <- lapply(lst, function(x) {
+  beta <- as.matrix(x, pars = c("ndjfm.sst", "era1989-2013:ndjfm.sst"))
+  data.frame(key = unique(x$data$name),
+             era1 = beta[ , 1],
+             era2 = beta[ , 1] + beta[ , 2])
+})
+coef_slope <- plyr::rbind.fill(lst.slope)
+mdf_slope <- reshape2::melt(coef_slope, id.vars = "key")
+
+
+# plot intercepts
+int <- ggplot(mdf_indv_arm, aes(x = value, fill = variable)) +
+  theme_bw() +
+  geom_density(alpha = 0.7) +
+  scale_fill_manual(values = c(cb[2], cb[3], cb[4]), labels=c("1950-1988", "1989-2013")) +
+  theme(legend.title = element_blank(), legend.position = 'top') +
+  geom_vline(xintercept = 0, lty = 2) +
+  labs(x = "Intercept (scaled anomaly)",
+       y = "Posterior density") +
+  facet_wrap( ~ key, scales="free")
+print(int)
+
+ggsave("figs/era intercepts - winter SST vs GOA climate.png", width=10, height=8, units="in")
+
+# plot slopes
+slope <- ggplot(mdf_slope, aes(x = value, fill = variable)) +
+  theme_bw() +
+  geom_density(alpha = 0.7) +
+  scale_fill_manual(values = c(cb[2], cb[3], cb[4]), labels=c("1964-1988", "1989-2013", "2014-2019")) +
+  theme(legend.title = element_blank(), legend.position = 'top') +
+  geom_vline(xintercept = 0, lty = 2) +
+  labs(x = "Slope (scaled anomaly)",
+       y = "Posterior density") +
+  facet_wrap( ~ key, scales="free")
+print(slope)
+
+ggsave("figs/era slopes - winter SST vs GOA climate.png", width=10, height=8, units='in')
+
+
+#########################################
+# dfa trend for shared variability??
+dfa.dat <- stan.data %>%
+  select(year, name, value) %>%
+  pivot_wider(names_from = name, values_from = value)
+
+dfa.dat <- as.matrix(t(select(dfa.dat, -year)))
+colnames(dfa.dat) <- 1950:2012
+
+
+# find best error structure for 1-trend model
+
+# changing convergence criterion to ensure convergence
+cntl.list = list(minit=200, maxit=20000, allow.degen=FALSE, conv.test.slope.tol=0.1, abstol=0.0001)
+
+# set up forms of R matrices
+levels.R = c("diagonal and equal",
+             "diagonal and unequal",
+             "equalvarcov",
+             "unconstrained")
+model.data = data.frame()
+
+# having trouble with convergence - not surprisingly! Upping maxit
+cntl.list = list(minit=200, maxit=40000, allow.degen=FALSE, conv.test.slope.tol=0.1, abstol=0.0001)
+
+# fit models & store results
+for(R in levels.R) {
+  for(m in 1) {  # allowing up to 1 trends
+    dfa.model = list(A="zero", R=R, m=m)
+    kemz = MARSS(dfa.dat[,colnames(dfa.dat) %in% 1989:2012], model=dfa.model, control=cntl.list,
+                 form="dfa", z.score=TRUE)
+    model.data = rbind(model.data,
+                       data.frame(R=R,
+                                  m=m,
+                                  logLik=kemz$logLik,
+                                  K=kemz$num.params,
+                                  AICc=kemz$AICc,
+                                  stringsAsFactors=FALSE))
+    assign(paste("kemz", m, R, sep="."), kemz)
+  } # end m loop
+} # end R loop
+
+# calculate delta-AICc scores, sort in descending order, and compare
+model.data$dAICc <- model.data$AICc-min(model.data$AICc)
+model.data <- model.data %>%
+  arrange(dAICc)
+
+era2.models <- model.data
+
+era1.models; era2.models
+# equalvarcov is best for each...but for era2 only diagonal and unequal / unconstrained show non-0 loadings!
+
+# fit models to each era
+model.list = list(A="zero", m=1, R="equalvarcov")
+mod1 = MARSS(dfa.dat[,colnames(dfa.dat) %in% 1950:1988], model=model.list, z.score=TRUE, form="dfa", control=cntl.list)
+model.list = list(A="zero", m=1, R="diagonal and unequal")
+mod2 = MARSS(dfa.dat[,colnames(dfa.dat) %in% 1989:2012], model=model.list, z.score=TRUE, form="dfa", control=cntl.list)
+
+# get CI and plot loadings...
+mod1.CI <- MARSSparamCIs(mod1)
+
+mod2.CI <- MARSSparamCIs(mod2)
+
+plot.CI <- data.frame(names=rep(rownames(dfa.dat),2),
+                      era=rep(c("1950-1988", "1989-2012"), each=nrow(dfa.dat)),
+                      mean=c(mod1.CI$par$Z, mod2.CI$par$Z),
+                      upCI=c(mod1.CI$par.upCI$Z,mod2.CI$par.upCI$Z),
+                      lowCI=c(mod1.CI$par.lowCI$Z,mod2.CI$par.lowCI$Z))
+
+plot.CI$names <- reorder(plot.CI$names, rep(mod1.CI$par$Z, 2))
+dodge <- position_dodge(width=0.9)
+
+# rename variables for plotting!
+plot.CI$names <- ifelse(plot.CI$names=="NDJ.grad", "SLP gradient",
+                      ifelse(plot.CI$names=="FMA.FW", "Freshwater discharge",
+                             ifelse(plot.CI$names=="FMA.WS", "Wind stress",
+                                    ifelse(plot.CI$names=="Papa", "Papa advection", "SSH"))))
+
+ggplot(plot.CI, aes(x=names, y=mean, fill=era)) +
+  geom_bar(position=dodge, stat="identity") +
+  geom_errorbar(aes(ymax=upCI, ymin=lowCI), position=dodge, width=0.5) +
+  ylab("Loading") +
+  xlab("") +
+  theme_bw() +
+  theme(axis.text.x  = element_text(angle=45, hjust=1,  size=12), legend.title = element_blank(), legend.position = 'top') +
+  geom_hline(yintercept = 0) +
+  scale_fill_manual(values=c(cb[2], cb[3]))
+
+ggsave("figs/non-sst GOA era-specific climate dfa loadings.png", width=4, height=6, units='in')
+
+
+# now make new stan data objects for era regression of sst-dfa relationships
+dat <- read.csv("data/GOA data/goa.winter.sst.csv", row.names=1)
+dat <- dat %>%
+  mutate(year=as.numeric(row.names(dat))) %>%
+  filter(year %in% 1950:2012)
+
+
+stan.new <- data.frame(year=1950:2012,
+                       ndjfm.sst=dat$ndjfm.sst,
+                       name="dfa.trend",
+                       value=c(mod1$states, mod2$states))
+stan.new$era <- ifelse(stan.new$year <= 1988, "1950-1988", "1989-2012")
+
+# and run regression
+dfa.stan <- stan_glm(value ~ era + ndjfm.sst + ndjfm.sst:era,
+                 data = stan.new,
+                 chains = 4, cores = 4, thin = 1,
+                 warmup = 1000, iter = 4000, refresh = 0,
+                 prior = normal(location = 0, scale = 5, autoscale = FALSE),
+                 prior_intercept = normal(location = 0, scale = 5, autoscale = FALSE),
+                 prior_aux = student_t(df = 3, location = 0, scale = 5, autoscale = FALSE))
+
+##############
+# and plot!
+
+lst <- list(dfa.stan)
+
+
+# extract intercepts
+lst.int <- lapply(lst, function(x) {
+  beta <- as.matrix(x, pars = c("(Intercept)", "era1989-2012"))
+  data.frame(key = unique(x$data$name),
+             era1 = beta[ , 1],
+             era2 = beta[ , 1] + beta[ , 2])
+})
+coef_indv_arm <- plyr::rbind.fill(lst.int)
+
+mdf_indv_arm <- reshape2::melt(coef_indv_arm, id.vars = "key")
+
+## extract slopes
+lst.slope <- lapply(lst, function(x) {
+  beta <- as.matrix(x, pars = c("ndjfm.sst", "era1989-2012:ndjfm.sst"))
+  data.frame(key = unique(x$data$name),
+             era1 = beta[ , 1],
+             era2 = beta[ , 1] + beta[ , 2])
+})
+coef_slope <- plyr::rbind.fill(lst.slope)
+mdf_slope <- reshape2::melt(coef_slope, id.vars = "key")
+
+
+# plot intercepts
+int <- ggplot(mdf_indv_arm, aes(x = value, fill = variable)) +
+  theme_bw() +
+  geom_density(alpha = 0.7) +
+  scale_fill_manual(values = c(cb[2], cb[3]), labels=c("1950-1988", "1989-2013")) +
+  theme(legend.title = element_blank(), legend.position = 'top') +
+  geom_vline(xintercept = 0, lty = 2) +
+  labs(x = "Intercept (scaled anomaly)",
+       y = "Posterior density") +
+  facet_wrap( ~ key, scales="free")
+print(int)
+
+ggsave("figs/era intercepts - winter SST vs GOA climate.png", width=10, height=8, units="in")
+
+# plot slopes
+slope <- ggplot(mdf_slope, aes(x = value, fill = variable)) +
+  theme_bw() +
+  geom_density(alpha = 0.7) +
+  scale_fill_manual(values = c(cb[2], cb[3], cb[4]), labels=c("1950-1988", "1989-2012")) +
+  theme(legend.title = element_blank(), legend.position = 'top') +
+  geom_vline(xintercept = 0, lty = 2) +
+  labs(x = "Slope (scaled anomaly)",
+       y = "Posterior density")
+print(slope)
+
+ggsave("figs/era slopes - winter SST vs GOA climate dfa trend.png", width=3, height=3, units='in')
+
+# era probabilities of being > 0
+
+probs <- mdf_slope %>%
+  group_by(variable) %>%
+  summarize(prob.greater=(sum(value>0)/length(value))) # 98.5% in era1, 57.0% in era2
+
+
+# so here's the problem - the dfa model in era 2 is mostly tracking ssh, which remains correlated with sst - not apples to apples!
+
+# try a dfa model for the whole TS
+model.data = data.frame()
+
+# fit models & store results
+for(R in levels.R) {
+  for(m in 1) {  # allowing up to 1 trends
+    dfa.model = list(A="zero", R=R, m=m)
+    kemz = MARSS(dfa.dat, model=dfa.model, control=cntl.list,
+                 form="dfa", z.score=TRUE)
+    model.data = rbind(model.data,
+                       data.frame(R=R,
+                                  m=m,
+                                  logLik=kemz$logLik,
+                                  K=kemz$num.params,
+                                  AICc=kemz$AICc,
+                                  stringsAsFactors=FALSE))
+    assign(paste("kemz", m, R, sep="."), kemz)
+  } # end m loop
+} # end R loop
+
+# calculate delta-AICc scores, sort in descending order, and compare
+model.data$dAICc <- model.data$AICc-min(model.data$AICc)
+model.data <- model.data %>%
+  arrange(dAICc)
+
+model.data
+
+# equalvarcov is best
+
+# fit model
+model.list = list(A="zero", m=1, R="equalvarcov")
+mod = MARSS(dfa.dat, model=model.list, z.score=TRUE, form="dfa", control=cntl.list)
+
+# get CI and plot loadings...
+mod.CI <- MARSSparamCIs(mod)
+
+plot.CI <- data.frame(names=rownames(dfa.dat),
+                      mean=mod.CI$par$Z,
+                      upCI=mod.CI$par.upCI$Z,
+                      lowCI=mod.CI$par.lowCI$Z)
+
+dodge <- position_dodge(width=0.9)
+
+# rename variables for plotting!
+plot.CI$names <- ifelse(plot.CI$names=="NDJ.grad", "SLP gradient",
+                        ifelse(plot.CI$names=="FMA.FW", "Freshwater discharge",
+                               ifelse(plot.CI$names=="FMA.WS", "Wind stress",
+                                      ifelse(plot.CI$names=="Papa", "Papa advection", "SSH"))))
+
+plot.CI$names <- reorder(plot.CI$names, mod.CI$par$Z)
+
+ggplot(plot.CI, aes(x=names, y=mean)) +
+  geom_bar(position=dodge, stat="identity", fill=cb[2]) +
+  geom_errorbar(aes(ymax=upCI, ymin=lowCI), position=dodge, width=0.5) +
+  ylab("Loading") +
+  xlab("") +
+  theme_bw() +
+  theme(axis.text.x  = element_text(angle=45, hjust=1,  size=12), legend.title = element_blank(), legend.position = 'top') +
+  geom_hline(yintercept = 0)
+
+ggsave("figs/non-sst GOA full TS climate dfa loadings.png", width=2.5, height=4, units='in')
+
+
+# now make new stan data objects for era regression of sst-dfa relationships
+dat <- read.csv("data/GOA data/goa.winter.sst.csv", row.names=1)
+dat <- dat %>%
+  mutate(year=as.numeric(row.names(dat))) %>%
+  filter(year %in% 1950:2012)
+
+
+stan.new <- data.frame(year=1950:2012,
+                       ndjfm.sst=dat$ndjfm.sst,
+                       name="dfa.trend",
+                       value=as.vector(mod$states))
+
+stan.new$era <- ifelse(stan.new$year <= 1988, "1950-1988", "1989-2012")
+
+# and run regression
+dfa.stan <- stan_glm(value ~ era + ndjfm.sst + ndjfm.sst:era,
+                     data = stan.new,
+                     chains = 4, cores = 4, thin = 1,
+                     warmup = 1000, iter = 4000, refresh = 0,
+                     prior = normal(location = 0, scale = 5, autoscale = FALSE),
+                     prior_intercept = normal(location = 0, scale = 5, autoscale = FALSE),
+                     prior_aux = student_t(df = 3, location = 0, scale = 5, autoscale = FALSE))
+
+##############
+# and plot!
+
+lst <- list(dfa.stan)
+
+
+# extract intercepts
+lst.int <- lapply(lst, function(x) {
+  beta <- as.matrix(x, pars = c("(Intercept)", "era1989-2012"))
+  data.frame(key = unique(x$data$name),
+             era1 = beta[ , 1],
+             era2 = beta[ , 1] + beta[ , 2])
+})
+coef_indv_arm <- plyr::rbind.fill(lst.int)
+
+mdf_indv_arm <- reshape2::melt(coef_indv_arm, id.vars = "key")
+
+## extract slopes
+lst.slope <- lapply(lst, function(x) {
+  beta <- as.matrix(x, pars = c("ndjfm.sst", "era1989-2012:ndjfm.sst"))
+  data.frame(key = unique(x$data$name),
+             era1 = beta[ , 1],
+             era2 = beta[ , 1] + beta[ , 2])
+})
+coef_slope <- plyr::rbind.fill(lst.slope)
+mdf_slope <- reshape2::melt(coef_slope, id.vars = "key")
+
+
+# plot intercepts
+int <- ggplot(mdf_indv_arm, aes(x = value, fill = variable)) +
+  theme_bw() +
+  geom_density(alpha = 0.7) +
+  scale_fill_manual(values = c(cb[2], cb[3]), labels=c("1950-1988", "1989-2013")) +
+  theme(legend.title = element_blank(), legend.position = 'top') +
+  geom_vline(xintercept = 0, lty = 2) +
+  labs(x = "Intercept (scaled anomaly)",
+       y = "Posterior density") +
+  facet_wrap( ~ key, scales="free")
+print(int)
+
+ggsave("figs/era intercepts - winter SST vs GOA dfa climate - full TS.png", width=10, height=8, units="in")
+
+# plot slopes
+slope <- ggplot(mdf_slope, aes(x = value, fill = variable)) +
+  theme_bw() +
+  geom_density(alpha = 0.7) +
+  scale_fill_manual(values = c(cb[2], cb[3], cb[4]), labels=c("1950-1988", "1989-2012")) +
+  theme(legend.title = element_blank(), legend.position = 'top') +
+  geom_vline(xintercept = 0, lty = 2) +
+  labs(x = "Slope (scaled anomaly)",
+       y = "Posterior density")
+print(slope)
+
+ggsave("figs/era slopes - winter SST vs GOA climate dfa trend full TS.png", width=3, height=3, units='in')
+
+# era probabilities of being > 0
+
+probs <- mdf_slope %>%
+  group_by(variable) %>%
+  summarize(prob.greater=(sum(value>0)/length(value))) # 99.0% in era1, 70.8% in era2
+
+# now...the same for EBS!!
+dat <- read.csv("data/climate data.csv")
+
+names(dat)
+
+# subset (no sst)
+wind <- c( "NW.wind.May.Sep", "NW.wind.Oct.Apr", "SE.wind.May.Sep", "SE.wind.Oct.Apr", "south.wind.stress.amj")
+
+ice <- c("ice.area.jfma","m4.march.ice", "m5.march.ice")
+
+ice.dat <- dat %>%
+  select(ice)
+
+ice.dat <- as.matrix(t(ice.dat))
+
+wind.dat <- dat %>%
+  select(wind)
+
+wind.dat <- as.matrix(t(wind.dat))
+
+colnames(ice.dat) <- colnames(wind.dat) <- dat$year
+
+
+
+# find best error structure for 1-trend model
+
+# changing convergence criterion to ensure convergence
+cntl.list = list(minit=200, maxit=20000, allow.degen=FALSE, conv.test.slope.tol=0.1, abstol=0.0001)
+
+# set up forms of R matrices
+levels.R = c("diagonal and equal",
+             "diagonal and unequal",
+             "equalvarcov",
+             "unconstrained")
+model.data = data.frame()
+
+# fit models & store results
+for(R in levels.R) {
+  for(m in 1) {  # allowing up to 1 trends
+    dfa.model = list(A="zero", R=R, m=m)
+    kemz = MARSS(ice.dat[,colnames(ice.dat) %in% 1951:2013], model=dfa.model, control=cntl.list,
+                 form="dfa", z.score=TRUE)
+    model.data = rbind(model.data,
+                       data.frame(R=R,
+                                  m=m,
+                                  logLik=kemz$logLik,
+                                  K=kemz$num.params,
+                                  AICc=kemz$AICc,
+                                  stringsAsFactors=FALSE))
+    assign(paste("kemz", m, R, sep="."), kemz)
+  } # end m loop
+} # end R loop
+
+# calculate delta-AICc scores, sort in descending order, and compare
+model.data$dAICc <- model.data$AICc-min(model.data$AICc)
+model.data <- model.data %>%
+  arrange(dAICc)
+
+ice.mod.data <- model.data # unconstrained produces no loadings!
+wind.mod.data <- model.data # also equal var covar
+
+# fit best models and plot.... 
+# fit model
+model.list = list(A="zero", m=1, R="diagonal and unequal")
+ice.mod = MARSS(ice.dat[,colnames(ice.dat) %in% 1951:2013], model=model.list, z.score=TRUE, form="dfa", control=cntl.list)
+model.list = list(A="zero", m=1, R="equalvarcov")
+wind.mod = MARSS(wind.dat[,colnames(wind.dat) %in% 1951:2013], model=model.list, z.score=TRUE, form="dfa", control=cntl.list)
+# get CI and plot loadings...
+
+ice.CI <- MARSSparamCIs(ice.mod)
+
+ice.plot.CI <- data.frame(names=rownames(ice.dat),
+                      mean=ice.CI$par$Z,
+                      upCI=ice.CI$par.upCI$Z,
+                      lowCI=ice.CI$par.lowCI$Z)
+
+dodge <- position_dodge(width=0.9)
+
+# rename variables for plotting!
+# plot.CI$names <- ifelse(plot.CI$names=="NDJ.grad", "SLP gradient",
+#                         ifelse(plot.CI$names=="FMA.FW", "Freshwater discharge",
+#                                ifelse(plot.CI$names=="FMA.WS", "Wind stress",
+#                                       ifelse(plot.CI$names=="Papa", "Papa advection", "SSH"))))
+
+ice.plot.CI$names <- reorder(ice.plot.CI$names, ice.CI$par$Z)
+
+ggplot(ice.plot.CI, aes(x=names, y=mean)) +
+  geom_bar(position=dodge, stat="identity", fill=cb[2]) +
+  geom_errorbar(aes(ymax=upCI, ymin=lowCI), position=dodge, width=0.5) +
+  ylab("Loading") +
+  xlab("") +
+  theme_bw() +
+  theme(axis.text.x  = element_text(angle=45, hjust=1,  size=12), legend.title = element_blank(), legend.position = 'top') +
+  geom_hline(yintercept = 0)
+
+ggsave("figs/EBS ice dfa loadings.png", width=2.5, height=4, units='in')
+
+wind.CI <- MARSSparamCIs(wind.mod)
+
+wind.plot.CI <- data.frame(names=rownames(wind.dat),
+                          mean=wind.CI$par$Z,
+                          upCI=wind.CI$par.upCI$Z,
+                          lowCI=wind.CI$par.lowCI$Z)
+
+dodge <- position_dodge(width=0.9)
+
+# rename variables for plotting!
+# plot.CI$names <- ifelse(plot.CI$names=="NDJ.grad", "SLP gradient",
+#                         ifelse(plot.CI$names=="FMA.FW", "Freshwater discharge",
+#                                ifelse(plot.CI$names=="FMA.WS", "Wind stress",
+#                                       ifelse(plot.CI$names=="Papa", "Papa advection", "SSH"))))
+
+wind.plot.CI$names <- reorder(wind.plot.CI$names, wind.CI$par$Z)
+
+ggplot(wind.plot.CI, aes(x=names, y=mean)) +
+  geom_bar(position=dodge, stat="identity", fill=cb[2]) +
+  geom_errorbar(aes(ymax=upCI, ymin=lowCI), position=dodge, width=0.5) +
+  ylab("Loading") +
+  xlab("") +
+  theme_bw() +
+  theme(axis.text.x  = element_text(angle=45, hjust=1,  size=12), legend.title = element_blank(), legend.position = 'top') +
+  geom_hline(yintercept = 0)
+
+ggsave("figs/EBS wind dfa loadings.png", width=2.5, height=4, units='in')
+
+# plot trend
+ice.trend <- data.frame(t=1951:2013,
+                         estimate=as.vector(ice.mod$states),
+                         conf.low=as.vector(ice.mod$states)-1.96*as.vector(ice.mod$states.se),
+                         conf.high=as.vector(ice.mod$states)+1.96*as.vector(ice.mod$states.se))
+
+
+ggplot(ice.trend, aes(t, estimate)) +
+  theme_bw() +
+  geom_line(color=cb[2]) +
+  geom_hline(yintercept = 0) +
+  geom_ribbon(aes(x=t, ymin=conf.low, ymax=conf.high), linetype=2, alpha=0.1, fill=cb[2]) + xlab("") + ylab("Trend")
+
+ggsave("figs/EBS ice dfa trend.png", width=4, height=2.5, units='in')
+
+wind.trend <- data.frame(t=1951:2013,
+                        estimate=as.vector(wind.mod$states),
+                        conf.low=as.vector(wind.mod$states)-1.96*as.vector(wind.mod$states.se),
+                        conf.high=as.vector(wind.mod$states)+1.96*as.vector(wind.mod$states.se))
+
+
+ggplot(wind.trend, aes(t, estimate)) +
+  theme_bw() +
+  geom_line(color=cb[2]) +
+  geom_hline(yintercept = 0) +
+  geom_ribbon(aes(x=t, ymin=conf.low, ymax=conf.high), linetype=2, alpha=0.1, fill=cb[2]) + xlab("") + ylab("Trend")
+
+ggsave("figs/EBS wind dfa trend.png", width=4, height=2.5, units='in')
+
+# now Bayes!
+# now make new stan data objects for era regression of sst-dfa relationships
+dat <- read.csv("data/climate data.csv")
+
+dat <- dat %>%
+  select(year, "south.sst.ndjfm") %>%
+  filter(year %in% 1951:2013)
+
+
+stan.new <- data.frame(year=1951:2013,
+                       ndjfm.sst=dat$south.sst,
+                       name=rep(c("ice.trend", "wind.trend"), each=length(1951:2013)),
+                       value=c(ice.mod$states, wind.mod$states))
+
+stan.new$era <- ifelse(stan.new$year <= 1988, "1950-1988", "1989-2012")
+
+# and run regression
+ice.stan <- stan_glm(value ~ era + ndjfm.sst + ndjfm.sst:era,
+                     data = filter(stan.new, name=="ice.trend"),
+                     chains = 4, cores = 4, thin = 1,
+                     warmup = 1000, iter = 4000, refresh = 0,
+                     prior = normal(location = 0, scale = 5, autoscale = FALSE),
+                     prior_intercept = normal(location = 0, scale = 5, autoscale = FALSE),
+                     prior_aux = student_t(df = 3, location = 0, scale = 5, autoscale = FALSE))
+
+wind.stan <- stan_glm(value ~ era + ndjfm.sst + ndjfm.sst:era,
+                     data = filter(stan.new, name=="wind.trend"),
+                     chains = 4, cores = 4, thin = 1,
+                     warmup = 1000, iter = 4000, refresh = 0,
+                     prior = normal(location = 0, scale = 5, autoscale = FALSE),
+                     prior_intercept = normal(location = 0, scale = 5, autoscale = FALSE),
+                     prior_aux = student_t(df = 3, location = 0, scale = 5, autoscale = FALSE))
+
+##############
+# and plot!
+
+lst <- list(ice.stan, wind.stan)
+
+
+# extract intercepts
+lst.int <- lapply(lst, function(x) {
+  beta <- as.matrix(x, pars = c("(Intercept)", "era1989-2012"))
+  data.frame(key = unique(x$data$name),
+             era1 = beta[ , 1],
+             era2 = beta[ , 1] + beta[ , 2])
+})
+coef_indv_arm <- plyr::rbind.fill(lst.int)
+
+mdf_indv_arm <- reshape2::melt(coef_indv_arm, id.vars = "key")
+
+## extract slopes
+lst.slope <- lapply(lst, function(x) {
+  beta <- as.matrix(x, pars = c("ndjfm.sst", "era1989-2012:ndjfm.sst"))
+  data.frame(key = unique(x$data$name),
+             era1 = beta[ , 1],
+             era2 = beta[ , 1] + beta[ , 2])
+})
+coef_slope <- plyr::rbind.fill(lst.slope)
+mdf_slope <- reshape2::melt(coef_slope, id.vars = "key")
+
+
+# plot intercepts
+int <- ggplot(mdf_indv_arm, aes(x = value, fill = variable)) +
+  theme_bw() +
+  geom_density(alpha = 0.7) +
+  scale_fill_manual(values = c(cb[2], cb[3]), labels=c("1950-1988", "1989-2013")) +
+  theme(legend.title = element_blank(), legend.position = 'top') +
+  geom_vline(xintercept = 0, lty = 2) +
+  labs(x = "Intercept (scaled anomaly)",
+       y = "Posterior density") +
+  facet_wrap( ~ key, scales="free")
+print(int)
+
+ggsave("figs/era intercepts - winter SST vs EBS ice and wind DFA.png", width=6, height=3, units="in")
+
+# plot slopes
+slope <- ggplot(mdf_slope, aes(x = value, fill = variable)) +
+  theme_bw() +
+  geom_density(alpha = 0.7) +
+  scale_fill_manual(values = c(cb[2], cb[3], cb[4]), labels=c("1950-1988", "1989-2012")) +
+  theme(legend.title = element_blank(), legend.position = 'top') +
+  geom_vline(xintercept = 0, lty = 2) +
+  labs(x = "Slope (scaled anomaly)",
+       y = "Posterior density") +
+  facet_wrap( ~ key, scales="free")
+print(slope)
+
+ggsave("figs/era slopes - winter SST vs EBS climate dfa wind and ice.png", width=6, height=3, units='in')
+
+# era probabilities of being > 0
+
+probs <- mdf_slope %>%
+  group_by(variable) %>%
+  summarize(prob.greater=(sum(value>0)/length(value))) # 98.5% in era1, 57.0% in era2
+
+
+
+##########################################################################################################
+# old stuff below!
+##########################################################################################################
 # ggsave("figs/rolling correlations - EBS climate vars and large-scale modes.png", width=6, height=5, units='in')
 
 
