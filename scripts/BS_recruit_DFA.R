@@ -72,6 +72,55 @@ ggplot(log.rec.dat, aes(x=year, y=log_recruitment)) + geom_point() + geom_line()
 
 
 
+#manupulate data for DFA========
+
+
+# save the full data set for later use...
+log.rec.mat <- t(as.matrix(log_rec))
+colnames(log.rec.mat) <- log.rec.mat[1,]
+log.rec.mat <- log.rec.mat[-1,]
+
+
+#fit model========
+
+# now fit DFA models with 1-3 trends and different error structures and compare
+
+# changing convergence criterion to ensure convergence
+cntl.list = list(minit=200, maxit=20000, allow.degen=FALSE, conv.test.slope.tol=0.1, abstol=0.0001)
+
+# set up forms of R matrices
+levels.R = c("diagonal and equal",
+             "diagonal and unequal",
+             "equalvarcov",
+             "unconstrained")
+model.data = data.frame()
+
+# fit models & store results
+for(R in levels.R) {
+  for(m in 1:4) {  # allowing up to 3 trends
+    dfa.model = list(A="zero", R=R, m=m)
+    kemz = MARSS(log.rec.mat, model=dfa.model, control=cntl.list,
+                 form="dfa", z.score=TRUE)
+    model.data = rbind(model.data,
+                       data.frame(R=R,
+                                  m=m,
+                                  logLik=kemz$logLik,
+                                  K=kemz$num.params,
+                                  AICc=kemz$AICc,
+                                  stringsAsFactors=FALSE))
+    assign(paste("kemz", m, R, sep="."), kemz)
+  } # end m loop
+} # end R loop
+
+# calculate delta-AICc scores, sort in descending order, and compare
+model.data$dAICc <- model.data$AICc-min(model.data$AICc)
+model.data <- model.data %>%
+  arrange(dAICc)
+model.data
+
+
+
+
 
 
 
