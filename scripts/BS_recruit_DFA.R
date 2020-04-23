@@ -249,8 +249,10 @@ ccf(proc_rot[1, ], proc_rot[2, ], lag.max = 12, main = "")
 # now fit second best model
 
 model.list.2 = list(A="zero", m=1, R="unconstrained") # second best model but not by much
-model.2 = MARSS(log.rec.mat, model=model.list.2, z.score=TRUE, form="dfa", control=cntl.list)
-#DOES NOT CONVERGE
+model.2 = MARSS(log.rec.mat, model=model.list.2, z.score=TRUE, form="dfa", control=cntl.list2)
+#DOES NOT CONVERGE bump up to 40K iter
+cntl.list2 = list(minit=200, maxit=40000, allow.degen=FALSE, conv.test.slope.tol=0.1, abstol=0.0001)
+
 
 # and rotate the loadings
 Z.est = coef(model.2, type="matrix")$Z
@@ -369,8 +371,10 @@ ccf(proc_rot[1, ], proc_rot[2, ], lag.max = 12, main = "")
 # now fit best model
 
 model.list.3 = list(A="zero", m=3, R="unconstrained") # second best model but not by much
-model.3 = MARSS(log.rec.mat, model=model.list.3, z.score=TRUE, form="dfa", control=cntl.list)
-#DOES NOT CONVERGE
+model.3 = MARSS(log.rec.mat, model=model.list.3, z.score=TRUE, form="dfa", control=cntl.list3)
+#DOES NOT CONVERGE bump up to 60K iter
+cntl.list3 = list(minit=200, maxit=60000, allow.degen=FALSE, conv.test.slope.tol=0.1, abstol=0.0001)
+
 
 # and rotate the loadings
 Z.est = coef(model.3, type="matrix")$Z
