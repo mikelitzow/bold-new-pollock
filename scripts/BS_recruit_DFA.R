@@ -488,6 +488,102 @@ ccf(proc_rot[1, ], proc_rot[2, ], lag.max = 12, main = "")
 
 
 
+#plot obs vs fitted========
+
+#from online course "nwfsc-timeseries.github.io"
+
+get_DFA_fits <- function(MLEobj, dd = NULL, alpha = 0.05) {
+  ## empty list for results
+  fits <- list()
+  ## extra stuff for var() calcs
+  Ey <- MARSS:::MARSShatyt(MLEobj)
+  ## model params
+  ZZ <- coef(MLEobj, type = "matrix")$Z
+  ## number of obs ts
+  nn <- dim(Ey$ytT)[1]
+  ## number of time steps
+  TT <- dim(Ey$ytT)[2]
+  ## get the inverse of the rotation matrix
+  H_inv <- varimax(ZZ)$rotmat
+  ## check for covars
+  if (!is.null(dd)) {
+    DD <- coef(MLEobj, type = "matrix")$D
+    ## model expectation
+    fits$ex <- ZZ %*% H_inv %*% MLEobj$states + DD %*% dd
+  } else {
+    ## model expectation
+    fits$ex <- ZZ %*% H_inv %*% MLEobj$states
+  }
+  ## Var in model fits
+  VtT <- MARSSkfss(MLEobj)$VtT
+  VV <- NULL
+  for (tt in 1:TT) {
+    RZVZ <- coef(MLEobj, type = "matrix")$R - ZZ %*% VtT[, 
+                                                         , tt] %*% t(ZZ)
+    SS <- Ey$yxtT[, , tt] - Ey$ytT[, tt, drop = FALSE] %*% 
+      t(MLEobj$states[, tt, drop = FALSE])
+    VV <- cbind(VV, diag(RZVZ + SS %*% t(ZZ) + ZZ %*% t(SS)))
+  }
+  SE <- sqrt(VV)
+  ## upper & lower (1-alpha)% CI
+  fits$up <- qnorm(1 - alpha/2) * SE + fits$ex
+  fits$lo <- qnorm(alpha/2) * SE + fits$ex
+  return(fits)
+}
+
+#demean data
+# y_bar <- apply(all.clim.dat, 1, mean, na.rm = TRUE)
+# dat <- all.clim.dat - y_bar
+# rownames(dat) <- rownames(all.clim.dat)
+
+dat <- scale(log.rec.mat)
+
+head(log.rec.mat)
+
+log.rec.mat.std <- log.rec.mat
+
+i <- 1
+for(i in 1:nrow(log.rec.mat)) {
+  log.rec.mat.std[i,] <- (log.rec.mat[i,]-mean(log.rec.mat[i,], na.rm=TRUE))/sd(log.rec.mat[i,], na.rm=TRUE)  
+}
+#Double checking
+apply(log.rec.mat.std, 1, mean, na.rm=TRUE)
+apply(log.rec.mat.std, 1, sd, na.rm=TRUE)
+dat <- log.rec.mat.std
+#plot demeaned data
+
+driv <- rownames(log.rec.mat)
+#clr <- c("brown", "blue", "darkgreen", "darkred", "purple")
+cnt <- 1
+par(mfrow = c(N_ts, 4), mar = c(1, 1,1.5,1), omi = c(0.1, 
+                                                       0.1, 0.1, 0.1))
+for (i in driv) {
+  plot(dat[i, ], xlab = "", ylab = "", bty = "L", 
+       xaxt = "n", pch = 16, col = clr[cnt], type = "b")
+  axis(1,  (0:dim(log.rec.mat)[2]) + 1, yr_frst + 0:dim(log.rec.mat)[2])
+  title(i)
+  cnt <- cnt + 1
+}
+
+#edit below here (and above!)
+
+## get model fits & CI's
+mod_fit <- get_DFA_fits(model.1)
+## plot the fits
+par(mfrow = c(3, 2), mar = c(1, 1, 1, 1), omi = c(0, 
+                                                       0, 0, 0))
+for (i in 1:N_ts) {
+  up <- mod_fit$up[i, ]
+  mn <- mod_fit$ex[i, ]
+  lo <- mod_fit$lo[i, ]
+  plot(w_ts, mn, xlab = "", xaxt = "n", type = "n", 
+       cex.lab = 1.2, ylim = c(min(lo), max(up)))
+  axis(1,  (0:dim(log.rec.mat)[2]) + 1, yr_frst + 0:dim(log.rec.mat)[2])
+  points(w_ts, dat[i, ], pch = 16, col = clr[i])
+  lines(w_ts, up, col = "darkgray")
+  lines(w_ts, mn, col = "black", lwd = 2)
+  lines(w_ts, lo, col = "darkgray")
+}
 
 
 
