@@ -30,8 +30,16 @@ ggplot(pol.trawl.dat, aes(YEAR, NUMCPUE, colour=as.factor(STRATUM))) + geom_line
 ggplot(pol.trawl.dat, aes(YEAR, NUMCPUE)) + geom_point() + theme(legend.position = "none") +
   geom_smooth() + facet_wrap(~STRATUM)
 
-nonzero_pollock <- pol.trawl.dat[which(pol.trawl.dat$NUMCPUE>1),]
+
 #are there -9999 in the data? Don't seem to be for pollock, maybe for other species???
 
-ggplot(nonzero_pollock, aes(YEAR, NUMCPUE)) + geom_point() + theme(legend.position = "none") +
+pol.trawl.dat$logCPUE <- log(pol.trawl.dat$NUMCPUE + 1)
+
+ggplot(pol.trawl.dat, aes(YEAR, logCPUE)) + geom_point() + theme(legend.position = "none") +
   geom_smooth() + facet_wrap(~STRATUM)
+
+ggplot(pol.trawl.dat, aes(logCPUE)) + geom_histogram() + facet_wrap(~YEAR, scales="free") #little better to my eye
+
+pol.trawl.dat$fourthrootCPUE <- pol.trawl.dat$NUMCPUE^(1/4)
+
+ggplot(pol.trawl.dat, aes(fourthrootCPUE)) + geom_histogram() + facet_wrap(~YEAR, scales="free") #long tail
