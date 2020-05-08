@@ -14,11 +14,11 @@ library(mgcv)
 
 sel.trawl.dat <- read.csv("data/select_trawl_dat.csv", row.names = 1)
 
-sel.trawl.dat$YEAR <- as.ordered(sel.trawl.dat$YEAR) #set year as ordered factor
 
-
-
-
+#going to need to get into a wider database I think
+#try w just pollock first
+onlysmoothers <- gam(logCPUE ~ s(YEAR) + ts(LATITUDE, LONGITUDE), 
+            data=sel.trawl.dat[which(sel.trawl.dat$SCIENTIFIC=="Gadus chalcogrammus"),])
 
 
 
