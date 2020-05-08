@@ -268,3 +268,26 @@ tnrc.trawl.dat$fourthrootCPUE <- tnrc.trawl.dat$WTCPUE^(1/4)
 ggplot(tnrc.trawl.dat, aes(fourthrootCPUE)) + geom_histogram() + facet_wrap(~YEAR, scales="free") #long tail
 
 
+
+
+#gather up all sps=============
+
+
+sel.trawl.dat <- trawl.data[which(trawl.data$SCIENTIFIC=="Gadus chalcogrammus"|trawl.data$SCIENTIFIC=="Pleuronectes quadrituberculatus"|
+                                  trawl.data$SCIENTIFIC=="Chionoecetes opilio"|trawl.data$SCIENTIFIC=="Atheresthes stomias"|
+                                    trawl.data$SCIENTIFIC=="Hippoglossoides elassodon"|trawl.data$SCIENTIFIC=="Gadus macrocephalus"|
+                                    trawl.data$SCIENTIFIC=="Lepidopsetta polyxystra"|trawl.data$SCIENTIFIC=="Lepidopsetta sp."|
+                                   trawl.data$SCIENTIFIC=="Limanda aspera"|trawl.data$SCIENTIFIC=="Hippoglossus stenolepis"|
+                                    trawl.data$SCIENTIFIC=="Chionoecetes bairdi"),]
+
+sel.trawl.dat$logCPUE <- log(sel.trawl.dat$WTCPUE + 1)
+
+#write.csv(sel.trawl.dat, "data/select_trawl_dat.csv")
+
+
+
+
+
+
+
+
