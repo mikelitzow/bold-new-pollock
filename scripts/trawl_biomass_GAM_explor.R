@@ -14,6 +14,7 @@ library(mgcv)
 
 sel.trawl.dat <- read.csv("data/select_trawl_dat.csv", row.names = 1)
 
+sel.trawl.dat$YEAR_factor <- as.factor(sel.trawl.dat$YEAR)
 
 #going to need to get into a wider database I think to get other sps in
 #and I need to only use early years!
@@ -23,20 +24,20 @@ sel.trawl.dat <- read.csv("data/select_trawl_dat.csv", row.names = 1)
 
 #proof of concept gams=====
 
-yr_int <- gam(logCPUE ~ YEAR + s(LATITUDE, LONGITUDE, YEAR), 
+yr_int <- gam(logCPUE ~ YEAR_factor + s(LATITUDE, LONGITUDE, YEAR), 
                       data=sel.trawl.dat[which(sel.trawl.dat$SCIENTIFIC=="Gadus chalcogrammus"),])
 summary(yr_int)
 plot(yr_int)
 vis.gam(yr_int, view=c("LATITUDE","LONGITUDE"))
 #look at predict.gam
 
-yr_botT_int <- gam(logCPUE ~ YEAR + BOT_TEMP + s(LATITUDE, LONGITUDE, YEAR), 
+yr_botT_int <- gam(logCPUE ~ YEAR_factor + BOT_TEMP + s(LATITUDE, LONGITUDE, YEAR), 
               data=sel.trawl.dat[which(sel.trawl.dat$SCIENTIFIC=="Gadus chalcogrammus"),])
 summary(yr_botT_int)
 plot(yr_botT_int)
 vis.gam(yr_botT_int, view=c("LATITUDE","LONGITUDE"))
 
-yr_botTD_int <- gam(logCPUE ~ YEAR + BOT_TEMP + BOT_DEPTH + s(LATITUDE, LONGITUDE, YEAR), 
+yr_botTD_int <- gam(logCPUE ~ YEAR_factor + BOT_TEMP + BOT_DEPTH + s(LATITUDE, LONGITUDE, YEAR), 
                    data=sel.trawl.dat[which(sel.trawl.dat$SCIENTIFIC=="Gadus chalcogrammus"),])
 summary(yr_botTD_int)
 plot(yr_botTD_int)
