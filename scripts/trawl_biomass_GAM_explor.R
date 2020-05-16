@@ -97,13 +97,22 @@ vis.gam(yr_botTD_int, view=c("LATITUDE","LONGITUDE"))
 
 
 #should likely be a tensor product
-
+library(mgcViz)
 ti_base_mod <- gam(logCPUE_Gadus_chalcogrammus ~ s(YEAR) + s(LATITUDE, LONGITUDE) +
                      ti(LATITUDE, LONGITUDE, YEAR, d=c(2,1)), method="REML", 
                    data=early_wide)
 plot(ti_base_mod, scheme = 2)
+ti_p <- getViz(ti_base_mod)
 
+plot(sm(ti_p, 2))
+print(plot(ti_p, allTerms = T), pages = 1)
+plotRGL(sm(ti_p, 3), fix = c("YEAR" = 2000), residuals = TRUE)
 
+par(mfrow=c(2,2))
+plot(sm(ti_p, 3), fix = c("YEAR" = 2000))
+plot(sm(ti_p, 3), fix = c("YEAR" = 2001))
+plot(sm(ti_p, 3), fix = c("YEAR" = 2002))
+plot(sm(ti_p, 3), fix = c("YEAR" = 2003))
 
 
 #now with other sps===========
