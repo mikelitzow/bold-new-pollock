@@ -68,6 +68,10 @@ early_wide <- early_wide %>% rename(WTCPUE_Chionoecetes_bairdi = "WTCPUE_Chionoe
   logCPUE_Pleuronectes_quadrituberculatus = "logCPUE_Pleuronectes quadrituberculatus" ,
   logCPUE_Lepidopsetta_polyxystra = "logCPUE_Lepidopsetta polyxystra") 
 
+#this results in a lot of NAs that should be zero, so I will enter zeros
+
+early_wide[,14:46][is.na(early_wide[,14:46])] <- 0 #WAIT ZERO OR NO?
+
 #try w just pollock first
 
 #proof of concept gams=====
@@ -92,19 +96,31 @@ plot(yr_botTD_int)
 vis.gam(yr_botTD_int, view=c("LATITUDE","LONGITUDE"))
 
 
+#should likely be a tensor product
+
+ti_base_mod <- gam(logCPUE_Gadus_chalcogrammus ~ s(YEAR) + s(LATITUDE, LONGITUDE) +
+                     ti(LATITUDE, LONGITUDE, YEAR, d=c(2,1)), method="REML", 
+                   data=early_wide)
+plot(ti_base_mod, scheme = 2)
+
+
+
+
 #now with other sps===========
 
-spscovar1 <- gam(logCPUE_Gadus chalcogrammus ~ YEAR_factor + 
-"logCPUE_Chionoecetes bairdi" + "logCPUE_Atheresthes stomias" +           
-                "logCPUE_Hippoglossus stenolepis" + "logCPUE_Limanda aspera" +             
-                 "logCPUE_Lepidopsetta sp." + "logCPUE_Chionoecetes opilio" +            
-                 "logCPUE_Gadus macrocephalus" + "logCPUE_Hippoglossoides elassodon" +    
-                 "logCPUE_Pleuronectes quadrituberculatus" + "logCPUE_Lepidopsetta polyxystra" +   
+spscovar1 <- gam(logCPUE_Gadus_chalcogrammus ~ YEAR_factor + 
+logCPUE_Chionoecetes_bairdi + logCPUE_Atheresthes_stomias +           
+                logCPUE_Hippoglossus_stenolepis + logCPUE_Limanda_aspera +             
+                 logCPUE_Lepidopsetta_sp + logCPUE_Chionoecetes_opilio +            
+                 logCPUE_Gadus_macrocephalus + logCPUE_Hippoglossoides_elassodon +    
+                 logCPUE_Pleuronectes_quadrituberculatus + logCPUE_Lepidopsetta_polyxystra +   
                    s(LATITUDE, LONGITUDE, YEAR), 
               data=early_wide)
 summary(spscovar1)
-plot(spscovar1)
+plot.gam(spscovar1)
 vis.gam(spscovar1, view=c("LATITUDE","LONGITUDE"))
+vis.gam(spscovar1,view=c("LATITUDE","LONGITUDE"), cond=list(YEAR=1990) )
+vis.gam(spscovar1,view=c("LATITUDE","LONGITUDE"), cond=list(YEAR=2010) )
 
 spscovar1 <- gam("logCPUE_Gadus chalcogrammus" ~ YEAR_factor + 
                   # "logCPUE_Chionoecetes bairdi" + "logCPUE_Atheresthes stomias" +           
