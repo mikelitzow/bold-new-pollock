@@ -9,6 +9,8 @@ library(ggplot2)
 library(tidyverse)
 library(corrplot)
 library(mgcv)
+library(nlme)
+library(mgcViz)
 
 
 
@@ -97,11 +99,12 @@ vis.gam(yr_botTD_int, view=c("LATITUDE","LONGITUDE"))
 
 
 #should likely be a tensor product
-library(mgcViz)
+
 ti_base_mod <- gam(logCPUE_Gadus_chalcogrammus ~ s(YEAR) + s(LATITUDE, LONGITUDE) +
                      ti(LATITUDE, LONGITUDE, YEAR, d=c(2,1)), 
                    data=early_wide)
 plot(ti_base_mod, scheme = 2)
+gam.check(ti_base_mod)
 ti_p <- getViz(ti_base_mod)
 
 plot(sm(ti_p, 2))
@@ -132,6 +135,7 @@ logCPUE_Chionoecetes_bairdi + logCPUE_Atheresthes_stomias +
               data=early_wide)
 summary(spscovar1)
 plot.gam(spscovar1)
+gam.check(spscovar1)
 vis.gam(spscovar1, view=c("LATITUDE","LONGITUDE"))
 vis.gam(spscovar1,view=c("LATITUDE","LONGITUDE"), cond=list(YEAR=1990) )
 vis.gam(spscovar1,view=c("LATITUDE","LONGITUDE"), cond=list(YEAR=2010) )
@@ -144,3 +148,15 @@ spscovar1 <- gam("logCPUE_Gadus chalcogrammus" ~ YEAR_factor +
                    # "logCPUE_Pleuronectes quadrituberculatus" + "logCPUE_Lepidopsetta polyxystra" +   
                    ti(LATITUDE, LONGITUDE, YEAR, d=c(2,1)), 
                  data=early_wide)
+
+#what about multivariate?
+#I think I need to use the long version of the dataset again
+tiny_dat <- early_dat[which(early_dat$SCIENTIFIC=="Gadus chalcogrammus"|early_dat$SCIENTIFIC=="Chionoecetes opilio"),]
+
+mmod <- gam(logCPUE ~ s(YEAR, by=SCIENTIFIC) +  s(LATITUDE, LONGITUDE, by=SCIENTIFIC) +
+                   ti(LATITUDE, LONGITUDE, YEAR, by=SCIENTIFIC), 
+                 data=tiny_dat)
+summary(mmod)
+plot(mmod)
+gam.check(mmod)
+
