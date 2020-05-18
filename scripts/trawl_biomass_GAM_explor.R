@@ -99,7 +99,7 @@ vis.gam(yr_botTD_int, view=c("LATITUDE","LONGITUDE"))
 #should likely be a tensor product
 library(mgcViz)
 ti_base_mod <- gam(logCPUE_Gadus_chalcogrammus ~ s(YEAR) + s(LATITUDE, LONGITUDE) +
-                     ti(LATITUDE, LONGITUDE, YEAR, d=c(2,1)), method="REML", 
+                     ti(LATITUDE, LONGITUDE, YEAR, d=c(2,1)), 
                    data=early_wide)
 plot(ti_base_mod, scheme = 2)
 ti_p <- getViz(ti_base_mod)
@@ -114,16 +114,21 @@ plot(sm(ti_p, 3), fix = c("YEAR" = 2001))
 plot(sm(ti_p, 3), fix = c("YEAR" = 2002))
 plot(sm(ti_p, 3), fix = c("YEAR" = 2003))
 
+plot(sm(ti_p, 3), fix = c("YEAR" = 1982))
+plot(sm(ti_p, 3), fix = c("YEAR" = 2013))
+
+
+
 
 #now with other sps===========
-
+#as covariates
 spscovar1 <- gam(logCPUE_Gadus_chalcogrammus ~ YEAR_factor + 
 logCPUE_Chionoecetes_bairdi + logCPUE_Atheresthes_stomias +           
                 logCPUE_Hippoglossus_stenolepis + logCPUE_Limanda_aspera +             
                  logCPUE_Lepidopsetta_sp + logCPUE_Chionoecetes_opilio +            
                  logCPUE_Gadus_macrocephalus + logCPUE_Hippoglossoides_elassodon +    
                  logCPUE_Pleuronectes_quadrituberculatus + logCPUE_Lepidopsetta_polyxystra +   
-                   s(LATITUDE, LONGITUDE, YEAR), 
+                   ti(LATITUDE, LONGITUDE, YEAR, d=c(2,1)), 
               data=early_wide)
 summary(spscovar1)
 plot.gam(spscovar1)
@@ -137,5 +142,5 @@ spscovar1 <- gam("logCPUE_Gadus chalcogrammus" ~ YEAR_factor +
                    # "logCPUE_Lepidopsetta sp." + "logCPUE_Chionoecetes opilio" +            
                    # "logCPUE_Gadus macrocephalus" + "logCPUE_Hippoglossoides elassodon" +    
                    # "logCPUE_Pleuronectes quadrituberculatus" + "logCPUE_Lepidopsetta polyxystra" +   
-                   s(LATITUDE, LONGITUDE, YEAR), 
+                   ti(LATITUDE, LONGITUDE, YEAR, d=c(2,1)), 
                  data=early_wide)
