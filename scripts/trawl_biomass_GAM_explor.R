@@ -160,3 +160,41 @@ summary(mmod)
 plot(mmod)
 gam.check(mmod)
 
+#try w five species
+#shared vs sps specific?
+#picked somewhat haphazardly pollock, opilio, p cod, arrowtooth, yellowfin sole
+five_dat <- early_dat[which(early_dat$SCIENTIFIC=="Gadus chalcogrammus"|early_dat$SCIENTIFIC=="Chionoecetes opilio"|
+                              early_dat$SCIENTIFIC=="Gadus macrocephalus"|early_dat$SCIENTIFIC=="Atheresthes stomias"|
+                              early_dat$SCIENTIFIC=="Limanda aspera"),]
+
+p1 <- ggplot(five_dat, aes(YEAR, logCPUE))
+p1+ geom_point() + geom_smooth() + facet_wrap(~SCIENTIFIC) 
+
+
+mod_by_sps <- gam(logCPUE ~ SCIENTIFIC + s(YEAR, by=SCIENTIFIC) +  s(LATITUDE, LONGITUDE, by=SCIENTIFIC) +
+              ti(LATITUDE, LONGITUDE, YEAR, by=SCIENTIFIC), 
+            data=five_dat)
+summary(mod_by_sps)
+plot(mod_by_sps)
+gam.check(mod_by_sps)
+
+mod1_by_sps <- gam(logCPUE ~ SCIENTIFIC +# s(YEAR, by=SCIENTIFIC) +  s(LATITUDE, LONGITUDE, by=SCIENTIFIC) +
+                    ti(LATITUDE, LONGITUDE, YEAR, by=SCIENTIFIC), 
+                  data=five_dat)
+summary(mod1_by_sps)
+plot(mod1_by_sps)
+gam.check(mod1_by_sps)
+
+mod_shared <- gam(logCPUE ~ SCIENTIFIC + s(YEAR) +  s(LATITUDE, LONGITUDE) +
+                    ti(LATITUDE, LONGITUDE, YEAR), 
+                  data=five_dat)
+summary(mod_shared)
+plot(mod_shared)
+gam.check(mod_shared)
+
+mod1_shared <- gam(logCPUE ~ SCIENTIFIC + #s(YEAR) +  s(LATITUDE, LONGITUDE) +
+                    ti(LATITUDE, LONGITUDE, YEAR), 
+                  data=five_dat)
+summary(mod1_shared)
+plot(mod1_shared)
+gam.check(mod1_shared)
