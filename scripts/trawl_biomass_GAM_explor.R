@@ -17,6 +17,8 @@ library(mgcViz)
 sel.trawl.dat <- read.csv("data/select_trawl_dat.csv", row.names = 1)
 
 sel.trawl.dat$YEAR_factor <- as.factor(sel.trawl.dat$YEAR)
+sel.trawl.dat$BOT_TEMP[which(sel.trawl.dat$BOT_TEMP=="-9999")]<-NA
+sel.trawl.dat$SURF_TEMP[which(sel.trawl.dat$SURF_TEMP=="-9999")]<-NA
 
 #going to need to get into a wider database I think to get other sps in
 
@@ -121,6 +123,46 @@ plot(sm(ti_p, 3), fix = c("YEAR" = 1982))
 plot(sm(ti_p, 3), fix = c("YEAR" = 2013))
 
 
+#Using temperature not year======
+
+plot(early_wide$YEAR, early_wide$BOT_TEMP)
+plot(early_wide$YEAR, early_wide$SURF_TEMP)
+
+
+ggplot(early_wide, aes(YEAR, BOT_TEMP)) + geom_point()
+
+ti_temp_mod <- gam(logCPUE_Gadus_chalcogrammus ~ s(BOT_TEMP) + ti(LATITUDE, LONGITUDE) +
+                     ti(LATITUDE, LONGITUDE, BOT_TEMP, d=c(2,1)), 
+                   data=early_wide)
+plot(ti_temp_mod, scheme = 2)
+plot(ti_temp_mod)
+gam.check(ti_temp_mod)
+summary(ti_temp_mod)
+
+
+ti_temp_mod2 <- gam(logCPUE_Gadus_chalcogrammus ~ s(BOT_TEMP) + ti(LATITUDE, LONGITUDE), 
+                   data=early_wide)
+plot(ti_temp_mod2, scheme = 2)
+plot(ti_temp_mod2)
+gam.check(ti_temp_mod2)
+summary(ti_temp_mod2)
+
+
+ti_temp_mod3 <- gam(logCPUE_Gadus_chalcogrammus ~ s(YEAR) + s(BOT_TEMP) + ti(LATITUDE, LONGITUDE), 
+                    data=early_wide)
+plot(ti_temp_mod3, scheme = 2)
+plot(ti_temp_mod3)
+gam.check(ti_temp_mod3)
+summary(ti_temp_mod3)
+
+
+ti_temp_mod4 <- gam(logCPUE_Gadus_chalcogrammus ~ s(YEAR) + s(BOT_TEMP) + ti(LATITUDE, LONGITUDE) +
+                      ti(LATITUDE, LONGITUDE, YEAR, d=c(2,1)), 
+                    data=early_wide)
+plot(ti_temp_mod4, scheme = 2)
+plot(ti_temp_mod4)
+gam.check(ti_temp_mod4)
+summary(ti_temp_mod4)
 
 
 #now with other sps===========
@@ -198,3 +240,12 @@ mod1_shared <- gam(logCPUE ~ SCIENTIFIC + #s(YEAR) +  s(LATITUDE, LONGITUDE) +
 summary(mod1_shared)
 plot(mod1_shared)
 gam.check(mod1_shared)
+
+
+#whole thing
+mod_by_sps_full <- gam(logCPUE ~ SCIENTIFIC + s(YEAR, by=SCIENTIFIC) +  s(LATITUDE, LONGITUDE, by=SCIENTIFIC) +
+                    ti(LATITUDE, LONGITUDE, YEAR, by=SCIENTIFIC), 
+                  data=early_dat)
+summary(mod_by_sps)
+plot(mod_by_sps)
+gam.check(mod_by_sps)
