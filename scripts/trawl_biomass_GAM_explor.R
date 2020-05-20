@@ -128,6 +128,10 @@ plot(sm(ti_p, 3), fix = c("YEAR" = 2013))
 plot(early_wide$YEAR, early_wide$BOT_TEMP)
 plot(early_wide$YEAR, early_wide$SURF_TEMP)
 
+plot( early_wide$BOT_TEMP, early_wide$logCPUE_Gadus_chalcogrammus)
+plot( early_wide$BOT_DEPTH, early_wide$logCPUE_Gadus_chalcogrammus)
+plot( early_wide$SURF_TEMP, early_wide$logCPUE_Gadus_chalcogrammus)
+
 
 ggplot(early_wide, aes(YEAR, BOT_TEMP)) + geom_point()
 
@@ -163,6 +167,46 @@ plot(ti_temp_mod4, scheme = 2)
 plot(ti_temp_mod4)
 gam.check(ti_temp_mod4)
 summary(ti_temp_mod4)
+
+
+ti_temp_mod5 <- gam(logCPUE_Gadus_chalcogrammus ~ s(YEAR) + s(BOT_TEMP) + s(BOT_DEPTH) +
+                      ti(LATITUDE, LONGITUDE) +
+                      ti(LATITUDE, LONGITUDE, YEAR, d=c(2,1)), 
+                    data=early_wide)
+plot(ti_temp_mod5, scheme = 2)
+plot(ti_temp_mod5)
+gam.check(ti_temp_mod5)
+summary(ti_temp_mod5)
+
+AIC(ti_temp_mod, ti_temp_mod2, ti_temp_mod3, ti_temp_mod4, ti_temp_mod5 )
+
+
+#add climate variables========
+# load environmental data
+climdat <- read.csv("data/climate data.csv")
+
+wide_join <- left_join(early_wide, climdat, by=c("YEAR" = "year"))
+
+p2 <- ggplot(wide_join, aes(summer.cold.pool.extent, logCPUE_Gadus_chalcogrammus))
+p2 + geom_smooth() + geom_point()
+
+p3 <- ggplot(wide_join, aes(AO.jfm, logCPUE_Gadus_chalcogrammus))
+p3 + geom_smooth() + geom_point()
+
+p4 <- ggplot(wide_join, aes(south.sst.ndjfm, logCPUE_Gadus_chalcogrammus))
+p4 + geom_smooth() + geom_point()
+
+p5 <- ggplot(wide_join, aes(south.sst.amj, logCPUE_Gadus_chalcogrammus))
+p5 + geom_smooth() + geom_point()
+
+ti_temp_mod6 <- gam(logCPUE_Gadus_chalcogrammus ~ s(summer.cold.pool.extent) + s(YEAR) + s(BOT_TEMP) + s(BOT_DEPTH) +
+                      ti(LATITUDE, LONGITUDE) +
+                      ti(LATITUDE, LONGITUDE, YEAR, d=c(2,1)), 
+                    data=wide_join)
+plot(ti_temp_mod6)
+gam.check(ti_temp_mod6)
+summary(ti_temp_mod6)
+
 
 
 #now with other sps===========
