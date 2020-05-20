@@ -76,32 +76,7 @@ early_wide <- early_wide %>% rename(WTCPUE_Chionoecetes_bairdi = "WTCPUE_Chionoe
 
 early_wide[,14:46][is.na(early_wide[,14:46])] <- 0 #WAIT ZERO OR NO?
 
-#try w just pollock first
-
-#proof of concept gams=====
-#confirm whether these should be te() or t2() or s()
-yr_int <- gam(logCPUE ~ YEAR_factor + s(LATITUDE, LONGITUDE, YEAR), 
-                      data=sel.trawl.dat[which(sel.trawl.dat$SCIENTIFIC=="Gadus chalcogrammus"),])
-summary(yr_int)
-plot(yr_int)
-vis.gam(yr_int, view=c("LATITUDE","LONGITUDE"))
-#look at predict.gam
-
-yr_botT_int <- gam(logCPUE ~ YEAR_factor + BOT_TEMP + s(LATITUDE, LONGITUDE, YEAR), 
-              data=sel.trawl.dat[which(sel.trawl.dat$SCIENTIFIC=="Gadus chalcogrammus"),])
-summary(yr_botT_int)
-plot(yr_botT_int)
-vis.gam(yr_botT_int, view=c("LATITUDE","LONGITUDE"))
-
-yr_botTD_int <- gam(logCPUE ~ YEAR_factor + BOT_TEMP + BOT_DEPTH + s(LATITUDE, LONGITUDE, YEAR), 
-                   data=sel.trawl.dat[which(sel.trawl.dat$SCIENTIFIC=="Gadus chalcogrammus"),])
-summary(yr_botTD_int)
-plot(yr_botTD_int)
-vis.gam(yr_botTD_int, view=c("LATITUDE","LONGITUDE"))
-
-
-#should likely be a tensor product
-
+#a base model====
 ti_base_mod <- gam(logCPUE_Gadus_chalcogrammus ~ s(YEAR) + s(LATITUDE, LONGITUDE) +
                      ti(LATITUDE, LONGITUDE, YEAR, d=c(2,1)), 
                    data=early_wide)
@@ -199,6 +174,7 @@ p4 + geom_smooth() + geom_point()
 p5 <- ggplot(wide_join, aes(south.sst.amj, logCPUE_Gadus_chalcogrammus))
 p5 + geom_smooth() + geom_point()
 
+#will adding these other climate covariates work? Yes
 ti_temp_mod6 <- gam(logCPUE_Gadus_chalcogrammus ~ s(summer.cold.pool.extent) + s(YEAR) + s(BOT_TEMP) + s(BOT_DEPTH) +
                       ti(LATITUDE, LONGITUDE) +
                       ti(LATITUDE, LONGITUDE, YEAR, d=c(2,1)), 
