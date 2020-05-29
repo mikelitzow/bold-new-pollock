@@ -98,6 +98,240 @@ plot(sm(ti_p, 3), fix = c("YEAR" = 1982))
 plot(sm(ti_p, 3), fix = c("YEAR" = 2013))
 
 
+#find 'global' best model======================================================================================
+
+
+
+#start small------
+
+small1 <- gam(logCPUE_Gadus_chalcogrammus ~ factor(YEAR) + s(BOT_TEMP), 
+               data=early_wide)
+summary(small1 )
+plot(small1 )
+gam.check(small1 ) #good on k, heteros?
+#saveRDS(small1, "mod_output_yr_stemp.rds")
+
+small2 <- gam(logCPUE_Gadus_chalcogrammus ~ factor(YEAR) + s(BOT_TEMP) +
+                t2(LATITUDE, LONGITUDE), 
+              data=early_wide)
+summary(small2 ) #big increase in dev explained
+plot(small2 )
+gam.check(small2 ) #k too low
+# small2k <- gam(logCPUE_Gadus_chalcogrammus ~ factor(YEAR) + s(BOT_TEMP) +
+#                 t2(LATITUDE, LONGITUDE, k=25), 
+#               data=early_wide)
+# gam.check(small2k) #good k, bad Hessian
+small2k2 <- gam(logCPUE_Gadus_chalcogrammus ~ factor(YEAR) + s(BOT_TEMP) +
+                 t2(LATITUDE, LONGITUDE, k=20), 
+               data=early_wide)
+gam.check(small2k2) #GOOD
+plot(small2k2)
+# small2k3 <- gam(logCPUE_Gadus_chalcogrammus ~ factor(YEAR) + s(BOT_TEMP) +
+#                   t2(LATITUDE, LONGITUDE, k=15), 
+#                 data=early_wide)
+# gam.check(small2k3) #k too low
+#saveRDS(small2k2, "mod_output_yr_stemp_t2lat-long.rds")
+
+small3 <- gam(logCPUE_Gadus_chalcogrammus ~ factor(YEAR) + s(BOT_TEMP) +
+                t2(LATITUDE, LONGITUDE) + t2(LATITUDE, LONGITUDE, by=factor(YEAR)), 
+              data=early_wide)
+
+summary(small3 )
+plot(small3 )
+gam.check(small3 ) #k too low, not pos defin
+
+small3k <- gam(logCPUE_Gadus_chalcogrammus ~ factor(YEAR) + s(BOT_TEMP) +
+                t2(LATITUDE, LONGITUDE, k=20) + t2(LATITUDE, LONGITUDE, by=factor(YEAR), k=20), 
+              data=early_wide) # return to this, too big
+
+sm3 <- getViz(small3)
+
+plot(sm(sm3, 3), fix = c("YEAR" = 2000))
+plot(sm(sm3, 3), fix = c("YEAR" = 2001))
+plot(sm(sm3, 3), fix = c("YEAR" = 2002))
+plot(sm(sm3, 3), fix = c("YEAR" = 2003))
+
+plot(sm(sm3, 3), fix = c("YEAR" = 1982))
+plot(sm(sm3, 3), fix = c("YEAR" = 2013))
+
+small4 <- gam(logCPUE_Gadus_chalcogrammus ~ factor(YEAR) + s(BOT_TEMP) +
+                t2(LATITUDE, LONGITUDE) + t2(LATITUDE, LONGITUDE, BOT_TEMP), 
+              data=early_wide)
+
+summary(small4 )
+plot(small4 )
+gam.check(small4 ) #k too low
+# small4k <- gam(logCPUE_Gadus_chalcogrammus ~ factor(YEAR) + s(BOT_TEMP) +
+#                 t2(LATITUDE, LONGITUDE, k=20) + t2(LATITUDE, LONGITUDE, BOT_TEMP), 
+#               data=early_wide)
+# gam.check(small4k) #good k, bad hessian
+# small4k2 <- gam(logCPUE_Gadus_chalcogrammus ~ factor(YEAR) + s(BOT_TEMP) +
+#                  t2(LATITUDE, LONGITUDE, k=15) + t2(LATITUDE, LONGITUDE, BOT_TEMP), 
+#                data=early_wide)
+# gam.check(small4k2) #k too low
+# small4k3 <- gam(logCPUE_Gadus_chalcogrammus ~ factor(YEAR) + s(BOT_TEMP) +
+#                   t2(LATITUDE, LONGITUDE, k=17) + t2(LATITUDE, LONGITUDE, BOT_TEMP), 
+#                 data=early_wide)
+# gam.check(small4k3) #k too low
+small4k4 <- gam(logCPUE_Gadus_chalcogrammus ~ factor(YEAR) + s(BOT_TEMP) +
+                  t2(LATITUDE, LONGITUDE, k=18) + t2(LATITUDE, LONGITUDE, BOT_TEMP), 
+                data=early_wide)
+gam.check(small4k4) #GOOOOD!
+#saveRDS(small4k4, "mod_output_yr_stemp_t2lat-long_t2lat-long-temp.rds")
+
+
+small4.5 <- gam(logCPUE_Gadus_chalcogrammus ~ factor(YEAR) + s(BOT_TEMP) +
+                # t2(LATITUDE, LONGITUDE) + 
+                  t2(LATITUDE, LONGITUDE, BOT_TEMP), 
+              data=early_wide)
+summary(small4.5 )
+plot(small4.5 )
+gam.check(small4.5 ) #k too low
+# small4.5k <- gam(logCPUE_Gadus_chalcogrammus ~ factor(YEAR) + s(BOT_TEMP) +
+#                   # t2(LATITUDE, LONGITUDE) + 
+#                   t2(LATITUDE, LONGITUDE, BOT_TEMP, k=15), 
+#                 data=early_wide)
+# gam.check(small4.5k) #bad hessian, good k
+# small4.5k2 <- gam(logCPUE_Gadus_chalcogrammus ~ factor(YEAR) + s(BOT_TEMP) +
+#                    # t2(LATITUDE, LONGITUDE) + 
+#                    t2(LATITUDE, LONGITUDE, BOT_TEMP, k=10), 
+#                  data=early_wide)
+# gam.check(small4.5k2) #k too low
+# small4.5k3 <- gam(logCPUE_Gadus_chalcogrammus ~ factor(YEAR) + s(BOT_TEMP) +
+#                     # t2(LATITUDE, LONGITUDE) + 
+#                     t2(LATITUDE, LONGITUDE, BOT_TEMP, k=12), 
+#                   data=early_wide)
+# gam.check(small4.5k3) #bad hessian, good k
+small4.5k4 <- gam(logCPUE_Gadus_chalcogrammus ~ factor(YEAR) + s(BOT_TEMP) +
+                    # t2(LATITUDE, LONGITUDE) + 
+                    t2(LATITUDE, LONGITUDE, BOT_TEMP, k=11), 
+                  data=early_wide)
+gam.check(small4.5k4) #GOOD
+#saveRDS(small4.5k, "mod_output_yr_stemp_t2lat-long-temp.rds")
+
+small4.6 <- gam(logCPUE_Gadus_chalcogrammus ~ factor(YEAR) + BOT_TEMP +
+                  # t2(LATITUDE, LONGITUDE) + 
+                  t2(LATITUDE, LONGITUDE, BOT_TEMP), 
+                data=early_wide)
+summary(small4.6 )
+plot(small4.6 )
+gam.check(small4.6 ) #k is too low
+# small4.6k <- gam(logCPUE_Gadus_chalcogrammus ~ factor(YEAR) + BOT_TEMP +
+#                   # t2(LATITUDE, LONGITUDE) + 
+#                   t2(LATITUDE, LONGITUDE, BOT_TEMP, k=11), 
+#                 data=early_wide)
+# gam.check(small4.6k) #k too low and bad Hessian
+small4.6k2 <- gam(logCPUE_Gadus_chalcogrammus ~ factor(YEAR) + BOT_TEMP +
+                   # t2(LATITUDE, LONGITUDE) + 
+                   t2(LATITUDE, LONGITUDE, BOT_TEMP, k=13), 
+                 data=early_wide)
+gam.check(small4.6k2) #GOOD
+#saveRDS(small4.6k2, "mod_output_yr_temp_t2lat-long-temp.rds")
+
+
+AIC(small1, small2, small3, small4) #small 3 by far best AIC, small 4 next best
+
+E1 <- resid(small3, type="pearson")
+F1 <- fitted(small3)
+plot(F1, E1)
+
+small5 <- gam(logCPUE_Gadus_chalcogrammus ~ factor(YEAR) + s(BOT_TEMP) +
+                #t2(LATITUDE, LONGITUDE, k=25) + 
+                t2(LATITUDE, LONGITUDE, by=factor(YEAR)), 
+              data=early_wide)
+
+summary(small5 )
+plot(small5 )
+gam.check(small5 ) 
+
+
+#small but ti====
+
+
+small2ti <- gam(logCPUE_Gadus_chalcogrammus ~ factor(YEAR) + s(BOT_TEMP) +
+                ti(LATITUDE, LONGITUDE), 
+              data=early_wide)
+
+summary(small2ti ) #
+plot(small2ti )
+gam.check(small2ti ) 
+# small2tik <- gam(logCPUE_Gadus_chalcogrammus ~ factor(YEAR) + s(BOT_TEMP) +
+#                   ti(LATITUDE, LONGITUDE, k=15), 
+#                 data=early_wide)
+# gam.check(small2tik)#too low
+small2tik2 <- gam(logCPUE_Gadus_chalcogrammus ~ factor(YEAR) + s(BOT_TEMP) +
+                   ti(LATITUDE, LONGITUDE, k=17), 
+                 data=early_wide)
+gam.check(small2tik2) #GOOD
+#saveRDS(small2tik2, "mod_output_yr_stemp_tilat-long.rds")
+
+small3ti <- gam(logCPUE_Gadus_chalcogrammus ~ factor(YEAR) + s(BOT_TEMP) +
+                ti(LATITUDE, LONGITUDE) + ti(LATITUDE, LONGITUDE, by=factor(YEAR)), 
+              data=early_wide)
+
+summary(small3ti )
+plot(small3ti )
+gam.check(small3ti ) 
+
+
+small4ti <- gam(logCPUE_Gadus_chalcogrammus ~ factor(YEAR) + s(BOT_TEMP) +
+                ti(LATITUDE, LONGITUDE) + ti(LATITUDE, LONGITUDE, BOT_TEMP), 
+              data=early_wide)
+
+summary(small4ti )
+plot(small4ti )
+gam.check(small4ti ) #k too low
+small4tik <- gam(logCPUE_Gadus_chalcogrammus ~ factor(YEAR) + s(BOT_TEMP) +
+                  ti(LATITUDE, LONGITUDE, k=17) + ti(LATITUDE, LONGITUDE, BOT_TEMP), 
+                data=early_wide)
+gam.check(small4tik) #GOOD
+# small4tik2 <- gam(logCPUE_Gadus_chalcogrammus ~ factor(YEAR) + s(BOT_TEMP) +
+#                    ti(LATITUDE, LONGITUDE, k=15) + ti(LATITUDE, LONGITUDE, BOT_TEMP), 
+#                  data=early_wide)
+# gam.check(small4tik2) #k too low
+#saveRDS(small4tik, "mod_output_yr_temp_tilat-long_tilat-long-temp.rds")
+
+small4.5ti <- gam(logCPUE_Gadus_chalcogrammus ~ factor(YEAR) + s(BOT_TEMP) +
+                  ti(LATITUDE, LONGITUDE, BOT_TEMP), 
+                data=early_wide)
+
+summary(small4.5ti )
+plot(small4.5ti )
+gam.check(small4.5ti )
+small4.5tik <- gam(logCPUE_Gadus_chalcogrammus ~ factor(YEAR) + s(BOT_TEMP) +
+                    ti(LATITUDE, LONGITUDE, BOT_TEMP, k=17), 
+                  data=early_wide)
+gam.check(small4.5tik) #GOOD
+#saveRDS(small4.5tik, "mod_output_yr_stemp_tilat-long-temp.rds")
+
+small4.6ti <- gam(logCPUE_Gadus_chalcogrammus ~ factor(YEAR) + BOT_TEMP +
+                  ti(LATITUDE, LONGITUDE, BOT_TEMP), 
+                data=early_wide)
+
+summary(small4.6ti )
+plot(small4.6ti )
+gam.check(small4.6ti ) #k is too low
+small4.6tik <- gam(logCPUE_Gadus_chalcogrammus ~ factor(YEAR) + BOT_TEMP +
+                    ti(LATITUDE, LONGITUDE, BOT_TEMP, k=17), 
+                  data=early_wide)
+gam.check(small4.6tik) #GOOD BUT CRAZY SLOW
+#saveRDS(small4.6tik, "mod_output_yr_temp_tilat-long-temp.rds")
+
+small5ti <- gam(logCPUE_Gadus_chalcogrammus ~ factor(YEAR) + s(BOT_TEMP) +
+                ti(LATITUDE, LONGITUDE, by=factor(YEAR)), 
+              data=early_wide)
+
+summary(small5ti )
+plot(small5ti )
+gam.check(small5ti ) 
+
+AIC(small1, small2ti, small4.6ti, small3ti, small4ti, small4.5ti, small5ti,
+    small2, small3, small4, small4.5, small4.6, small5)
+
+#loop through species=======================================
+
+#==============================================================================================================
+
 #Using temperature not year======
 
 plot(early_wide$YEAR, early_wide$BOT_TEMP)
@@ -110,50 +344,6 @@ plot( early_wide$SURF_TEMP, early_wide$logCPUE_Gadus_chalcogrammus)
 
 ggplot(early_wide, aes(YEAR, BOT_TEMP)) + geom_point()
 
-ti_temp_mod <- gam(logCPUE_Gadus_chalcogrammus ~ s(BOT_TEMP) + ti(LATITUDE, LONGITUDE) +
-                     ti(LATITUDE, LONGITUDE, BOT_TEMP, d=c(2,1)), 
-                   data=early_wide)
-plot(ti_temp_mod, scheme = 2)
-plot(ti_temp_mod)
-gam.check(ti_temp_mod)
-summary(ti_temp_mod)
-
-
-ti_temp_mod2 <- gam(logCPUE_Gadus_chalcogrammus ~ s(BOT_TEMP) + ti(LATITUDE, LONGITUDE), 
-                   data=early_wide)
-plot(ti_temp_mod2, scheme = 2)
-plot(ti_temp_mod2)
-gam.check(ti_temp_mod2)
-summary(ti_temp_mod2)
-
-
-ti_temp_mod3 <- gam(logCPUE_Gadus_chalcogrammus ~ s(YEAR) + s(BOT_TEMP) + ti(LATITUDE, LONGITUDE), 
-                    data=early_wide)
-plot(ti_temp_mod3, scheme = 2)
-plot(ti_temp_mod3)
-gam.check(ti_temp_mod3)
-summary(ti_temp_mod3)
-
-
-ti_temp_mod4 <- gam(logCPUE_Gadus_chalcogrammus ~ s(YEAR) + s(BOT_TEMP) + ti(LATITUDE, LONGITUDE) +
-                      ti(LATITUDE, LONGITUDE, YEAR, d=c(2,1)), 
-                    data=early_wide)
-plot(ti_temp_mod4, scheme = 2)
-plot(ti_temp_mod4)
-gam.check(ti_temp_mod4)
-summary(ti_temp_mod4)
-
-
-ti_temp_mod5 <- gam(logCPUE_Gadus_chalcogrammus ~ s(YEAR) + s(BOT_TEMP) + s(BOT_DEPTH) +
-                      ti(LATITUDE, LONGITUDE) +
-                      ti(LATITUDE, LONGITUDE, YEAR, d=c(2,1)), 
-                    data=early_wide)
-plot(ti_temp_mod5, scheme = 2)
-plot(ti_temp_mod5)
-gam.check(ti_temp_mod5)
-summary(ti_temp_mod5)
-
-AIC(ti_temp_mod, ti_temp_mod2, ti_temp_mod3, ti_temp_mod4, ti_temp_mod5 )
 
 
 #add climate variables========
@@ -187,40 +377,7 @@ summary(ti_temp_mod6)
 
 #now with other sps===========
 #as covariates
-spscovar1 <- gam(logCPUE_Gadus_chalcogrammus ~ YEAR_factor + 
-logCPUE_Chionoecetes_bairdi + logCPUE_Atheresthes_stomias +           
-                logCPUE_Hippoglossus_stenolepis + logCPUE_Limanda_aspera +             
-                 logCPUE_Lepidopsetta_sp + logCPUE_Chionoecetes_opilio +            
-                 logCPUE_Gadus_macrocephalus + logCPUE_Hippoglossoides_elassodon +    
-                 logCPUE_Pleuronectes_quadrituberculatus + logCPUE_Lepidopsetta_polyxystra +   
-                   ti(LATITUDE, LONGITUDE, YEAR, d=c(2,1)), 
-              data=early_wide)
-summary(spscovar1)
-plot.gam(spscovar1)
-gam.check(spscovar1)
-vis.gam(spscovar1, view=c("LATITUDE","LONGITUDE"))
-vis.gam(spscovar1,view=c("LATITUDE","LONGITUDE"), cond=list(YEAR=1990) )
-vis.gam(spscovar1,view=c("LATITUDE","LONGITUDE"), cond=list(YEAR=2010) )
 
-spscovar1 <- gam("logCPUE_Gadus chalcogrammus" ~ YEAR_factor + 
-                  # "logCPUE_Chionoecetes bairdi" + "logCPUE_Atheresthes stomias" +           
-                   # "logCPUE_Hippoglossus stenolepis" + "logCPUE_Limanda aspera" +             
-                   # "logCPUE_Lepidopsetta sp." + "logCPUE_Chionoecetes opilio" +            
-                   # "logCPUE_Gadus macrocephalus" + "logCPUE_Hippoglossoides elassodon" +    
-                   # "logCPUE_Pleuronectes quadrituberculatus" + "logCPUE_Lepidopsetta polyxystra" +   
-                   ti(LATITUDE, LONGITUDE, YEAR, d=c(2,1)), 
-                 data=early_wide)
-
-#what about multivariate?
-#I think I need to use the long version of the dataset again
-tiny_dat <- early_dat[which(early_dat$SCIENTIFIC=="Gadus chalcogrammus"|early_dat$SCIENTIFIC=="Chionoecetes opilio"),]
-
-mmod <- gam(logCPUE ~ s(YEAR, by=SCIENTIFIC) +  s(LATITUDE, LONGITUDE, by=SCIENTIFIC) +
-                   ti(LATITUDE, LONGITUDE, YEAR, by=SCIENTIFIC), 
-                 data=tiny_dat)
-summary(mmod)
-plot(mmod)
-gam.check(mmod)
 
 #try w five species
 #shared vs sps specific?
@@ -232,40 +389,3 @@ five_dat <- early_dat[which(early_dat$SCIENTIFIC=="Gadus chalcogrammus"|early_da
 p1 <- ggplot(five_dat, aes(YEAR, logCPUE))
 p1+ geom_point() + geom_smooth() + facet_wrap(~SCIENTIFIC) 
 
-
-mod_by_sps <- gam(logCPUE ~ SCIENTIFIC + s(YEAR, by=SCIENTIFIC) +  s(LATITUDE, LONGITUDE, by=SCIENTIFIC) +
-              ti(LATITUDE, LONGITUDE, YEAR, by=SCIENTIFIC), 
-            data=five_dat)
-summary(mod_by_sps)
-plot(mod_by_sps)
-gam.check(mod_by_sps)
-
-mod1_by_sps <- gam(logCPUE ~ SCIENTIFIC +# s(YEAR, by=SCIENTIFIC) +  s(LATITUDE, LONGITUDE, by=SCIENTIFIC) +
-                    ti(LATITUDE, LONGITUDE, YEAR, by=SCIENTIFIC), 
-                  data=five_dat)
-summary(mod1_by_sps)
-plot(mod1_by_sps)
-gam.check(mod1_by_sps)
-
-mod_shared <- gam(logCPUE ~ SCIENTIFIC + s(YEAR) +  s(LATITUDE, LONGITUDE) +
-                    ti(LATITUDE, LONGITUDE, YEAR), 
-                  data=five_dat)
-summary(mod_shared)
-plot(mod_shared)
-gam.check(mod_shared)
-
-mod1_shared <- gam(logCPUE ~ SCIENTIFIC + #s(YEAR) +  s(LATITUDE, LONGITUDE) +
-                    ti(LATITUDE, LONGITUDE, YEAR), 
-                  data=five_dat)
-summary(mod1_shared)
-plot(mod1_shared)
-gam.check(mod1_shared)
-
-
-#whole thing
-mod_by_sps_full <- gam(logCPUE ~ SCIENTIFIC + s(YEAR, by=SCIENTIFIC) +  s(LATITUDE, LONGITUDE, by=SCIENTIFIC) +
-                    ti(LATITUDE, LONGITUDE, YEAR, by=SCIENTIFIC), 
-                  data=early_dat)
-summary(mod_by_sps)
-plot(mod_by_sps)
-gam.check(mod_by_sps)
