@@ -109,7 +109,7 @@ small1 <- gam(logCPUE_Gadus_chalcogrammus ~ factor(YEAR) + s(BOT_TEMP),
 summary(small1 )
 plot(small1 )
 gam.check(small1 ) #good on k, heteros?
-#saveRDS(small1, "mod_output_yr_stemp.rds")
+#saveRDS(small1, "scripts/GAM_output/mod_output_yr_stemp.rds")
 
 small2 <- gam(logCPUE_Gadus_chalcogrammus ~ factor(YEAR) + s(BOT_TEMP) +
                 t2(LATITUDE, LONGITUDE), 
@@ -130,7 +130,7 @@ plot(small2k2)
 #                   t2(LATITUDE, LONGITUDE, k=15), 
 #                 data=early_wide)
 # gam.check(small2k3) #k too low
-#saveRDS(small2k2, "mod_output_yr_stemp_t2lat-long.rds")
+#saveRDS(small2k2, "scripts/GAM_output/mod_output_yr_stemp_t2lat-long.rds")
 
 small3 <- gam(logCPUE_Gadus_chalcogrammus ~ factor(YEAR) + s(BOT_TEMP) +
                 t2(LATITUDE, LONGITUDE) + t2(LATITUDE, LONGITUDE, by=factor(YEAR)), 
@@ -177,7 +177,7 @@ small4k4 <- gam(logCPUE_Gadus_chalcogrammus ~ factor(YEAR) + s(BOT_TEMP) +
                   t2(LATITUDE, LONGITUDE, k=18) + t2(LATITUDE, LONGITUDE, BOT_TEMP), 
                 data=early_wide)
 gam.check(small4k4) #GOOOOD!
-#saveRDS(small4k4, "mod_output_yr_stemp_t2lat-long_t2lat-long-temp.rds")
+#saveRDS(small4k4, "scripts/GAM_output/mod_output_yr_stemp_t2lat-long_t2lat-long-temp.rds")
 
 
 small4.5 <- gam(logCPUE_Gadus_chalcogrammus ~ factor(YEAR) + s(BOT_TEMP) +
@@ -207,7 +207,7 @@ small4.5k4 <- gam(logCPUE_Gadus_chalcogrammus ~ factor(YEAR) + s(BOT_TEMP) +
                     t2(LATITUDE, LONGITUDE, BOT_TEMP, k=11), 
                   data=early_wide)
 gam.check(small4.5k4) #GOOD
-#saveRDS(small4.5k, "mod_output_yr_stemp_t2lat-long-temp.rds")
+#saveRDS(small4.5k, "scripts/GAM_output/mod_output_yr_stemp_t2lat-long-temp.rds")
 
 small4.6 <- gam(logCPUE_Gadus_chalcogrammus ~ factor(YEAR) + BOT_TEMP +
                   # t2(LATITUDE, LONGITUDE) + 
@@ -226,7 +226,7 @@ small4.6k2 <- gam(logCPUE_Gadus_chalcogrammus ~ factor(YEAR) + BOT_TEMP +
                    t2(LATITUDE, LONGITUDE, BOT_TEMP, k=13), 
                  data=early_wide)
 gam.check(small4.6k2) #GOOD
-#saveRDS(small4.6k2, "mod_output_yr_temp_t2lat-long-temp.rds")
+#saveRDS(small4.6k2, "scripts/GAM_output/mod_output_yr_temp_t2lat-long-temp.rds")
 
 
 AIC(small1, small2, small3, small4) #small 3 by far best AIC, small 4 next best
@@ -263,7 +263,7 @@ small2tik2 <- gam(logCPUE_Gadus_chalcogrammus ~ factor(YEAR) + s(BOT_TEMP) +
                    ti(LATITUDE, LONGITUDE, k=17), 
                  data=early_wide)
 gam.check(small2tik2) #GOOD
-#saveRDS(small2tik2, "mod_output_yr_stemp_tilat-long.rds")
+#saveRDS(small2tik2, "scripts/GAM_output/mod_output_yr_stemp_tilat-long.rds")
 
 small3ti <- gam(logCPUE_Gadus_chalcogrammus ~ factor(YEAR) + s(BOT_TEMP) +
                 ti(LATITUDE, LONGITUDE) + ti(LATITUDE, LONGITUDE, by=factor(YEAR)), 
@@ -289,7 +289,7 @@ gam.check(small4tik) #GOOD
 #                    ti(LATITUDE, LONGITUDE, k=15) + ti(LATITUDE, LONGITUDE, BOT_TEMP), 
 #                  data=early_wide)
 # gam.check(small4tik2) #k too low
-#saveRDS(small4tik, "mod_output_yr_temp_tilat-long_tilat-long-temp.rds")
+#saveRDS(small4tik, "scripts/GAM_output/mod_output_yr_temp_tilat-long_tilat-long-temp.rds")
 
 small4.5ti <- gam(logCPUE_Gadus_chalcogrammus ~ factor(YEAR) + s(BOT_TEMP) +
                   ti(LATITUDE, LONGITUDE, BOT_TEMP), 
@@ -302,7 +302,7 @@ small4.5tik <- gam(logCPUE_Gadus_chalcogrammus ~ factor(YEAR) + s(BOT_TEMP) +
                     ti(LATITUDE, LONGITUDE, BOT_TEMP, k=17), 
                   data=early_wide)
 gam.check(small4.5tik) #GOOD
-#saveRDS(small4.5tik, "mod_output_yr_stemp_tilat-long-temp.rds")
+#saveRDS(small4.5tik, "scripts/GAM_output/mod_output_yr_stemp_tilat-long-temp.rds")
 
 small4.6ti <- gam(logCPUE_Gadus_chalcogrammus ~ factor(YEAR) + BOT_TEMP +
                   ti(LATITUDE, LONGITUDE, BOT_TEMP), 
@@ -315,7 +315,7 @@ small4.6tik <- gam(logCPUE_Gadus_chalcogrammus ~ factor(YEAR) + BOT_TEMP +
                     ti(LATITUDE, LONGITUDE, BOT_TEMP, k=17), 
                   data=early_wide)
 gam.check(small4.6tik) #GOOD BUT CRAZY SLOW
-#saveRDS(small4.6tik, "mod_output_yr_temp_tilat-long-temp.rds")
+#saveRDS(small4.6tik, "scripts/GAM_output/mod_output_yr_temp_tilat-long-temp.rds")
 
 small5ti <- gam(logCPUE_Gadus_chalcogrammus ~ factor(YEAR) + s(BOT_TEMP) +
                 ti(LATITUDE, LONGITUDE, by=factor(YEAR)), 
