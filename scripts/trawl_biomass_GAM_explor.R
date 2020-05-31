@@ -389,3 +389,41 @@ five_dat <- early_dat[which(early_dat$SCIENTIFIC=="Gadus chalcogrammus"|early_da
 p1 <- ggplot(five_dat, aes(YEAR, logCPUE))
 p1+ geom_point() + geom_smooth() + facet_wrap(~SCIENTIFIC) 
 
+
+
+#GAMS without year=====================================================================
+
+#Mike asked me to also try these with no main effect of year
+
+noy1 <- gam(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP), 
+              data=early_wide)
+
+
+noy2 <- gam(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP) +
+                t2(LATITUDE, LONGITUDE), 
+              data=early_wide)
+
+noy3 <- gam(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP) +
+                t2(LATITUDE, LONGITUDE) + t2(LATITUDE, LONGITUDE, by=factor(YEAR)), 
+              data=early_wide)
+
+
+noy4 <- gam(logCPUE_Gadus_chalcogrammus ~ s(BOT_TEMP) +
+                t2(LATITUDE, LONGITUDE) + t2(LATITUDE, LONGITUDE, BOT_TEMP), 
+              data=early_wide)
+
+
+noy4.5 <- gam(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP) +
+                  t2(LATITUDE, LONGITUDE, BOT_TEMP), 
+                data=early_wide)
+
+noy4.6 <- gam(logCPUE_Gadus_chalcogrammus ~  BOT_TEMP +
+                  t2(LATITUDE, LONGITUDE, BOT_TEMP), 
+                data=early_wide)
+
+noy5 <- gam(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP) +
+                t2(LATITUDE, LONGITUDE, by=factor(YEAR)), 
+              data=early_wide)
+ 
+
+
