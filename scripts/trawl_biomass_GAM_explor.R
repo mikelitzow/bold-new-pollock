@@ -396,12 +396,14 @@ p1+ geom_point() + geom_smooth() + facet_wrap(~SCIENTIFIC)
 #Mike asked me to also try these with no main effect of year
 
 noy1 <- gam(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP), 
-              data=early_wide)
+              data=early_wide) #k too low
 
 
 noy2 <- gam(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP) +
                 t2(LATITUDE, LONGITUDE), 
               data=early_wide)
+
+AIC(small1, small2, noy1, noy2) #models with year better so far
 
 noy3 <- gam(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP) +
                 t2(LATITUDE, LONGITUDE) + t2(LATITUDE, LONGITUDE, by=factor(YEAR)), 
@@ -423,7 +425,52 @@ noy4.6 <- gam(logCPUE_Gadus_chalcogrammus ~  BOT_TEMP +
 
 noy5 <- gam(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP) +
                 t2(LATITUDE, LONGITUDE, by=factor(YEAR)), 
+              data=early_wide) #bad hessian, k too low
+noy5 <- bam(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP) +
+              t2(LATITUDE, LONGITUDE, by=factor(YEAR), k=20), 
+            data=early_wide) #
+
+
+#GAMs w year random===================================================================================
+#random intercept, will deal with mean diff among years but allow out of sample prediction
+
+ran1 <- gamm(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP), random=list(YEAR_factor=~1),
+            data=early_wide) #AIC is 44471.99 compared to 44364.46 for small1
+summary(ran1)
+summary(ran1[[1]])
+summary(ran1[[2]])
+plot(ran1[[2]])
+gam.check(ran1[[2]]) #looks pretty bad
+
+ran2 <- gamm(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP) +
+              t2(LATITUDE, LONGITUDE), random=list(YEAR_factor=~1), 
+            data=early_wide)
+summary(ran2[[1]]) #AIC 40857.67
+summary(ran2[[2]])
+plot(ran2[[2]])
+gam.check(ran2[[2]]) #k too low
+
+ran3 <- gamm(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP) +
+              t2(LATITUDE, LONGITUDE) + t2(LATITUDE, LONGITUDE, by=factor(YEAR)), random=list(YEAR_factor=~1), 
+            data=early_wide)
+
+
+ran4 <- gamm(logCPUE_Gadus_chalcogrammus ~ s(BOT_TEMP) +
+              t2(LATITUDE, LONGITUDE) + t2(LATITUDE, LONGITUDE, BOT_TEMP), random=list(YEAR_factor=~1), 
+            data=early_wide)
+
+
+ran4.5 <- gamm(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP) +
+                t2(LATITUDE, LONGITUDE, BOT_TEMP), random=list(YEAR_factor=~1), 
               data=early_wide)
- 
+
+noy4.6 <- gamm(logCPUE_Gadus_chalcogrammus ~  BOT_TEMP +
+                t2(LATITUDE, LONGITUDE, BOT_TEMP), random=list(YEAR_factor=~1), 
+              data=early_wide)
+
+ran5 <- gamm(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP) +
+              t2(LATITUDE, LONGITUDE, by=factor(YEAR)), random=list(YEAR_factor=~1), 
+            data=early_wide) 
+
 
 
