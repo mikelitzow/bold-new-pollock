@@ -401,7 +401,21 @@ noy1 <- gam(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP),
 
 noy2 <- gam(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP) +
                 t2(LATITUDE, LONGITUDE), 
+              data=early_wide) #k too low
+# noy2k <- gam(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP) +
+#               t2(LATITUDE, LONGITUDE, k=20), 
+#             data=early_wide)
+# gam.check(noy2k) #k too low
+# noy2k2 <- gam(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP) +
+#                t2(LATITUDE, LONGITUDE, k=23), 
+#              data=early_wide)
+# gam.check(noy2k2)#good k, bad hessian
+noy2k3 <- gam(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP) +
+                t2(LATITUDE, LONGITUDE, k=21), 
               data=early_wide)
+gam.check(noy2k3) #GOOD
+plot(noy2k3)
+AIC(small2k_import, noy2k3) #w year still much better
 
 AIC(small1, small2, noy1, noy2) #models with year better so far
 
@@ -412,16 +426,18 @@ noy3 <- gam(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP) +
 
 noy4 <- gam(logCPUE_Gadus_chalcogrammus ~ s(BOT_TEMP) +
                 t2(LATITUDE, LONGITUDE) + t2(LATITUDE, LONGITUDE, BOT_TEMP), 
-              data=early_wide)
+              data=early_wide) #k too low
 
 
 noy4.5 <- gam(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP) +
                   t2(LATITUDE, LONGITUDE, BOT_TEMP), 
-                data=early_wide)
+                data=early_wide) #k too low
 
 noy4.6 <- gam(logCPUE_Gadus_chalcogrammus ~  BOT_TEMP +
                   t2(LATITUDE, LONGITUDE, BOT_TEMP), 
                 data=early_wide)
+summary(noy4.6)
+gam.check(noy4.6)#k too low
 
 noy5 <- gam(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP) +
                 t2(LATITUDE, LONGITUDE, by=factor(YEAR)), 
@@ -449,28 +465,76 @@ summary(ran2[[1]]) #AIC 40857.67
 summary(ran2[[2]])
 plot(ran2[[2]])
 gam.check(ran2[[2]]) #k too low
+# ran2k <- gamm(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP) +
+#                t2(LATITUDE, LONGITUDE, k=17), random=list(YEAR_factor=~1), 
+#              data=early_wide)
+# gam.check(ran2k[[2]])#k too low
+# ran2k2 <- gamm(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP) +
+#                 t2(LATITUDE, LONGITUDE, k=18), random=list(YEAR_factor=~1), 
+#               data=early_wide)
+# gam.check(ran2k2[[2]]) #k too low
+# ran2k3 <- gamm(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP) +
+#                  t2(LATITUDE, LONGITUDE, k=19), random=list(YEAR_factor=~1), 
+#                data=early_wide)
+# gam.check(ran2k3[[2]]) #k too low
+# ran2k4 <- gamm(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP) +
+#                  t2(LATITUDE, LONGITUDE, k=20), random=list(YEAR_factor=~1), 
+#                data=early_wide)
+# gam.check(ran2k4[[2]])#k too low
+# ran2k5 <- gamm(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP) +
+#                  t2(LATITUDE, LONGITUDE, k=21), random=list(YEAR_factor=~1), 
+#                data=early_wide)
+# gam.check(ran2k5[[2]]) #k too low
+# ran2k6 <- gamm(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP) +
+#                  t2(LATITUDE, LONGITUDE, k=22), random=list(YEAR_factor=~1), 
+#                data=early_wide)
+# gam.check(ran2k6[[2]]) #k too low
+# ran2k7 <- gamm(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP) +
+#                  t2(LATITUDE, LONGITUDE, k=23), random=list(YEAR_factor=~1), 
+#                data=early_wide)
+# gam.check(ran2k7[[2]]) #k too low
+# ran2k8 <- gamm(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP) +
+#                  t2(LATITUDE, LONGITUDE, k=24), random=list(YEAR_factor=~1), 
+#                data=early_wide)
+# gam.check(ran2k8[[2]]) #k too low
+ran2k9 <- gamm(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP) +
+                 t2(LATITUDE, LONGITUDE, k=25), random=list(YEAR_factor=~1), 
+               data=early_wide)
+gam.check(ran2k9[[2]])
+AIC(small2k_import, noy2k3) #
 
 ran3 <- gamm(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP) +
               t2(LATITUDE, LONGITUDE) + t2(LATITUDE, LONGITUDE, by=factor(YEAR)), random=list(YEAR_factor=~1), 
-            data=early_wide)
+            data=early_wide) #singularity in backsolve error, looking into stack overflow suggests this is lack of main year effect?
 
 
 ran4 <- gamm(logCPUE_Gadus_chalcogrammus ~ s(BOT_TEMP) +
               t2(LATITUDE, LONGITUDE) + t2(LATITUDE, LONGITUDE, BOT_TEMP), random=list(YEAR_factor=~1), 
             data=early_wide)
-
+#singular convergence error
 
 ran4.5 <- gamm(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP) +
                 t2(LATITUDE, LONGITUDE, BOT_TEMP), random=list(YEAR_factor=~1), 
               data=early_wide)
+summary(ran4.5)
+summary(ran4.5[[1]])#AIC 40498.14
+summary(ran4.5[[2]])
+plot(ran4.5[[2]])
+gam.check(ran4.5[[2]]) #k too low
 
-noy4.6 <- gamm(logCPUE_Gadus_chalcogrammus ~  BOT_TEMP +
+ran4.6 <- gamm(logCPUE_Gadus_chalcogrammus ~  BOT_TEMP +
                 t2(LATITUDE, LONGITUDE, BOT_TEMP), random=list(YEAR_factor=~1), 
               data=early_wide)
+#Singularity in backsolve
 
 ran5 <- gamm(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP) +
               t2(LATITUDE, LONGITUDE, by=factor(YEAR)), random=list(YEAR_factor=~1), 
-            data=early_wide) 
+            data=early_wide) #doesn't want to run
 
-
+ran6 <- gamm(logCPUE_Gadus_chalcogrammus ~  BOT_TEMP +
+               t2(LATITUDE, LONGITUDE, by=factor(YEAR)), random=list(YEAR_factor=~1), 
+             data=early_wide) #ktoo low
+ran6 <- gamm(logCPUE_Gadus_chalcogrammus ~  BOT_TEMP +
+               t2(LATITUDE, LONGITUDE, by=factor(YEAR), k=18), random=list(YEAR_factor=~1), 
+             data=early_wide) #ktoo low
 
