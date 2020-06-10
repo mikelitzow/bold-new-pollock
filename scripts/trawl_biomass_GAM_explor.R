@@ -53,6 +53,7 @@ early_wide <- early_wide %>% rename(WTCPUE_Chionoecetes_bairdi = "WTCPUE_Chionoe
   WTCPUE_Hippoglossoides_elassodon = "WTCPUE_Hippoglossoides elassodon",  
   WTCPUE_Pleuronectes_quadrituberculatus = "WTCPUE_Pleuronectes quadrituberculatus", 
   WTCPUE_Lepidopsetta_polyxystra = "WTCPUE_Lepidopsetta polyxystra", 
+  WTCPUE_Gadus_chalcogrammus = "WTCPUE_Gadus chalcogrammus", 
   NUMCPUE_Gadus_chalcogrammus = "NUMCPUE_Gadus chalcogrammus",        
   NUMCPUE_Chionoecetes_bairdi = "NUMCPUE_Chionoecetes bairdi",            
   NUMCPUE_Atheresthes_stomias = "NUMCPUE_Atheresthes stomias",           
@@ -405,6 +406,10 @@ rangam2k8 <- gam(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP, k=9) +
                    t2(LONGITUDE, LATITUDE, k=25)+ s(YEAR_factor, bs="re"), 
                  data=analysis_dat) #about 1 hr run time
 gam.check(rangam2k8) #GOOD
+rangam2k9 <- gam(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP, k=10) +
+                   t2(LONGITUDE, LATITUDE, k=20)+ s(YEAR_factor, bs="re"), 
+                 data=analysis_dat) 
+gam.check(rangam2k9) #GOOD
 summary(rangam2k8)
 plot_smooth(rangam2k8, view="BOT_TEMP", plot_all = "YEAR_factor") 
 plot_smooth(rangam2k8, view="LATITUDE", plot_all = "YEAR_factor") 
@@ -517,5 +522,9 @@ rangam6k <- gam(logCPUE_Gadus_chalcogrammus ~  BOT_TEMP +
              data=analysis_dat)
 
 
+#what about with poisson?
 
+poi1 <- gam(WTCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP) +
+                   t2(LONGITUDE, LATITUDE)+ s(YEAR_factor, bs="re"), familiy="poisson",
+                 data=analysis_dat) 
 
