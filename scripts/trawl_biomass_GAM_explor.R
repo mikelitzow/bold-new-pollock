@@ -19,6 +19,8 @@ sel.trawl.dat <- read.csv("data/select_trawl_dat.csv", row.names = 1)
 sel.trawl.dat$YEAR_factor <- as.factor(sel.trawl.dat$YEAR)
 sel.trawl.dat$BOT_TEMP[which(sel.trawl.dat$BOT_TEMP=="-9999")]<-NA
 sel.trawl.dat$SURF_TEMP[which(sel.trawl.dat$SURF_TEMP=="-9999")]<-NA
+sel.trawl.dat$WTCPUE[which(sel.trawl.dat$WTCPUE=="-9999")]<-NA
+sel.trawl.dat$NUMCPUE[which(sel.trawl.dat$NUMCPUE=="-9999")]<-NA
 
 #going to need to get into a wider database I think to get other sps in
 
@@ -74,9 +76,7 @@ early_wide <- early_wide %>% rename(WTCPUE_Chionoecetes_bairdi = "WTCPUE_Chionoe
   logCPUE_Pleuronectes_quadrituberculatus = "logCPUE_Pleuronectes quadrituberculatus" ,
   logCPUE_Lepidopsetta_polyxystra = "logCPUE_Lepidopsetta polyxystra") 
 
-#this results in a lot of NAs that should be zero, so I will enter zeros
 
-early_wide[,14:46][is.na(early_wide[,14:46])] <- 0 #WAIT ZERO OR NO?
 
 #exclusion criteria===============
 library(tidyverse)
@@ -104,280 +104,11 @@ t3 + geom_histogram(stat="count")
 
 
 
-#a base model====
-ti_base_mod <- gam(logCPUE_Gadus_chalcogrammus ~ s(YEAR) + s(LONGITUDE, LATITUDE) +
-                     ti(LONGITUDE, LATITUDE, YEAR, d=c(2,1)), 
-                   data=analysis_dat)
-plot(ti_base_mod, scheme = 2)
-gam.check(ti_base_mod)
-ti_p <- getViz(ti_base_mod)
-
-plot(sm(ti_p, 2))
-print(plot(ti_p, allTerms = T), pages = 1)
-plotRGL(sm(ti_p, 3), fix = c("YEAR" = 2000), residuals = TRUE)
-
-par(mfrow=c(2,2))
-plot(sm(ti_p, 3), fix = c("YEAR" = 2000))
-plot(sm(ti_p, 3), fix = c("YEAR" = 2001))
-plot(sm(ti_p, 3), fix = c("YEAR" = 2002))
-plot(sm(ti_p, 3), fix = c("YEAR" = 2003))
-
-plot(sm(ti_p, 3), fix = c("YEAR" = 1982))
-plot(sm(ti_p, 3), fix = c("YEAR" = 2013))
-
 
 #find 'global' best model======================================================================================
 
 
 
-#start small------
-
-small1 <- gam(logCPUE_Gadus_chalcogrammus ~ factor(YEAR) + s(BOT_TEMP), 
-               data=analysis_dat)
-summary(small1 )
-plot(small1 )
-gam.check(small1 ) #k too small
-small1k <- gam(logCPUE_Gadus_chalcogrammus ~ factor(YEAR) + s(BOT_TEMP, k=10), 
-              data=analysis_dat)
-gam.check(small1k ) #GOOD
-#saveRDS(small1k, "scripts/GAM_output/mod_output_yr_stemp.rds") 
-
-small2 <- gam(logCPUE_Gadus_chalcogrammus ~ factor(YEAR) + s(BOT_TEMP) +
-                t2(LONGITUDE, LATITUDE), 
-              data=analysis_dat)
-summary(small2 ) #big increase in dev explained
-plot(small2 )
-gam.check(small2 ) #k too low
-# small2k <- gam(logCPUE_Gadus_chalcogrammus ~ factor(YEAR) + s(BOT_TEMP) +
-#                 t2(LONGITUDE, LATITUDE, k=23),
-#               data=analysis_dat)
-# gam.check(small2k) #GOOD
-small2k2 <- gam(logCPUE_Gadus_chalcogrammus ~ factor(YEAR) + s(BOT_TEMP) +
-                 t2(LONGITUDE, LATITUDE, k=22), 
-               data=analysis_dat)
-gam.check(small2k2) #BETTER
-plot(small2k2)
-#saveRDS(small2k2, "scripts/GAM_output/mod_output_yr_stemp_t2lat-long.rds") 
-
-small3 <- gam(logCPUE_Gadus_chalcogrammus ~ factor(YEAR) + s(BOT_TEMP) +
-                t2(LONGITUDE, LATITUDE) + t2(LONGITUDE, LATITUDE, by=factor(YEAR)), 
-              data=analysis_dat)
-
-summary(small3 )
-plot(small3 )
-gam.check(small3 ) #k too low, not pos defin
-
-small3k <- gam(logCPUE_Gadus_chalcogrammus ~ factor(YEAR) + s(BOT_TEMP) +
-                t2(LONGITUDE, LATITUDE, k=20) + t2(LONGITUDE, LATITUDE, by=factor(YEAR), k=20), 
-              data=analysis_dat) # return to this, too big
-
-sm3 <- getViz(small3)
-
-plot(sm(sm3, 3), fix = c("YEAR" = 2000))
-plot(sm(sm3, 3), fix = c("YEAR" = 2001))
-plot(sm(sm3, 3), fix = c("YEAR" = 2002))
-plot(sm(sm3, 3), fix = c("YEAR" = 2003))
-
-plot(sm(sm3, 3), fix = c("YEAR" = 1982))
-plot(sm(sm3, 3), fix = c("YEAR" = 2013))
-
-small4 <- gam(logCPUE_Gadus_chalcogrammus ~ factor(YEAR) + s(BOT_TEMP) +
-                t2(LONGITUDE, LATITUDE) + t2(LONGITUDE, LATITUDE, BOT_TEMP), 
-              data=analysis_dat)
-
-summary(small4 )
-plot(small4 )
-gam.check(small4 ) #k too low bad hessian
-# small4k <- gam(logCPUE_Gadus_chalcogrammus ~ factor(YEAR) + s(BOT_TEMP) +
-#                 t2(LONGITUDE, LATITUDE, k=20) + t2(LONGITUDE, LATITUDE, BOT_TEMP), 
-#               data=analysis_dat)
-# gam.check(small4k) #good k, bad hessian
-# small4k2 <- gam(logCPUE_Gadus_chalcogrammus ~ factor(YEAR) + s(BOT_TEMP) +
-#                  t2(LONGITUDE, LATITUDE, k=15) + t2(LONGITUDE, LATITUDE, BOT_TEMP), 
-#                data=analysis_dat)
-# gam.check(small4k2) #k too low
-# small4k3 <- gam(logCPUE_Gadus_chalcogrammus ~ factor(YEAR) + s(BOT_TEMP) +
-#                   t2(LONGITUDE, LATITUDE, k=17) + t2(LONGITUDE, LATITUDE, BOT_TEMP),
-#                 data=analysis_dat)
-# gam.check(small4k3) #k too low
-small4k4 <- gam(logCPUE_Gadus_chalcogrammus ~ factor(YEAR) + s(BOT_TEMP) +
-                  t2(LONGITUDE, LATITUDE, k=18) + t2(LONGITUDE, LATITUDE, BOT_TEMP), 
-                data=analysis_dat)
-gam.check(small4k4) #GOOD
-#saveRDS(small4k4, "scripts/GAM_output/mod_output_yr_stemp_t2lat-long_t2lat-long-temp.rds") 
-
-
-small4.5 <- gam(logCPUE_Gadus_chalcogrammus ~ factor(YEAR) + s(BOT_TEMP) +
-                # t2(LONGITUDE, LATITUDE) + 
-                  t2(LONGITUDE, LATITUDE, BOT_TEMP), 
-              data=analysis_dat)
-summary(small4.5 )
-plot(small4.5 )
-gam.check(small4.5 ) #k too low bad hessian
-# small4.5k <- gam(logCPUE_Gadus_chalcogrammus ~ factor(YEAR) + s(BOT_TEMP) +
-#                   # t2(LONGITUDE, LATITUDE) + 
-#                   t2(LONGITUDE, LATITUDE, BOT_TEMP, k=15), 
-#                 data=analysis_dat)
-# gam.check(small4.5k) #bad hessian, good k
-# small4.5k2 <- gam(logCPUE_Gadus_chalcogrammus ~ factor(YEAR) + s(BOT_TEMP) +
-#                    # t2(LONGITUDE, LATITUDE) + 
-#                    t2(LONGITUDE, LATITUDE, BOT_TEMP, k=10), 
-#                  data=analysis_dat)
-# gam.check(small4.5k2) #k too low
-# small4.5k3 <- gam(logCPUE_Gadus_chalcogrammus ~ factor(YEAR) + s(BOT_TEMP) +
-#                     # t2(LONGITUDE, LATITUDE) + 
-#                     t2(LONGITUDE, LATITUDE, BOT_TEMP, k=12), 
-#                   data=analysis_dat)
-# gam.check(small4.5k3) #bad hessian, good k
-# small4.5k4 <- gam(logCPUE_Gadus_chalcogrammus ~ factor(YEAR) + s(BOT_TEMP) +
-#                     # t2(LONGITUDE, LATITUDE) + 
-#                     t2(LONGITUDE, LATITUDE, BOT_TEMP, k=11), 
-#                   data=analysis_dat)
-# gam.check(small4.5k4) #bad hessian, k too low
-# small4.5k5 <- gam(logCPUE_Gadus_chalcogrammus ~ factor(YEAR) + s(BOT_TEMP) +
-#                     # t2(LONGITUDE, LATITUDE) + 
-#                     t2(LONGITUDE, LATITUDE, BOT_TEMP, k=15), 
-#                   data=analysis_dat)
-# gam.check(small4.5k5) #bad hessian
-# small4.5k6 <- gam(logCPUE_Gadus_chalcogrammus ~ factor(YEAR) + s(BOT_TEMP) +
-#                     # t2(LONGITUDE, LATITUDE) + 
-#                     t2(LONGITUDE, LATITUDE, BOT_TEMP, k=13), 
-#                   data=analysis_dat)
-# gam.check(small4.5k6)#k too low
-small4.5k7 <- gam(logCPUE_Gadus_chalcogrammus ~ factor(YEAR) + s(BOT_TEMP) +
-                    # t2(LONGITUDE, LATITUDE) + 
-                    t2(LONGITUDE, LATITUDE, BOT_TEMP, k=14), 
-                  data=analysis_dat)
-gam.check(small4.5k7) #GOOD
-#saveRDS(small4.5k7, "scripts/GAM_output/mod_output_yr_stemp_t2lat-long-temp.rds") 
-
-small4.6 <- gam(logCPUE_Gadus_chalcogrammus ~ factor(YEAR) + BOT_TEMP +
-                  # t2(LONGITUDE, LATITUDE) + 
-                  t2(LONGITUDE, LATITUDE, BOT_TEMP), 
-                data=analysis_dat)
-summary(small4.6 )
-plot(small4.6 )
-gam.check(small4.6 ) #k is too low
-# small4.6k <- gam(logCPUE_Gadus_chalcogrammus ~ factor(YEAR) + BOT_TEMP +
-#                   # t2(LONGITUDE, LATITUDE) + 
-#                   t2(LONGITUDE, LATITUDE, BOT_TEMP, k=11), 
-#                 data=analysis_dat)
-# gam.check(small4.6k) #k too low and bad Hessian
-# small4.6k2 <- gam(logCPUE_Gadus_chalcogrammus ~ factor(YEAR) + BOT_TEMP +
-#                    # t2(LONGITUDE, LATITUDE) + 
-#                    t2(LONGITUDE, LATITUDE, BOT_TEMP, k=13), 
-#                  data=analysis_dat)
-# gam.check(small4.6k2) #k little too low
-small4.6k3 <- gam(logCPUE_Gadus_chalcogrammus ~ factor(YEAR) + BOT_TEMP +
-                    # t2(LONGITUDE, LATITUDE) + 
-                    t2(LONGITUDE, LATITUDE, BOT_TEMP, k=14), 
-                  data=analysis_dat)
-gam.check(small4.6k3)#good!
-saveRDS(small4.6k3, "scripts/GAM_output/mod_output_yr_temp_t2lat-long-temp.rds") 
-
-
-AIC(small1, small2, small3, small4) #small 3 by far best AIC, small 4 next best
-
-E1 <- resid(small3, type="pearson")
-F1 <- fitted(small3)
-plot(F1, E1)
-
-small5 <- gam(logCPUE_Gadus_chalcogrammus ~ factor(YEAR) + s(BOT_TEMP) +
-                #t2(LONGITUDE, LATITUDE, k=25) + 
-                t2(LONGITUDE, LATITUDE, by=factor(YEAR)), 
-              data=analysis_dat)
-
-summary(small5 )
-plot(small5 )
-gam.check(small5 ) 
-
-
-#small but ti====
-
-
-small2ti <- gam(logCPUE_Gadus_chalcogrammus ~ factor(YEAR) + s(BOT_TEMP) +
-                ti(LONGITUDE, LATITUDE), 
-              data=analysis_dat)
-
-summary(small2ti ) #
-plot(small2ti )
-gam.check(small2ti ) 
-# small2tik <- gam(logCPUE_Gadus_chalcogrammus ~ factor(YEAR) + s(BOT_TEMP) +
-#                   ti(LONGITUDE, LATITUDE, k=15), 
-#                 data=analysis_dat)
-# gam.check(small2tik)#too low
-small2tik2 <- gam(logCPUE_Gadus_chalcogrammus ~ factor(YEAR) + s(BOT_TEMP) +
-                   ti(LONGITUDE, LATITUDE, k=17), 
-                 data=analysis_dat)
-gam.check(small2tik2) #GOOD
-#saveRDS(small2tik2, "scripts/GAM_output/mod_output_yr_stemp_tilat-long.rds") OLD REPLACE
-
-small3ti <- gam(logCPUE_Gadus_chalcogrammus ~ factor(YEAR) + s(BOT_TEMP) +
-                ti(LONGITUDE, LATITUDE) + ti(LONGITUDE, LATITUDE, by=factor(YEAR)), 
-              data=analysis_dat)
-
-summary(small3ti )
-plot(small3ti )
-gam.check(small3ti ) 
-
-
-small4ti <- gam(logCPUE_Gadus_chalcogrammus ~ factor(YEAR) + s(BOT_TEMP) +
-                ti(LONGITUDE, LATITUDE) + ti(LONGITUDE, LATITUDE, BOT_TEMP), 
-              data=analysis_dat)
-
-summary(small4ti )
-plot(small4ti )
-gam.check(small4ti ) #k too low
-small4tik <- gam(logCPUE_Gadus_chalcogrammus ~ factor(YEAR) + s(BOT_TEMP) +
-                  ti(LONGITUDE, LATITUDE, k=17) + ti(LONGITUDE, LATITUDE, BOT_TEMP), 
-                data=analysis_dat)
-gam.check(small4tik) #GOOD
-# small4tik2 <- gam(logCPUE_Gadus_chalcogrammus ~ factor(YEAR) + s(BOT_TEMP) +
-#                    ti(LONGITUDE, LATITUDE, k=15) + ti(LONGITUDE, LATITUDE, BOT_TEMP), 
-#                  data=analysis_dat)
-# gam.check(small4tik2) #k too low
-#saveRDS(small4tik, "scripts/GAM_output/mod_output_yr_temp_tilat-long_tilat-long-temp.rds") OLD REPLACE
-
-small4.5ti <- gam(logCPUE_Gadus_chalcogrammus ~ factor(YEAR) + s(BOT_TEMP) +
-                  ti(LONGITUDE, LATITUDE, BOT_TEMP), 
-                data=analysis_dat)
-
-summary(small4.5ti )
-plot(small4.5ti )
-gam.check(small4.5ti )
-small4.5tik <- gam(logCPUE_Gadus_chalcogrammus ~ factor(YEAR) + s(BOT_TEMP) +
-                    ti(LONGITUDE, LATITUDE, BOT_TEMP, k=17), 
-                  data=analysis_dat)
-gam.check(small4.5tik) #GOOD
-#saveRDS(small4.5tik, "scripts/GAM_output/mod_output_yr_stemp_tilat-long-temp.rds") OLD REPLACE
-
-small4.6ti <- gam(logCPUE_Gadus_chalcogrammus ~ factor(YEAR) + BOT_TEMP +
-                  ti(LONGITUDE, LATITUDE, BOT_TEMP), 
-                data=analysis_dat)
-
-summary(small4.6ti )
-plot(small4.6ti )
-gam.check(small4.6ti ) #k is too low
-small4.6tik <- gam(logCPUE_Gadus_chalcogrammus ~ factor(YEAR) + BOT_TEMP +
-                    ti(LONGITUDE, LATITUDE, BOT_TEMP, k=17), 
-                  data=analysis_dat)
-gam.check(small4.6tik) #GOOD BUT CRAZY SLOW
-#saveRDS(small4.6tik, "scripts/GAM_output/mod_output_yr_temp_tilat-long-temp.rds") OLD REPLACE
-
-small5ti <- gam(logCPUE_Gadus_chalcogrammus ~ factor(YEAR) + s(BOT_TEMP) +
-                ti(LONGITUDE, LATITUDE, by=factor(YEAR)), 
-              data=analysis_dat)
-
-summary(small5ti )
-plot(small5ti )
-gam.check(small5ti ) 
-
-AIC(small1, small2ti, small4.6ti, small3ti, small4ti, small4.5ti, small5ti,
-    small2, small3, small4, small4.5, small4.6, small5)
-
-#loop through species=======================================
-
-#==============================================================================================================
 
 #Using temperature not year======
 
@@ -642,12 +373,114 @@ plot(sm(r2, 2), residuals = TRUE)
 plot(sm(r2, 1), fix = c("YEAR" = 2000), residuals = TRUE)
 print(plot(r2, allTerms = T), pages = 1)
 
+# rangam2k <- gam(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP) +
+#                  t2(LONGITUDE, LATITUDE, k=20)+ s(YEAR_factor, bs="re"), 
+#                data=analysis_dat)
+# gam.check(rangam2k) #k too low bad hessian
+# rangam2k2 <- gam(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP) +
+#                   t2(LONGITUDE, LATITUDE, k=21)+ s(YEAR_factor, bs="re"), 
+#                 data=analysis_dat)
+# gam.check(rangam2k2) #k ok bad hessian
+# rangam2k3 <- gam(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP) +
+#                    t2(LONGITUDE, LATITUDE, k=22)+ s(YEAR_factor, bs="re"), 
+#                  data=analysis_dat)
+# gam.check(rangam2k3) #still bad hessian
+# rangam2k4 <- gam(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP, k=15) +
+#                    t2(LONGITUDE, LATITUDE)+ s(YEAR_factor, bs="re"), 
+#                  data=analysis_dat)
+# gam.check(rangam2k4) #lat long k too low
+# rangam2k5 <- gam(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP, k=10) +
+#                    t2(LONGITUDE, LATITUDE)+ s(YEAR_factor, bs="re"), 
+#                  data=analysis_dat)
+# gam.check(rangam2k5)#lat long k too low
+# rangam2k6 <- gam(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP, k=8) +
+#                    t2(LONGITUDE, LATITUDE)+ s(YEAR_factor, bs="re"), 
+#                  data=analysis_dat)
+# gam.check(rangam2k6)#bad hessian
+# rangam2k7 <- gam(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP, k=9) +
+#                    t2(LONGITUDE, LATITUDE)+ s(YEAR_factor, bs="re"), 
+#                  data=analysis_dat)
+# gam.check(rangam2k7)#bad hessian
+rangam2k8 <- gam(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP, k=9) +
+                   t2(LONGITUDE, LATITUDE, k=25)+ s(YEAR_factor, bs="re"), 
+                 data=analysis_dat) #about 1 hr run time
+gam.check(rangam2k8) #GOOD
+summary(rangam2k8)
+plot_smooth(rangam2k8, view="BOT_TEMP", plot_all = "YEAR_factor") 
+plot_smooth(rangam2k8, view="LATITUDE", plot_all = "YEAR_factor") 
+plot_smooth(rangam2k8, view="LONGITUDE", plot_all = "YEAR_factor")
+r2k8 <- getViz(rangam2k8)
+plot(sm(r2k8, 2), residuals = TRUE)
+plot(sm(r2k8, 1), fix = c("YEAR" = 2000), residuals = TRUE)
+print(plot(r2k8, allTerms = T), pages = 1)
+
+acf(residuals(rangam2k8))
+pacf(residuals(rangam2k8))
+
+res1 <- residuals(rangam2k8, type = "pearson")
+ var <- variogram(res1 ~ LONGITUDE + LATITUDE, data=analysis_dat)    
+ plot(var)
+ 
+ resapend <- analysis_dat[which(is.na(analysis_dat$BOT_TEMP)==FALSE),] #missing bottom temps leads to difference 
+ #in length residuals v original dataset
+ resapend$residual <- res1
+ z1 <- ggplot(resapend, aes(LONGITUDE, LATITUDE, colour=residual))
+z1 + geom_point() +   scale_colour_gradient2(low="blue", high="red", guide="colorbar")
+#definitely looks like there is spatial patterns in residuals!
+
+z2 <- ggplot(resapend, aes(LONGITUDE, LATITUDE, colour=BOT_DEPTH))
+z2 + geom_point() +   scale_colour_gradient2(low="blue", high="red", guide="colorbar")
+
+z3 <- ggplot(resapend, aes(LONGITUDE, LATITUDE, colour=BOT_TEMP))
+z3 + geom_point() +   scale_colour_gradient2(low="blue", high="red", guide="colorbar")
+ 
+library(geoR)  
+
+coords <- matrix(0, length(resapend$logCPUE_Gadus_chalcogrammus), 2)
+coords[,1] <- resapend$LONGITUDE
+coords[,2] <- resapend$LATITUDE
+
+gb <- list(data=resapend$logCPUE_Gadus_chalcogrammus, cords=coords)
+plot(variog(gb))
+
+Variogram(rangam2k8, form =~ LONGITUDE + LATITUDE, data=analysis_dat, nugget=TRUE, maxDist=200000)
+
+
+#compared to no random?
+noyr2k8 <- gam(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP, k=9) +
+                   t2(LONGITUDE, LATITUDE, k=25), 
+                 data=analysis_dat)
+AIC(rangam2k8,noyr2k8) #yes better with random yr effect
+
+
+AIC(rangam1, rangam2k8)
 
 #RERUN THE NEXT THREE!!
 rangam3 <- gam(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP) +
                t2(LONGITUDE, LATITUDE) + t2(LONGITUDE, LATITUDE, by=factor(YEAR_factor))+ s(YEAR, bs="re"), 
              data=analysis_dat) 
 gam.check(rangam3)#bad hessian, k too low
+rangam3k <- gam(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP) +
+                 t2(LONGITUDE, LATITUDE, k=17) + t2(LONGITUDE, LATITUDE, by=factor(YEAR_factor))+ s(YEAR, bs="re"), 
+               data=analysis_dat) 
+gam.check(rangam3k) #k fine, bad hessian
+rangam3k2 <- gam(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP) +
+                  t2(LONGITUDE, LATITUDE, k=15) + t2(LONGITUDE, LATITUDE, by=factor(YEAR_factor))+ s(YEAR, bs="re"), 
+                data=analysis_dat) 
+gam.check(rangam3k2) #k too low, bad hessian
+rangam3k3 <- gam(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP) +
+                   t2(LONGITUDE, LATITUDE, k=16) + t2(LONGITUDE, LATITUDE, by=factor(YEAR_factor))+ s(YEAR, bs="re"), 
+                 data=analysis_dat) 
+gam.check(rangam3k3) #k too low bad hessian
+
+rangam3k4 <- gam(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP) +
+                   t2(LONGITUDE, LATITUDE) + t2(LONGITUDE, LATITUDE, by=factor(YEAR_factor), k=25)+ s(YEAR, bs="re"), 
+                 data=analysis_dat) 
+gam.check(rangam3k4) #memory issue
+rangam3k5 <- bam(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP) +
+                   t2(LONGITUDE, LATITUDE) + t2(LONGITUDE, LATITUDE, by=factor(YEAR_factor), k=20)+ s(YEAR, bs="re"), 
+                 data=analysis_dat) 
+gam.check(rangam3k5)
 
 rangam4 <- gam(logCPUE_Gadus_chalcogrammus ~ s(BOT_TEMP) +
                t2(LONGITUDE, LATITUDE) + t2(LONGITUDE, LATITUDE, BOT_TEMP)+ s(YEAR_factor, bs="re"), 
