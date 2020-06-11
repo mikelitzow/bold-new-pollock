@@ -1,11 +1,11 @@
 require(mgcv)
 
 # load modified gCV function (gCV2) that allows for threshold to be looped
-source("//Users/MikeLitzow 1/Documents/R/NSF-GOA/gCV.modified.R")
+source("scripts/gCV.modified.R")
 
-source("/Users/MikeLitzow 1/Documents/R/NSF-GOA/ThresholdGam.R") ### shortcut to look for threshold value
+source("scripts/ThresholdGam.R") ### shortcut to look for threshold value
 
-stocks.env <- read.csv("example.data.csv", row.names=1)
+stocks.env <- read.csv("data/tgam.example.data.csv", row.names=1)
 
 # add year column
 stocks.env$year <- 1965:2014
@@ -16,12 +16,13 @@ stocks.env$year <- 1965:2014
 
      lower <- round(quantile(1965:2012, prob = 0.2)) # 2012 is the last year of complete data...
      upper <- round(quantile(1965:2012, prob = 0.8))
+     
 upper; lower # these define the upper and lower possible thresholds!
 
  # for every TS, I'll consider the same set of thresholds: 1974-2003
   
   
-pdf("aggregated salmon-sst tgam gCV.pdf", 5,6)
+png("figs/aggregated salmon-sst tgam gCV.png", 5,6, units='in', res=300)
 par(mfrow=c(3,2), mar=c(4,4,2,1))
 gam <- best.threshold <- NA
 thresholds <- 1974:2003
