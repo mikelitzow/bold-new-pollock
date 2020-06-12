@@ -426,7 +426,8 @@ res1 <- residuals(rangam2k8, type = "pearson")
  var <- variogram(res1 ~ LONGITUDE + LATITUDE, data=analysis_dat)    
  plot(var)
  
- resapend <- analysis_dat[which(is.na(analysis_dat$BOT_TEMP)==FALSE),] #missing bottom temps leads to difference 
+ resapend <- analysis_dat[which(is.na(analysis_dat$BOT_TEMP)==FALSE &
+            is.na(analysis_dat$logCPUE_Gadus_chalcogrammus)==FALSE),] #missing bottom temps leads to difference 
  #in length residuals v original dataset
  resapend$residual <- res1
  z1 <- ggplot(resapend, aes(LONGITUDE, LATITUDE, colour=residual))
@@ -449,6 +450,75 @@ gb <- list(data=resapend$logCPUE_Gadus_chalcogrammus, cords=coords)
 plot(variog(gb))
 
 Variogram(rangam2k8, form =~ LONGITUDE + LATITUDE, data=analysis_dat, nugget=TRUE, maxDist=200000)
+
+#try refitting with gamm so I can get a variogram
+gamm2k9 <- gamm(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP, k=10) +
+                  t2(LONGITUDE, LATITUDE, k=20), random=list(YEAR_factor=~1), 
+                data=analysis_dat)
+
+mmvar <- Variogram(gamm2k9$lme, form=~ LONGITUDE + LATITUDE, nugget=TRUE, data=analysis_dat)
+plot(mmvar)
+gam.check(gamm2k9[[2]]) #k little too low but keep same for now to keep parallel w previous
+
+
+resapend$r <- resid(gamm2k9[[2]])   # Extract residuals
+coordinates(resapend) <- c("LONGITUDE","LATITUDE")
+j <- resapend$YEAR == 2010  # Extract 2010 data only
+bubble(resapend[j,], zcol="r")
+k <- resapend$YEAR == 1982  # Extract 2010 data only
+bubble(resapend[k,], zcol="r")
+l <- resapend$YEAR == 1990  # Extract 2010 data only
+bubble(resapend[l,], zcol="r")
+m <- resapend$YEAR == 2000  # Extract 2010 data only
+bubble(resapend[m,], zcol="r")
+
+
+# examine autocorrelation for one year at a time because the spatial 
+# autocorrelation, if present, should be evident within years only 
+
+r <- resid(gamm2k9[[2]])[j]   # Extract residuals
+# Compute pairwise distances among logations based on distances in 'x'
+d <- dist(coordinates(resapend)[j,])
+d  # Large matrix of pairwise distances (values below diagonal only!)
+d <- as.vector(d)   # Need to convert to a vector for 'Variogram' function
+# The vector d, contains only one set of pairwise distances (values from below
+# the diagonal) and has length: n * (n-1) / 2, where n is the number of observations
+# (see help files for 'dist' and 'Variogram')
+
+SemiVar <- Variogram(r, d)
+head(SemiVar, 10) 
+
+plot(SemiVar, xlim=c(0,0.1))
+plot(SemiVar, xlim=c(0,25))
+
+bins <- cut(SemiVar$dist, seq(0,25, by=1))  
+plot(bins, SemiVar$variog)
+
+cgmod <- gamm(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP, k=10) +
+                  t2(LONGITUDE, LATITUDE, k=20), random=list(YEAR_factor=~1), 
+              correlation = corGaus(form=~ LONGITUDE + LATITUDE, nugget=TRUE),
+                data=analysis_dat)
+plot(Variogram(cgmod$lme, form=~ LONGITUDE + LATITUDE, nugget=TRUE, data=analysis_dat))
+gam.check(cgmod[[2]])
+summary(cgmod[[1]]) #AIC 35898.18 compared to 37302.43 for rangam2k9 or  37859.72 for gamm2k9
+csmod <- gamm(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP, k=10) +
+                t2(LONGITUDE, LATITUDE, k=20), random=list(YEAR_factor=~1), 
+              correlation = corSpher(form=~ LONGITUDE + LATITUDE, nugget=TRUE),
+              data=analysis_dat) #no covergence
+crmod <- gamm(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP, k=10) +
+                t2(LONGITUDE, LATITUDE, k=20), random=list(YEAR_factor=~1), 
+              correlation = corRatio(form=~ LONGITUDE + LATITUDE, nugget=TRUE),
+              data=analysis_dat)
+plot(Variogram(crmod$lme, form=~ LONGITUDE + LATITUDE, nugget=TRUE, data=analysis_dat))
+gam.check(crmod[[2]])
+summary(crmod[[1]]) #AIC 35786.53
+cemod <- gamm(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP, k=10) +
+                t2(LONGITUDE, LATITUDE, k=20), random=list(YEAR_factor=~1), 
+              correlation = corExp(form=~ LONGITUDE + LATITUDE, nugget=TRUE),
+              data=analysis_dat)
+plot(Variogram(cemod$lme, form=~ LONGITUDE + LATITUDE, nugget=TRUE, data=analysis_dat))
+gam.check(cemod[[2]])
+summary(cemod[[1]]) #AIC 35777.97
 
 
 #compared to no random?
@@ -527,4 +597,39 @@ rangam6k <- gam(logCPUE_Gadus_chalcogrammus ~  BOT_TEMP +
 poi1 <- gam(WTCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP) +
                    t2(LONGITUDE, LATITUDE)+ s(YEAR_factor, bs="re"), familiy="poisson",
                  data=analysis_dat) 
+gam.check(poi1) #nice
+logpoi1 <- gam(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP) +
+              t2(LONGITUDE, LATITUDE)+ s(YEAR_factor, bs="re"), familiy="poisson",
+            data=analysis_dat) 
+gam.check(logpoi1) #k too low
+logpoi1k <- gam(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP) +
+                 t2(LONGITUDE, LATITUDE, k=20)+ s(YEAR_factor, bs="re"), familiy="poisson",
+               data=analysis_dat) #GOOD
+gam.check(logpoi1k)
+AIC(poi1, logpoi1, rangam2k8, rangam2k9) #much worse
 
+
+
+#Spatial cor models w/o spatial surface==========================================================================
+
+cg1 <- gamm(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP), random=list(YEAR_factor=~1), 
+              correlation = corGaus(form=~ LONGITUDE + LATITUDE|YEAR_factor, nugget=TRUE),
+              data=analysis_dat)
+plot(Variogram(cg1$lme, form=~ LONGITUDE + LATITUDE|YEAR_factor, nugget=TRUE, data=analysis_dat))
+gam.check(cg1[[2]])
+summary(cg1[[1]]) #
+cs1 <- gamm(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP, k=10), random=list(YEAR_factor=~1), 
+              correlation = corSpher(form=~ LONGITUDE + LATITUDE|YEAR_factor, nugget=TRUE),
+              data=analysis_dat) 
+cr1 <- gamm(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP, k=10), random=list(YEAR_factor=~1), 
+              correlation = corRatio(form=~ LONGITUDE + LATITUDE|YEAR_factor, nugget=TRUE),
+              data=analysis_dat)
+plot(Variogram(cr1$lme, form=~ LONGITUDE + LATITUDE|YEAR_factor, nugget=TRUE, data=analysis_dat))
+gam.check(cr1[[2]])
+summary(cr1[[1]]) #
+ce1 <- gamm(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP, k=10), random=list(YEAR_factor=~1), 
+              correlation = corExp(form=~ LONGITUDE + LATITUDE|YEAR_factor, nugget=TRUE),
+              data=analysis_dat)
+plot(Variogram(ce1$lme, form=~ LONGITUDE + LATITUDE|YEAR_factor, nugget=TRUE, data=analysis_dat))
+gam.check(ce1[[2]])
+summary(ce1[[1]])
