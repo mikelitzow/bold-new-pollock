@@ -617,19 +617,44 @@ cg1 <- gamm(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP), random=list(YEAR_factor=
               data=analysis_dat)
 plot(Variogram(cg1$lme, form=~ LONGITUDE + LATITUDE|YEAR_factor, nugget=TRUE, data=analysis_dat))
 gam.check(cg1[[2]])
-summary(cg1[[1]]) #
-cs1 <- gamm(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP, k=10), random=list(YEAR_factor=~1), 
+summary(cg1[[1]]) #AIC 36951.44
+
+cggam1 <- gam(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP) + s(YEAR_factor, bs="re"), 
+              correlation = corGaus(form=~ LONGITUDE + LATITUDE|YEAR_factor, nugget=TRUE),
+              data=analysis_dat)
+gam.check(cggam1)
+plot(cggam1)
+AIC(cggam1) #41780.86
+
+cs1 <- gamm(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP), random=list(YEAR_factor=~1), 
               correlation = corSpher(form=~ LONGITUDE + LATITUDE|YEAR_factor, nugget=TRUE),
-              data=analysis_dat) 
-cr1 <- gamm(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP, k=10), random=list(YEAR_factor=~1), 
+              data=analysis_dat) #didn't converge
+
+cr1 <- gamm(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP), random=list(YEAR_factor=~1), 
               correlation = corRatio(form=~ LONGITUDE + LATITUDE|YEAR_factor, nugget=TRUE),
               data=analysis_dat)
 plot(Variogram(cr1$lme, form=~ LONGITUDE + LATITUDE|YEAR_factor, nugget=TRUE, data=analysis_dat))
-gam.check(cr1[[2]])
-summary(cr1[[1]]) #
-ce1 <- gamm(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP, k=10), random=list(YEAR_factor=~1), 
+gam.check(cr1[[2]]) #
+summary(cr1[[1]]) #AIC 36831.98
+
+crgam1 <- gam(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP) + s(YEAR_factor, bs="re"), 
+              correlation = corRatio(form=~ LONGITUDE + LATITUDE|YEAR_factor, nugget=TRUE),
+              data=analysis_dat)
+gam.check(crgam1)
+plot(crgam1)
+AIC(crgam1) #41780.86
+
+
+ce1 <- gamm(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP), random=list(YEAR_factor=~1), 
               correlation = corExp(form=~ LONGITUDE + LATITUDE|YEAR_factor, nugget=TRUE),
               data=analysis_dat)
 plot(Variogram(ce1$lme, form=~ LONGITUDE + LATITUDE|YEAR_factor, nugget=TRUE, data=analysis_dat))
 gam.check(ce1[[2]])
 summary(ce1[[1]])
+
+cegam1 <- gam(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP) + s(YEAR_factor, bs="re"), 
+               correlation = corExp(form=~ LONGITUDE + LATITUDE|YEAR_factor, nugget=TRUE),
+               data=analysis_dat)
+gam.check(cegam1)
+plot(cegam1)
+AIC(cegam1) #41780.86
