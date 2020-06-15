@@ -11,6 +11,7 @@ library(corrplot)
 library(mgcv)
 library(nlme)
 library(mgcViz)
+library(tidyverse)
 
 
 
@@ -22,7 +23,13 @@ sel.trawl.dat$SURF_TEMP[which(sel.trawl.dat$SURF_TEMP=="-9999")]<-NA
 sel.trawl.dat$WTCPUE[which(sel.trawl.dat$WTCPUE=="-9999")]<-NA
 sel.trawl.dat$NUMCPUE[which(sel.trawl.dat$NUMCPUE=="-9999")]<-NA
 
-#going to need to get into a wider database I think to get other sps in
+#convert latitude & longitude to x/y coordinates that reflect 
+# actual distances using the equal-distance Albers projection:
+# (I chose the parameters based on a 'rule of thumb' in the help file)
+x <- mapproject(sel.trawl.dat$LONGITUDE, sel.trawl.dat$LATITUDE, "albers", param=c(55.9, 60.8))
+sel.trawl.dat$long_albers <- x$x
+sel.trawl.dat$lat_albers <- x$y
+
 
 
 
@@ -80,7 +87,7 @@ early_wide <- early_wide %>% rename(WTCPUE_Chionoecetes_bairdi = "WTCPUE_Chionoe
 
 
 #exclusion criteria===============
-library(tidyverse)
+
 station_summary <- early_wide %>% group_by(STATION, LONGITUDE, LATITUDE) %>%
   summarize(n_yrs=n())
 
