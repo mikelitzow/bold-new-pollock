@@ -60,6 +60,9 @@ trawl.data <- rbind(trawl.data, temp1, temp2, temp3)
 #remove duplicate rows
 trawl.data <- trawl.data[!duplicated(trawl.data)]
 
+#save output for other scripts
+#write.csv(trawl.data, "data/select_trawl_data.csv", row.names = F)
+
 lat <- tapply(trawl.data$LATITUDE, list(trawl.data$YEAR, trawl.data$STATION), mean, na.rm=T)
 long <- tapply(trawl.data$LONGITUDE, list(trawl.data$YEAR, trawl.data$STATION), mean, na.rm=T)
 j <- apply(lat, 2, function(x) sum(is.na(x)))
