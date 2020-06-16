@@ -58,7 +58,7 @@ trawl.data <- rbind(trawl.data, temp1, temp2, temp3)
 #in particular, 2016 data are entered in both ebs2013_2016 and ebs2017_2018
 #and the header row is getting added in duplicate
 #remove duplicate rows
-trawl.data <- trawl.data[!duplicated(trawl.data)]
+trawl.data <- trawl.data[!duplicated(trawl.data),]
 
 #save output for other scripts
 #write.csv(trawl.data, "data/select_trawl_data.csv", row.names = F)
