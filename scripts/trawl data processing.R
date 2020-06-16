@@ -54,6 +54,11 @@ temp2 <- read.csv("data/cpue_nbs_trunc_allspecies_2018.csv")
 temp3 <- read.csv(("data/nbs_2019_preliminary.csv"))
 trawl.data <- rbind(trawl.data, temp1, temp2, temp3)
 
+#the steps above lead to some rows being duplicated
+#in particular, 2016 data are entered in both ebs2013_2016 and ebs2017_2018
+#and the header row is getting added in duplicate
+#remove duplicate rows
+trawl.data <- trawl.data[!duplicated(trawl.data)]
 
 lat <- tapply(trawl.data$LATITUDE, list(trawl.data$YEAR, trawl.data$STATION), mean, na.rm=T)
 long <- tapply(trawl.data$LONGITUDE, list(trawl.data$YEAR, trawl.data$STATION), mean, na.rm=T)
