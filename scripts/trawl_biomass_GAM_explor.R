@@ -113,12 +113,7 @@ t3 + geom_histogram(stat="count")
 
 
 
-#find 'global' best model======================================================================================
-
-
-
-
-#Using temperature not year======
+#plot covars======================================================================================
 
 plot(early_wide$YEAR, early_wide$BOT_TEMP)
 plot(early_wide$YEAR, early_wide$SURF_TEMP)
@@ -132,7 +127,7 @@ ggplot(early_wide, aes(YEAR, BOT_TEMP)) + geom_point()
 
 
 
-#add climate variables========
+#plot climate variables========
 # load environmental data
 climdat <- read.csv("data/climate data.csv")
 
@@ -150,87 +145,9 @@ p4 + geom_smooth() + geom_point()
 p5 <- ggplot(wide_join, aes(south.sst.amj, logCPUE_Gadus_chalcogrammus))
 p5 + geom_smooth() + geom_point()
 
-#will adding these other climate covariates work? Yes
-ti_temp_mod6 <- gam(logCPUE_Gadus_chalcogrammus ~ s(summer.cold.pool.extent) + s(YEAR) + s(BOT_TEMP) + s(BOT_DEPTH) +
-                      ti(LONGITUDE, LATITUDE) +
-                      ti(LONGITUDE, LATITUDE, YEAR, d=c(2,1)), 
-                    data=wide_join)
-plot(ti_temp_mod6)
-gam.check(ti_temp_mod6)
-summary(ti_temp_mod6)
 
 
 
-#now with other sps===========
-#as covariates
-
-
-#try w five species
-#shared vs sps specific?
-#picked somewhat haphazardly pollock, opilio, p cod, arrowtooth, yellowfin sole
-five_dat <- early_dat[which(early_dat$SCIENTIFIC=="Gadus chalcogrammus"|early_dat$SCIENTIFIC=="Chionoecetes opilio"|
-                              early_dat$SCIENTIFIC=="Gadus macrocephalus"|early_dat$SCIENTIFIC=="Atheresthes stomias"|
-                              early_dat$SCIENTIFIC=="Limanda aspera"),]
-
-p1 <- ggplot(five_dat, aes(YEAR, logCPUE))
-p1+ geom_point() + geom_smooth() + facet_wrap(~SCIENTIFIC) 
-
-
-
-#GAMS without year=====================================================================
-
-#Mike asked me to also try these with no main effect of year
-
-noy1 <- gam(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP), 
-              data=analysis_dat) #k too low
-
-
-noy2 <- gam(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP) +
-                t2(LONGITUDE, LATITUDE), 
-              data=analysis_dat) #k too low
-# noy2k <- gam(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP) +
-#               t2(LONGITUDE, LATITUDE, k=20), 
-#             data=analysis_dat)
-# gam.check(noy2k) #k too low
-# noy2k2 <- gam(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP) +
-#                t2(LONGITUDE, LATITUDE, k=23), 
-#              data=analysis_dat)
-# gam.check(noy2k2)#good k, bad hessian
-noy2k3 <- gam(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP) +
-                t2(LONGITUDE, LATITUDE, k=21), 
-              data=analysis_dat)
-gam.check(noy2k3) #GOOD
-plot(noy2k3)
-AIC(small2k_import, noy2k3) #w year still much better
-
-AIC(small1, small2, noy1, noy2) #models with year better so far
-
-noy3 <- gam(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP) +
-                t2(LONGITUDE, LATITUDE) + t2(LONGITUDE, LATITUDE, by=factor(YEAR)), 
-              data=analysis_dat)
-
-
-noy4 <- gam(logCPUE_Gadus_chalcogrammus ~ s(BOT_TEMP) +
-                t2(LONGITUDE, LATITUDE) + t2(LONGITUDE, LATITUDE, BOT_TEMP), 
-              data=analysis_dat) #k too low
-
-
-noy4.5 <- gam(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP) +
-                  t2(LONGITUDE, LATITUDE, BOT_TEMP), 
-                data=analysis_dat) #k too low
-
-noy4.6 <- gam(logCPUE_Gadus_chalcogrammus ~  BOT_TEMP +
-                  t2(LONGITUDE, LATITUDE, BOT_TEMP), 
-                data=analysis_dat)
-summary(noy4.6)
-gam.check(noy4.6)#k too low
-
-noy5 <- gam(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP) +
-                t2(LONGITUDE, LATITUDE, by=factor(YEAR)), 
-              data=analysis_dat) #bad hessian, k too low
-noy5 <- bam(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP) +
-              t2(LONGITUDE, LATITUDE, by=factor(YEAR), k=20), 
-            data=analysis_dat) #
 
 
 #GAMs w year random===================================================================================
@@ -658,6 +575,7 @@ ce1 <- gamm(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP), random=list(YEAR_factor=
 plot(Variogram(ce1$lme, form=~ LONGITUDE + LATITUDE|YEAR_factor, nugget=TRUE, data=analysis_dat))
 gam.check(ce1[[2]])
 summary(ce1[[1]])
+plot(ce1[[2]])
 
 cegam1 <- gam(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP) + s(YEAR_factor, bs="re"), 
                correlation = corExp(form=~ LONGITUDE + LATITUDE|YEAR_factor, nugget=TRUE),
