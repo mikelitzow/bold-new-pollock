@@ -15,13 +15,25 @@ library(tidyverse)
 
 
 
-sel.trawl.dat <- read.csv("data/select_trawl_dat.csv", row.names = 1)
+sel.trawl.dat <- read.csv("data/select_trawl_dat.csv", stringsAsFactors = FALSE, row.names = 1)
 
 sel.trawl.dat$YEAR_factor <- as.factor(sel.trawl.dat$YEAR)
 sel.trawl.dat$BOT_TEMP[which(sel.trawl.dat$BOT_TEMP=="-9999")]<-NA
 sel.trawl.dat$SURF_TEMP[which(sel.trawl.dat$SURF_TEMP=="-9999")]<-NA
 sel.trawl.dat$WTCPUE[which(sel.trawl.dat$WTCPUE=="-9999")]<-NA
 sel.trawl.dat$NUMCPUE[which(sel.trawl.dat$NUMCPUE=="-9999")]<-NA
+
+sel.trawl.dat$LATITUDE  <- as.numeric(sel.trawl.dat$LATITUDE)
+sel.trawl.dat$LONGITUDE <- as.numeric(sel.trawl.dat$LONGITUDE)
+sel.trawl.dat$YEAR <- as.numeric(sel.trawl.dat$YEAR )
+sel.trawl.dat$WTCPUE <- as.numeric(sel.trawl.dat$WTCPUE)
+sel.trawl.dat$NUMCPUE <- as.numeric(sel.trawl.dat$NUMCPUE)
+sel.trawl.dat$BOT_DEPTH <- as.numeric(sel.trawl.dat$BOT_DEPTH )
+sel.trawl.dat$BOT_TEMP <- as.numeric(sel.trawl.dat$BOT_TEMP)
+sel.trawl.dat$SURF_TEMP <- as.numeric(sel.trawl.dat$SURF_TEMP)
+
+
+sel.trawl.dat$logCPUE <- log(sel.trawl.dat$WTCPUE + 1)
 
 #convert latitude & longitude to x/y coordinates that reflect 
 # actual distances using the equal-distance Albers projection:
@@ -83,6 +95,7 @@ early_wide <- early_wide %>% rename(WTCPUE_Chionoecetes_bairdi = "WTCPUE_Chionoe
   logCPUE_Hippoglossoides_elassodon = "logCPUE_Hippoglossoides elassodon",      
   logCPUE_Pleuronectes_quadrituberculatus = "logCPUE_Pleuronectes quadrituberculatus" ,
   logCPUE_Lepidopsetta_polyxystra = "logCPUE_Lepidopsetta polyxystra") 
+
 
 
 
@@ -516,21 +529,6 @@ rangam6k <- gam(logCPUE_Gadus_chalcogrammus ~  BOT_TEMP +
              data=analysis_dat)
 
 
-#what about with poisson?
-
-poi1 <- gam(WTCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP) +
-                   t2(LONGITUDE, LATITUDE)+ s(YEAR_factor, bs="re"), familiy="poisson",
-                 data=analysis_dat) 
-gam.check(poi1) #nice
-logpoi1 <- gam(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP) +
-              t2(LONGITUDE, LATITUDE)+ s(YEAR_factor, bs="re"), familiy="poisson",
-            data=analysis_dat) 
-gam.check(logpoi1) #k too low
-logpoi1k <- gam(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP) +
-                 t2(LONGITUDE, LATITUDE, k=20)+ s(YEAR_factor, bs="re"), familiy="poisson",
-               data=analysis_dat) #GOOD
-gam.check(logpoi1k)
-AIC(poi1, logpoi1, rangam2k8, rangam2k9) #much worse
 
 
 
@@ -583,3 +581,120 @@ cegam1 <- gam(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP) + s(YEAR_factor, bs="re
 gam.check(cegam1)
 plot(cegam1)
 AIC(cegam1) #41780.86
+
+
+
+#cor models w both periods========================================================================================
+
+#both periods inclusion criteria
+
+both_dat <- sel.trawl.dat
+both_dat <- both_dat[,-c(9,11)] #drop columns that repeat info
+both_dat <- both_dat[!duplicated(both_dat),] #few duplicated rows, remove them
+
+#widen dataframe to have columns for each sps
+
+both_wide <-both_dat %>% pivot_wider(names_from=SCIENTIFIC, 
+                                        values_from=c(WTCPUE, NUMCPUE, logCPUE)) #
+#eek this causes some bad column names!
+both_wide <- both_wide %>% rename(WTCPUE_Chionoecetes_bairdi = "WTCPUE_Chionoecetes bairdi",            
+                                    WTCPUE_Atheresthes_stomia = "WTCPUE_Atheresthes stomias",             
+                                    WTCPUE_Hippoglossus_stenolepis = "WTCPUE_Hippoglossus stenolepis",
+                                    WTCPUE_Limanda_aspera = "WTCPUE_Limanda aspera",         
+                                    WTCPUE_Lepidopsetta_sp= "WTCPUE_Lepidopsetta sp.",               
+                                    WTCPUE_Chionoecetes_opilio = "WTCPUE_Chionoecetes opilio",             
+                                    WTCPUE_Gadus_macrocephalus = "WTCPUE_Gadus macrocephalus",            
+                                    WTCPUE_Hippoglossoides_elassodon = "WTCPUE_Hippoglossoides elassodon",  
+                                    WTCPUE_Pleuronectes_quadrituberculatus = "WTCPUE_Pleuronectes quadrituberculatus", 
+                                    WTCPUE_Lepidopsetta_polyxystra = "WTCPUE_Lepidopsetta polyxystra", 
+                                    WTCPUE_Gadus_chalcogrammus = "WTCPUE_Gadus chalcogrammus", 
+                                    NUMCPUE_Gadus_chalcogrammus = "NUMCPUE_Gadus chalcogrammus",        
+                                    NUMCPUE_Chionoecetes_bairdi = "NUMCPUE_Chionoecetes bairdi",            
+                                    NUMCPUE_Atheresthes_stomias = "NUMCPUE_Atheresthes stomias",           
+                                    NUMCPUE_Hippoglossus_stenolepis = "NUMCPUE_Hippoglossus stenolepis",        
+                                    NUMCPUE_Limanda_aspera = "NUMCPUE_Limanda aspera",                
+                                    NUMCPUE_Lepidopsetta_sp = "NUMCPUE_Lepidopsetta sp.",               
+                                    NUMCPUE_Chionoecetes_opilio = "NUMCPUE_Chionoecetes opilio",           
+                                    NUMCPUE_Gadus_macrocephalus = "NUMCPUE_Gadus macrocephalus",            
+                                    NUMCPUE_Hippoglossoides_elassodon = "NUMCPUE_Hippoglossoides elassodon",     
+                                    NUMCPUE_Pleuronectes_quadrituberculatus = "NUMCPUE_Pleuronectes quadrituberculatus",
+                                    NUMCPUE_Lepidopsetta_polyxystra = "NUMCPUE_Lepidopsetta polyxystra",
+                                    logCPUE_Gadus_chalcogrammus = "logCPUE_Gadus chalcogrammus",        
+                                    logCPUE_Chionoecetes_bairdi = "logCPUE_Chionoecetes bairdi",           
+                                    logCPUE_Atheresthes_stomias = "logCPUE_Atheresthes stomias",            
+                                    logCPUE_Hippoglossus_stenolepis = "logCPUE_Hippoglossus stenolepis", 
+                                    logCPUE_Limanda_aspera = "logCPUE_Limanda aspera",        
+                                    logCPUE_Lepidopsetta_sp = "logCPUE_Lepidopsetta sp.",              
+                                    logCPUE_Chionoecetes_opilio = "logCPUE_Chionoecetes opilio",            
+                                    logCPUE_Gadus_macrocephalus = "logCPUE_Gadus macrocephalus",           
+                                    logCPUE_Hippoglossoides_elassodon = "logCPUE_Hippoglossoides elassodon",      
+                                    logCPUE_Pleuronectes_quadrituberculatus = "logCPUE_Pleuronectes quadrituberculatus" ,
+                                    logCPUE_Lepidopsetta_polyxystra = "logCPUE_Lepidopsetta polyxystra") 
+
+station_summary_both <- both_wide %>% group_by(STATION, LONGITUDE, LATITUDE) %>%
+  summarize(n_yrs=n())
+
+station_summary2_both <- both_wide %>% group_by(STATION) %>%
+  summarize(n_yrs=n())
+
+joinboth <- left_join(both_wide, station_summary2_both)
+
+periods_dat <- joinboth[which(joinboth$n_yrs>5),]
+
+periods_dat$period <- NA
+
+periods_dat$period[which(periods_dat$YEAR<2014)] <- "early"
+periods_dat$period[which(periods_dat$YEAR>2013)] <- "late"
+
+#===***===***===
+
+pg1 <- gamm(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP, by=period, bs="fs"), random=list(YEAR_factor=~1), 
+            correlation = corGaus(form=~ LONGITUDE + LATITUDE|YEAR_factor, nugget=TRUE),
+            data=periods_dat)
+plot(Variogram(pg1$lme, form=~ LONGITUDE + LATITUDE|YEAR_factor, nugget=TRUE, data=periods_dat))
+gam.check(pg1[[2]])
+summary(pg1[[1]]) #
+
+pggam1 <- gam(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP, by=period, bs="fs") + s(YEAR_factor, bs="re"), 
+              correlation = corGaus(form=~ LONGITUDE + LATITUDE|YEAR_factor, nugget=TRUE),
+              data=periods_dat)
+gam.check(pggam1)
+plot(pggam1)
+AIC(pggam1) #
+
+ps1 <- gamm(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP, by=period, bs="fs"), random=list(YEAR_factor=~1), 
+            correlation = corSpher(form=~ LONGITUDE + LATITUDE|YEAR_factor, nugget=TRUE),
+            data=periods_dat) #
+
+pr1 <- gamm(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP, by=period, bs="fs"), random=list(YEAR_factor=~1), 
+            correlation = corRatio(form=~ LONGITUDE + LATITUDE|YEAR_factor, nugget=TRUE),
+            data=periods_dat)
+plot(Variogram(pr1$lme, form=~ LONGITUDE + LATITUDE|YEAR_factor, nugget=TRUE, data=periods_dat))
+gam.check(pr1[[2]]) #
+summary(cr1[[1]]) #
+
+prgam1 <- gam(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP, by=period, bs="fs") + s(YEAR_factor, bs="re"), 
+              correlation = corRatio(form=~ LONGITUDE + LATITUDE|YEAR_factor, nugget=TRUE),
+              data=periods_dat)
+gam.check(prgam1)
+plot(prgam1)
+AIC(prgam1) #
+
+
+pe1 <- gamm(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP, by=period, bs="fs"), random=list(YEAR_factor=~1), 
+            correlation = corExp(form=~ LONGITUDE + LATITUDE|YEAR_factor, nugget=TRUE),
+            data=analysis_dat)
+plot(Variogram(pe1$lme, form=~ LONGITUDE + LATITUDE|YEAR_factor, nugget=TRUE, data=periods_dat))
+gam.check(pe1[[2]])
+summary(pe1[[1]])
+plot(pe1[[2]])
+
+pegam1 <- gam(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP, by=period, bs="fs") + s(YEAR_factor, bs="re"), 
+              correlation = corExp(form=~ LONGITUDE + LATITUDE|YEAR_factor, nugget=TRUE),
+              data=periods_dat)
+gam.check(pegam1)
+plot(pegam1)
+AIC(pegam1) #
+
+
+
