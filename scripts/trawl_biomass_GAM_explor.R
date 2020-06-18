@@ -646,34 +646,199 @@ periods_dat$period <- NA
 periods_dat$period[which(periods_dat$YEAR<2014)] <- "early"
 periods_dat$period[which(periods_dat$YEAR>2013)] <- "late"
 
+#deal w missing data=================
+
+table(periods_dat$YEAR[which(is.na(periods_dat$BOT_TEMP)==TRUE)])
+#all years have some NAs in bottom temp, a LOT in 1994
+
+table(periods_dat$YEAR[which(is.na(periods_dat$BOT_TEMP)==FALSE)])
+#but far far more with data, even in 94
+
+tempmod82 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers), data=periods_dat[which(periods_dat$YEAR==1982),] )
+summary(tempmod82)
+gam.check(tempmod82)
+
+tempmod83 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers), data=periods_dat[which(periods_dat$YEAR==1983),] )
+summary(tempmod83)
+gam.check(tempmod83)
+
+tempmod84 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers), data=periods_dat[which(periods_dat$YEAR==1984),] )
+summary(tempmod84)
+gam.check(tempmod84)
+
+tempmod85 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers), data=periods_dat[which(periods_dat$YEAR==1985),] )
+summary(tempmod85)
+gam.check(tempmod85)
+
+tempmod86 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers), data=periods_dat[which(periods_dat$YEAR==1986),] )
+summary(tempmod86)
+gam.check(tempmod86)
+
+tempmod87 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers), data=periods_dat[which(periods_dat$YEAR==1987),] )
+summary(tempmod87)
+gam.check(tempmod87)
+
+tempmod88 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers), data=periods_dat[which(periods_dat$YEAR==1988),] )
+summary(tempmod88)
+gam.check(tempmod88)
+
+tempmod89 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers), data=periods_dat[which(periods_dat$YEAR==1989),] )
+summary(tempmod89)
+gam.check(tempmod89)
+
+tempmod90 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers), data=periods_dat[which(periods_dat$YEAR==1990),] )
+summary(tempmod90)
+gam.check(tempmod90)
+
+tempmod91 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers), data=periods_dat[which(periods_dat$YEAR==1991),]  )
+summary(tempmod91)
+gam.check(tempmod91)
+
+tempmod92 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers), data=periods_dat[which(periods_dat$YEAR==1992),]  )
+summary(tempmod92)
+gam.check(tempmod92)
+
+tempmod93 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers), data=periods_dat[which(periods_dat$YEAR==1993),]  )
+summary(tempmod93)
+gam.check(tempmod93)
+
+tempmod94 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers), data=periods_dat[which(periods_dat$YEAR==1994),]  )
+summary(tempmod94)
+gam.check(tempmod94)
+
+tempmod95 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers), data=periods_dat[which(periods_dat$YEAR==1995),]  )
+summary(tempmod95)
+gam.check(tempmod95)
+
+tempmod96 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers), data=periods_dat[which(periods_dat$YEAR==1996),]  )
+summary(tempmod96)
+gam.check(tempmod96)
+
+tempmod97 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers), data=periods_dat[which(periods_dat$YEAR==1997),]  )
+summary(tempmod97)
+gam.check(tempmod97)
+
+tempmod98 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers), data=periods_dat[which(periods_dat$YEAR==1998),]  )
+summary(tempmod98)
+gam.check(tempmod98)
+
+tempmod99 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers), data=periods_dat[which(periods_dat$YEAR==1999),]  )
+summary(tempmod99)
+gam.check(tempmod99)
+
+tempmod00 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers), data=periods_dat[which(periods_dat$YEAR==2000),]  )
+summary(tempmod00)
+gam.check(tempmod00)
+
+tempmod01 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers), data=periods_dat[which(periods_dat$YEAR==2001),]  )
+summary(tempmod01)
+gam.check(tempmod01)
+
+tempmod02 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers), data=periods_dat[which(periods_dat$YEAR==2002),]  )
+summary(tempmod02)
+gam.check(tempmod02)
+
+tempmod03 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers), data=periods_dat[which(periods_dat$YEAR==2003),]  )
+summary(tempmod03)
+gam.check(tempmod03)
+
+tempmod04 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers), data=periods_dat[which(periods_dat$YEAR==2004),]  )
+summary(tempmod04)
+gam.check(tempmod04)
+
+tempmod05 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers), data=periods_dat[which(periods_dat$YEAR==2005),]  )
+summary(tempmod05)
+gam.check(tempmod05)
+
+tempmod06 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers), data=periods_dat[which(periods_dat$YEAR==2006),]  )
+summary(tempmod06)
+gam.check(tempmod06)
+
+tempmod07 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers), data=periods_dat[which(periods_dat$YEAR==2007),]  )
+summary(tempmod07)
+gam.check(tempmod07)
+
+tempmod08 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers), data=periods_dat[which(periods_dat$YEAR==2008),]  )
+summary(tempmod08)
+gam.check(tempmod08)
+
+tempmod09 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers), data=periods_dat[which(periods_dat$YEAR==2009),]  )
+summary(tempmod09)
+gam.check(tempmod09)
+
+tempmod10 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers), data=periods_dat[which(periods_dat$YEAR==2010),]  )
+summary(tempmod10)
+gam.check(tempmod10)
+
+tempmod11 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers), data=periods_dat[which(periods_dat$YEAR==2011),] )
+summary(tempmod11)
+gam.check(tempmod11)
+
+tempmod12 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers), data=periods_dat[which(periods_dat$YEAR==2012),] )
+summary(tempmod12)
+gam.check(tempmod12)
+
+tempmod13 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers), data=periods_dat[which(periods_dat$YEAR==2013),] )
+summary(tempmod13)
+gam.check(tempmod13)
+
+tempmod14 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers), data=periods_dat[which(periods_dat$YEAR==2014),] )
+summary(tempmod14)
+gam.check(tempmod14)
+
+tempmod15 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers), data=periods_dat[which(periods_dat$YEAR==2015),] )
+summary(tempmod15)
+gam.check(tempmod15)
+
+tempmod16 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers), data=periods_dat[which(periods_dat$YEAR==2016),] )
+summary(tempmod16)
+gam.check(tempmod16)
+
+tempmod17 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers), data=periods_dat[which(periods_dat$YEAR==2017),] )
+summary(tempmod17)
+gam.check(tempmod17)
+
+tempmod18 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers), data=periods_dat[which(periods_dat$YEAR==2018),] )
+summary(tempmod18)
+gam.check(tempmod18)
+
+tempmod19 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers), data=periods_dat[which(periods_dat$YEAR==2019),] )
+summary(tempmod19)
+gam.check(tempmod19)
+
+
+
+predtest <- predict.gam(tempmod)
+
 #===***===***===
 
-pg1 <- gamm(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP, by=period, bs="fs"), random=list(YEAR_factor=~1), 
+pg1 <- gamm(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP, by=as.factor(period), bs="fs"), random=list(YEAR_factor=~1), 
             correlation = corGaus(form=~ LONGITUDE + LATITUDE|YEAR_factor, nugget=TRUE),
             data=periods_dat)
 plot(Variogram(pg1$lme, form=~ LONGITUDE + LATITUDE|YEAR_factor, nugget=TRUE, data=periods_dat))
 gam.check(pg1[[2]])
-summary(pg1[[1]]) #
+summary(pg1[[1]]) #44182.43 is this for the whole model though??
 
-pggam1 <- gam(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP, by=period, bs="fs") + s(YEAR_factor, bs="re"), 
+pggam1 <- gam(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP, by=as.factor(period), bs="fs") + s(YEAR_factor, bs="re"), 
               correlation = corGaus(form=~ LONGITUDE + LATITUDE|YEAR_factor, nugget=TRUE),
               data=periods_dat)
 gam.check(pggam1)
 plot(pggam1)
-AIC(pggam1) #
+AIC(pggam1) #49624.98
+summary(pggam1)
 
-ps1 <- gamm(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP, by=period, bs="fs"), random=list(YEAR_factor=~1), 
+ps1 <- gamm(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP, by=as.factor(period), bs="fs"), random=list(YEAR_factor=~1), 
             correlation = corSpher(form=~ LONGITUDE + LATITUDE|YEAR_factor, nugget=TRUE),
             data=periods_dat) #
 
-pr1 <- gamm(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP, by=period, bs="fs"), random=list(YEAR_factor=~1), 
+pr1 <- gamm(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP, by=as.factor(period), bs="fs"), random=list(YEAR_factor=~1), 
             correlation = corRatio(form=~ LONGITUDE + LATITUDE|YEAR_factor, nugget=TRUE),
             data=periods_dat)
 plot(Variogram(pr1$lme, form=~ LONGITUDE + LATITUDE|YEAR_factor, nugget=TRUE, data=periods_dat))
 gam.check(pr1[[2]]) #
 summary(cr1[[1]]) #
 
-prgam1 <- gam(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP, by=period, bs="fs") + s(YEAR_factor, bs="re"), 
+prgam1 <- gam(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP, by=as.factor(period), bs="fs") + s(YEAR_factor, bs="re"), 
               correlation = corRatio(form=~ LONGITUDE + LATITUDE|YEAR_factor, nugget=TRUE),
               data=periods_dat)
 gam.check(prgam1)
@@ -681,15 +846,15 @@ plot(prgam1)
 AIC(prgam1) #
 
 
-pe1 <- gamm(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP, by=period, bs="fs"), random=list(YEAR_factor=~1), 
+pe1 <- gamm(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP, by=as.factor(period), bs="fs"), random=list(YEAR_factor=~1), 
             correlation = corExp(form=~ LONGITUDE + LATITUDE|YEAR_factor, nugget=TRUE),
-            data=analysis_dat)
+            data=periods_dat)
 plot(Variogram(pe1$lme, form=~ LONGITUDE + LATITUDE|YEAR_factor, nugget=TRUE, data=periods_dat))
 gam.check(pe1[[2]])
 summary(pe1[[1]])
 plot(pe1[[2]])
 
-pegam1 <- gam(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP, by=period, bs="fs") + s(YEAR_factor, bs="re"), 
+pegam1 <- gam(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP, by=as.factor(period), bs="fs") + s(YEAR_factor, bs="re"), 
               correlation = corExp(form=~ LONGITUDE + LATITUDE|YEAR_factor, nugget=TRUE),
               data=periods_dat)
 gam.check(pegam1)
