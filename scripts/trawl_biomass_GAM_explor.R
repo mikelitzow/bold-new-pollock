@@ -1194,9 +1194,20 @@ missingall <- rbind(missing82, missing83, missing84, missing85, missing86, missi
     missing16, missing17, missing18, missing19)
 
 
-nona <- periods_dat$YEAR[which(is.na(periods_dat$BOT_TEMP)==FALSE)]
+nona <- periods_dat[which(is.na(periods_dat$BOT_TEMP)==FALSE),]
 
-periods_analysis_dat <- rbind(nona, missingall)
+filled <- rbind(nona, missingall)
+
+
+#calculate anomalies and means=====================================================================
+
+#annual 'global' (w/in dataset) mean
+btempmeans <- filled %>% group_by(STATION) %>% summarize(mean_station_bottemp=mean(BOT_TEMP))
+filled <- left_join(filled, btempmeans)
+
+filled$bottemp_anom <- filled$BOT_TEMP - filled$mean_station_bottemp
+
+periods_analysis_dat <- filled
 
 #===***===***===
 
