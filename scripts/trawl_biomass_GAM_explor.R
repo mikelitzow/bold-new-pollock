@@ -12,6 +12,7 @@ library(mgcv)
 library(nlme)
 library(mgcViz)
 library(tidyverse)
+library(mapproj)
 
 
 
@@ -1213,7 +1214,7 @@ periods_analysis_dat <- filled
 
 pg1 <- gamm(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP, by=as.factor(period), bs="fs"), random=list(YEAR_factor=~1), 
             correlation = corGaus(form=~ LONGITUDE + LATITUDE|YEAR_factor, nugget=TRUE),
-            data=periods_dat)
+            data=periods_analysis_dat)
 plot(Variogram(pg1$lme, form=~ LONGITUDE + LATITUDE|YEAR_factor, nugget=TRUE, data=periods_analysis_dat))
 gam.check(pg1[[2]])
 summary(pg1[[1]]) #44182.43 is this for the whole model though??
@@ -1261,4 +1262,100 @@ plot(pegam1)
 AIC(pegam1) #
 
 
+#models w temp and temp anom==================================================================
 
+tmodbase <- gamm(logCPUE_Gadus_chalcogrammus ~  ti(mean_station_bottemp, BOT_DEPTH) +
+                s(bottemp_anom, by=as.factor(period), bs="fs"), random=list(YEAR_factor=~1), 
+              data=periods_analysis_dat)
+plot(Variogram(tmodbase$lme, form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE, data=periods_analysis_dat))
+#is there any spatial correlation though?
+plot(Variogram(tmodbase$lme, form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE, data=periods_analysis_dat))
+
+
+tgambase <- gam(logCPUE_Gadus_chalcogrammus ~  ti(mean_station_bottemp, BOT_DEPTH) +
+                   s(bottemp_anom, by=as.factor(period), bs="fs") + s(YEAR_factor, bs="re"), 
+                 data=periods_analysis_dat)
+
+res2 <- residuals(tgambase, type = "pearson")
+#var <- variogram(res2 ~ long_albers + lat_albers, data=periods_analysis_dat)    
+plot(var)
+tgamdat <- periods_analysis_dat[is.na(periods_analysis_dat$logCPUE_Gadus_chalcogrammus)==FALSE,]
+tgamdat$residual <- res2
+z1 <- ggplot(tgamdat[which(tgamdat$YEAR==2000),], aes(LONGITUDE, LATITUDE, colour=residual))
+z1 + geom_point() +   scale_colour_gradient2(low="blue", high="red", guide="colorbar")
+
+z1 <- ggplot(tgamdat[which(tgamdat$YEAR==2010),], aes(LONGITUDE, LATITUDE, colour=residual))
+z1 + geom_point() +   scale_colour_gradient2(low="blue", high="red", guide="colorbar")
+
+z1 <- ggplot(tgamdat[which(tgamdat$YEAR==1990),], aes(LONGITUDE, LATITUDE, colour=residual))
+z1 + geom_point() +   scale_colour_gradient2(low="blue", high="red", guide="colorbar")
+#yes looks like spatial cor!
+
+tmod1 <- gamm(logCPUE_Gadus_chalcogrammus ~  ti(mean_station_bottemp, BOT_DEPTH) +
+                s(bottemp_anom, by=as.factor(period), bs="fs"), random=list(YEAR_factor=~1), 
+           correlation = corGaus(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE),
+           data=periods_analysis_dat)
+summary(tmod1[[1]])
+summary(tmod1[[2]])
+plot(tmod1[[2]])
+plot(Variogram(tmod1$lme, form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE, data=periods_analysis_dat))
+
+
+tmod1.1 <- gam(logCPUE_Gadus_chalcogrammus ~  ti(mean_station_bottemp, BOT_DEPTH) +
+                s(bottemp_anom, by=as.factor(period), bs="fs") + s(YEAR_factor, bs="re"), 
+              correlation = corGaus(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE),
+              data=periods_analysis_dat)
+summary(tmod1.1)
+plot(tmod1.1)
+
+
+
+tmod1R <- gamm(logCPUE_Gadus_chalcogrammus ~  ti(mean_station_bottemp, BOT_DEPTH) +
+                s(bottemp_anom, by=as.factor(period), bs="fs"), random=list(YEAR_factor=~1), 
+              correlation = corRatio(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE),
+              data=periods_analysis_dat)
+summary(tmod1R[[1]])
+summary(tmod1R[[2]])
+plot(tmod1R[[2]])
+plot(Variogram(tmod1R$lme, form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE, data=periods_analysis_dat))
+
+tmod1R.1 <- gam(logCPUE_Gadus_chalcogrammus ~  ti(mean_station_bottemp, BOT_DEPTH) +
+                 s(bottemp_anom, by=as.factor(period), bs="fs") + s(YEAR_factor, bs="re"), 
+               correlation = corRatio(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE),
+               data=periods_analysis_dat)
+summary(tmod1R.1)
+plot(tmod1R.1)
+
+
+
+tmod1E <- gamm(logCPUE_Gadus_chalcogrammus ~  ti(mean_station_bottemp, BOT_DEPTH) +
+                 s(bottemp_anom, by=as.factor(period), bs="fs"), random=list(YEAR_factor=~1), 
+               correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE),
+               data=periods_analysis_dat)
+plot(Variogram(tmod1E$lme, form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE, data=periods_analysis_dat))
+
+tmod1E.1 <- gam(logCPUE_Gadus_chalcogrammus ~  ti(mean_station_bottemp, BOT_DEPTH) +
+                 s(bottemp_anom, by=as.factor(period), bs="fs") + s(YEAR_factor, bs="re"), 
+               correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE),
+               data=periods_analysis_dat)
+summary(tmod1E.1)
+plot(tmod1E.1)
+
+#all the AICs are the same for all of these with gam??
+# E is the best of the others
+
+#since E is best repeat that model w/o period, compare
+
+tmod1Edropp <- gamm(logCPUE_Gadus_chalcogrammus ~  ti(mean_station_bottemp, BOT_DEPTH) +
+                 s(bottemp_anom), random=list(YEAR_factor=~1), 
+               correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE),
+               data=periods_analysis_dat)
+
+AIC(tmod1E[[1]], tmod1Edropp[[1]])
+
+tmod1E.1dropp <- gam(logCPUE_Gadus_chalcogrammus ~  ti(mean_station_bottemp, BOT_DEPTH) +
+                  s(bottemp_anom) + s(YEAR_factor, bs="re"), 
+                correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE),
+                data=periods_analysis_dat)
+summary(tmod1E.1)
+AIC(tmod1E.1, tmod1E.1dropp) #in both cases model WITH period does better
