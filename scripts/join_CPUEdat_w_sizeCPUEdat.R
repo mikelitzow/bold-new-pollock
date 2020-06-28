@@ -25,14 +25,16 @@ sex.dat$SEX <- as.factor(sex.dat$SEX)
 sex.dat$LENGTH[which(sex.dat$LENGTH=="-9")]<-NA
 sex.dat$SEX[which(sex.dat$SEX=="-9")]<-NA
 
+indiv_pollock <- read.csv("data/survey data/poll_specimen_haul.csv", stringsAsFactors = TRUE)
 
+indiv_pollock$SEX <- as.factor(indiv_pollock$SEX)
+indiv_pollock$AGE <- as.factor(indiv_pollock$AGE)
 
-
-
-
-
-
-
+indiv_pollock <- indiv_pollock %>%
+  separate(CRUISE, 
+           c("Year", "cruisenum"), 
+           sep=cumsum(c(4,2)))
+indiv_pollock$Year <- as.factor(indiv_pollock$Year)
 
 
 
