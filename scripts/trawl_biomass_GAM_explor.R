@@ -13,6 +13,7 @@ library(nlme)
 library(mgcViz)
 library(tidyverse)
 library(mapproj)
+library(visreg)
 
 
 
@@ -1340,6 +1341,8 @@ tmod1E.1 <- gam(logCPUE_Gadus_chalcogrammus ~  ti(mean_station_bottemp, BOT_DEPT
                data=periods_analysis_dat)
 summary(tmod1E.1)
 plot(tmod1E.1)
+visreg(tmod1E.1, "bottemp_anom", "period") #no data with low anom in late period??
+visreg(tmod1E.1, "mean_station_bottemp", "BOT_DEPTH")
 
 #all the AICs are the same for all of these with gam??
 # E is the best of the others
@@ -1358,4 +1361,6 @@ tmod1E.1dropp <- gam(logCPUE_Gadus_chalcogrammus ~  ti(mean_station_bottemp, BOT
                 correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE),
                 data=periods_analysis_dat)
 summary(tmod1E.1)
+
+
 AIC(tmod1E.1, tmod1E.1dropp) #in both cases model WITH period does better
