@@ -1364,3 +1364,39 @@ summary(tmod1E.1)
 
 
 AIC(tmod1E.1, tmod1E.1dropp) #in both cases model WITH period does better
+
+
+#try plotting spatially
+
+res3 <- residuals(tmod1E.1, type = "pearson")
+
+tgamdat3 <- periods_analysis_dat[is.na(periods_analysis_dat$logCPUE_Gadus_chalcogrammus)==FALSE,]
+tgamdat3$residual <- res3
+z1 <- ggplot(tgamdat3[which(tgamdat3$YEAR==2000),], aes(LONGITUDE, LATITUDE, colour=residual))
+z1 + geom_point() +   scale_colour_gradient2(low="blue", high="red", guide="colorbar")
+
+z1 <- ggplot(tgamdat3[which(tgamdat3$YEAR==2010),], aes(LONGITUDE, LATITUDE, colour=residual))
+z1 + geom_point() +   scale_colour_gradient2(low="blue", high="red", guide="colorbar")
+
+z1 <- ggplot(tgamdat3[which(tgamdat3$YEAR==1990),], aes(LONGITUDE, LATITUDE, colour=residual))
+z1 + geom_point() +   scale_colour_gradient2(low="blue", high="red", guide="colorbar")
+
+z1 <- ggplot(tgamdat3, aes(LONGITUDE, LATITUDE, colour=residual))
+z1 + geom_point() +   scale_colour_gradient2(low="blue", high="red", guide="colorbar")
+
+library("rnaturalearth")
+library("rnaturalearthdata")
+library( "ggspatial" )
+library("sf")
+
+world <- ne_countries(scale = "medium", returnclass = "sf")
+ggplot(data = world) +
+  geom_sf() +
+  coord_sf(xlim = c(-180, -155), ylim = c(53, 63), expand = TRUE) +
+  annotation_scale(location = "bl", width_hint = 0.5) +
+  annotation_north_arrow(location = "bl", which_north = "true", 
+                         pad_x = unit(0.75, "in"), pad_y = unit(0.5, "in"),
+                         style = north_arrow_fancy_orienteering) +  
+  geom_point(aes(LONGITUDE, LATITUDE, colour=residual), data=tgamdat3) +   
+  scale_colour_gradient2(low="blue", high="red", guide="colorbar")
+
