@@ -36,6 +36,15 @@ ex5 + geom_point() + facet_wrap(~bin, scales="free")
 ex5.5 <- ggplot(binmeta, aes( lat_albers, log_sum_WGTCPUE_LEN))
 ex5.5 + geom_point() + facet_wrap(~bin, scales="free")
 
+hist(binmeta$n) #bins with just one fish very common
+
+
+binmeta$STATION <- as.factor(binmeta$STATION)
+binmeta$VESSEL <- as.factor(binmeta$VESSEL)
+binmeta$CRUISE <- as.factor(binmeta$CRUISE)
+binmeta$HAUL <- as.factor(binmeta$HAUL)
+binmeta$bin <- as.factor(binmeta$bin)
+
 
 
 
