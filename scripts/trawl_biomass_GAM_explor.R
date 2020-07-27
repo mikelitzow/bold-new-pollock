@@ -45,8 +45,6 @@ sel.trawl.dat$long_albers <- x$x
 sel.trawl.dat$lat_albers <- x$y
 
 
-
-
 #select data======================================================
 
 #we only want data pre2014
