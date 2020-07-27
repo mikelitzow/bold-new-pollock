@@ -90,7 +90,17 @@ trawljoin$bin[which(trawljoin$LENGTH>300 & trawljoin$LENGTH<=400)]<- "300-400"
 trawljoin$bin[which(trawljoin$LENGTH>400 & trawljoin$LENGTH<=500)]<- "400-500"
 trawljoin$bin[which(trawljoin$LENGTH>500)]<- "500+"
 
+#certain number have NA in both SEX and LENGTH which causes some issues
+trawljoin <- trawljoin[which(is.finite(trawljoin$SEX)==TRUE),]
+trawljoin <- droplevels(trawljoin)
 
-binneddat <- trawljoin %>% group_by(YEAR, STATION, STRATUM, SCIENTIFIC, VESSEL, CRUISE, HAUL, bin) %>%
+binneddat <- trawljoin %>% group_by(YEAR, STATION, STRATUM, SCIENTIFIC, VESSEL, CRUISE, HAUL, SEX, bin) %>%
   summarize(bin_sum_WGTCPUE_LEN=sum(WGTCPUE_LENGTH, na.rm=TRUE), bin_sum_NUMCPUE_LEN=sum(NUMCPUE_LENGTH, na.rm=TRUE),
-            n=n())
+            n=n()) 
+
+
+binjoin <- left_join(trawljoin[,c(1:21)], binneddat) #this creates a ton of duplicate rows
+#I tried everything I could think of to stop them form being created but can't figure it out
+#I'll just remove the duplicates, this is a bit clumbsy but kind of stuck otherwise
+binmeta <- binjoin[!duplicated(binjoin),] #check length is same as binneddat, looks good
+
