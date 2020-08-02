@@ -1209,6 +1209,20 @@ filled$bottemp_anom <- filled$BOT_TEMP - filled$mean_station_bottemp
 
 periods_analysis_dat <- filled
 
+#exclusion criteria again===============
+
+
+station_summary3 <- periods_analysis_dat %>% group_by(STATION) %>%
+  summarize(n_yrs=n())
+
+join2 <- left_join(periods_analysis_dat, station_summary3)
+
+periods_analysis_dat <- join2[which(join2$n_yrs>5),]
+
+#let's save the processed data
+wd <- getwd()
+write.csv(periods_analysis_dat, file=paste(wd,"/data/processed_periods_analysis_data.csv", sep=""))
+
 #===***===***===
 
 pg1 <- gamm(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP, by=as.factor(period), bs="fs"), random=list(YEAR_factor=~1), 

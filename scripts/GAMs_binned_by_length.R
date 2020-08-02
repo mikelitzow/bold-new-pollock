@@ -9,6 +9,7 @@ ex1 + geom_point() + facet_wrap(~bin, scales="free") #one super high value in 50
 #log??
 
 binmeta$log_sum_WGTCPUE_LEN <- log(binmeta$bin_sum_WGTCPUE_LEN)
+binmeta2$log_sum_WGTCPUE_LEN <- log(binmeta2$bin_sum_WGTCPUE_LEN)
 ex1.5 <- ggplot(binmeta, aes( YEAR, log_sum_WGTCPUE_LEN))
 ex1.5 + geom_point() + facet_wrap(~bin, scales="free")
 
@@ -45,9 +46,39 @@ binmeta$CRUISE <- as.factor(binmeta$CRUISE)
 binmeta$HAUL <- as.factor(binmeta$HAUL)
 binmeta$bin <- as.factor(binmeta$bin)
 
+##exclusion criteria===============
+
+station_bin <- binmeta %>% group_by(STATION) %>%
+  summarize(n_yrs=n()) #not going to work, repeated years b/c diff bins
+
+joinstat <- left_join(binmeta, station_bin)
+
+bin_analysis_dat <- joinstat[which(joinstat$n_yrs>5),] #is this too liberal?
+table(joinstat$STATION, joinstat$bin)
+
+z11 <- ggplot(bin_analysis_dat[which(bin_analysis_dat$YEAR==2000),], aes(LONGITUDE, LATITUDE, 
+                                           colour=log_sum_WGTCPUE_LEN))
+z11 + geom_point() +   scale_colour_gradient2(low="blue", high="red", guide="colorbar")
+
+z11 <- ggplot(bin_analysis_dat, aes(LONGITUDE, LATITUDE, 
+                                                                         colour=log_sum_WGTCPUE_LEN))
+z11 + geom_point() +   scale_colour_gradient2(low="blue", high="red", guide="colorbar")
 
 
+#need anoms and means for temps too
 
+bmodbase <- gamm(log_sum_WGTCPUE_LEN ~  ti(mean_station_bottemp, BOT_DEPTH) +
+                   s(bottemp_anom, by=as.factor(period), bs="fs"), random=list(YEAR_factor=~1), 
+                 data=binmeta2)
+plot(Variogram(tmodbase$lme, form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE, 
+               data=periods_analysis_dat))
+#is there any spatial correlation though?
+plot(Variogram(tmodbase$lme, form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE, data=periods_analysis_dat))
+
+
+bgambase <- gam(logCPUE_Gadus_chalcogrammus ~  ti(mean_station_bottemp, BOT_DEPTH) +
+                  s(bottemp_anom, by=as.factor(period), bs="fs") + s(YEAR_factor, bs="re"), 
+                data=periods_analysis_dat)
 
 
 
