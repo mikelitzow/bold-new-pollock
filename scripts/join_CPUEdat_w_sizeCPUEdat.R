@@ -104,3 +104,13 @@ binjoin <- left_join(trawljoin[,c(1:21)], binneddat) #this creates a ton of dupl
 #I'll just remove the duplicates, this is a bit clumbsy but kind of stuck otherwise
 binmeta <- binjoin[!duplicated(binjoin),] #check length is same as binneddat, looks good
 
+
+#periods_analysis_dat is also loaded in trawl_biomass_GAM_explor.R
+wd <- getwd()
+periods_analysis_dat <- read.csv(paste(wd,"/data/processed_periods_analysis_data.csv",sep=""), row.names = 1)
+
+periods_meta <- periods_analysis_dat[,c(1:15, 49:52)]
+
+binjoin2 <- left_join(periods_meta, binneddat)
+binmeta2 <- binjoin2[!duplicated(binjoin2),] #check length is same as binneddat
+#there are some rows here that don't match for sure, return to this
