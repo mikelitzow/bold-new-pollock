@@ -288,6 +288,3 @@ sel.trawl.dat$logCPUE <- log(sel.trawl.dat$WTCPUE + 1)
 
 
 
-
-
-

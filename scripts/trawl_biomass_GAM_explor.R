@@ -140,6 +140,25 @@ ggplot(early_wide, aes(YEAR, BOT_TEMP)) + geom_point()
 
 
 
+
+#NMDS=======================
+
+#install.packages("vegan")
+library(vegan)
+set.seed(2)
+
+early_comm_mat <- as.matrix(early_wide[,c(38:48)])
+
+exampleearly_NMDS <- metaMDS(early_comm_mat, # Our community-by-species matrix
+                     k=2,
+                     na.rm=TRUE) # The number of reduced dimensions
+#uh oh NAs
+
+
+
+
+
+
 #plot climate variables========
 # load environmental data
 climdat <- read.csv("data/climate data.csv")
