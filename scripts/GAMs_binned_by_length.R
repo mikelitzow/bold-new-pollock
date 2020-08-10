@@ -1040,7 +1040,7 @@ plot(tmod3E.1UK)
 visreg(tmod3E.1UK, "bottemp_anom", "period") #no data with low anom in late period??
 visreg(tmod3E.1UK, "mean_station_bottemp", "BOT_DEPTH")
 
-
+AIC(tmod3E.1UK)
 
 
 
@@ -1550,7 +1550,8 @@ tmod5E.1F <- gam(log_sum_WGTCPUE_LEN ~  ti(mean_station_bottemp, BOT_DEPTH) +
                  data=bin5datF)
 summary(tmod5E.1F)
 plot(tmod5E.1F)
-visreg(tmod5E.1F, "bottemp_anom", "period") #no data with low anom in late period??
+visreg(tmod5E.1F, "bottemp_anom", "period")
+visreg(tmod5E.1F, "bottemp_anom", "period", ylim=c(-5,10)) #no data with low anom in late period??
 visreg(tmod5E.1F, "mean_station_bottemp", "BOT_DEPTH")
 
 tmod5E.1F_lin <- gam(log_sum_WGTCPUE_LEN ~ bottemp_anom:period + ti(mean_station_bottemp, BOT_DEPTH) + s(YEAR_factor, bs="re"), 
