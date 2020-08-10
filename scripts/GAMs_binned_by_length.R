@@ -172,6 +172,7 @@ tmod1E.1M <- gam(log_sum_WGTCPUE_LEN ~  ti(mean_station_bottemp, BOT_DEPTH) +
 summary(tmod1E.1M)
 plot(tmod1E.1M)
 visreg(tmod1E.1M, "bottemp_anom", "period") #no data with low anom in late period??
+visreg(tmod1E.1M, "bottemp_anom", "period", ylim=c(-10,5))
 visreg(tmod1E.1M, "mean_station_bottemp", "BOT_DEPTH")
 
 AIC(tmod1.1M, tmod1R.1M, tmod1E.1M) #all same, deviance explained all too, anova all same
@@ -278,6 +279,7 @@ tmod1E.1F <- gam(log_sum_WGTCPUE_LEN ~  ti(mean_station_bottemp, BOT_DEPTH) +
 summary(tmod1E.1F)
 plot(tmod1E.1F)
 visreg(tmod1E.1F, "bottemp_anom", "period") #no data with low anom in late period??
+visreg(tmod1E.1F, "bottemp_anom", "period", ylim=c(-10,5))
 visreg(tmod1E.1F, "mean_station_bottemp", "BOT_DEPTH")
 
 tmod1E.1F_lin <- gam(log_sum_WGTCPUE_LEN ~ bottemp_anom:period + ti(mean_station_bottemp, BOT_DEPTH) + s(YEAR_factor, bs="re"), 
