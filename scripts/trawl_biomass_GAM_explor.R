@@ -152,6 +152,15 @@ early_comm_mat <- as.matrix(early_wide[,c(38:48)])
 early_comm_mat[is.na(early_comm_mat)==TRUE]<-0
 unique(is.finite(early_comm_mat)) #cool no NAs
 
+short_early_mat <- early_comm_mat[1:1000,]
+short.rel <- decostand(short_early_mat, method = "total")
+
+short_NMDS <- metaMDS(short.rel, # Our community-by-species matrix
+                      distance = "bray",
+                             k=2, # The number of reduced dimensions
+                             na.rm=TRUE) 
+
+#CAUTION SUPER SLOW
 exampleearly_NMDS <- metaMDS(early_comm_mat, # Our community-by-species matrix
                      k=2, # The number of reduced dimensions
                      na.rm=TRUE) 
