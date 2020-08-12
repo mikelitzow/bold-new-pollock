@@ -148,11 +148,13 @@ library(vegan)
 set.seed(2)
 
 early_comm_mat <- as.matrix(early_wide[,c(38:48)])
+#going to replace NAs with zeros, should discuss whether this is a good choice or not
+early_comm_mat[is.na(early_comm_mat)==TRUE]<-0
+unique(is.finite(early_comm_mat)) #cool no NAs
 
 exampleearly_NMDS <- metaMDS(early_comm_mat, # Our community-by-species matrix
-                     k=2,
-                     na.rm=TRUE) # The number of reduced dimensions
-#uh oh NAs
+                     k=2, # The number of reduced dimensions
+                     na.rm=TRUE) 
 
 
 
@@ -1373,6 +1375,7 @@ tmod1E.1 <- gam(logCPUE_Gadus_chalcogrammus ~  ti(mean_station_bottemp, BOT_DEPT
 summary(tmod1E.1)
 plot(tmod1E.1)
 visreg(tmod1E.1, "bottemp_anom", "period") #no data with low anom in late period??
+visreg(tmod1E.1, "bottemp_anom", "period", ylim=c(-5,15))
 visreg(tmod1E.1, "mean_station_bottemp", "BOT_DEPTH")
 
 #all the AICs are the same for all of these with gam??
