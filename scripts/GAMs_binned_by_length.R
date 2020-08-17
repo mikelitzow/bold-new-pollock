@@ -405,7 +405,8 @@ plot(tmod1E.1UK_drop)
 visreg(tmod1E.1UK_drop, "bottemp_anom")
 AIC(tmod1E.1UK, tmod1E.1UK_lin, tmod1E.1UK_drop) #gam w period interaction best
 
-
+b2 <- getViz(tmod1E.1UK_drop)
+plot(sm(b2, 1))
 
 
 
@@ -1451,6 +1452,8 @@ summary(tmod5E.1M)
 plot(tmod5E.1M)
 visreg(tmod5E.1M, "bottemp_anom", "period") #no data with low anom in late period??
 visreg(tmod5E.1M, "mean_station_bottemp", "BOT_DEPTH")
+big2 <- getViz(tmod5E.1M)
+plot(sm(big2, 1))
 
 tmod5E.1M_lin <- gam(log_sum_WGTCPUE_LEN ~ bottemp_anom:period + ti(mean_station_bottemp, BOT_DEPTH) + s(YEAR_factor, bs="re"), 
                      correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE),
@@ -1458,6 +1461,8 @@ tmod5E.1M_lin <- gam(log_sum_WGTCPUE_LEN ~ bottemp_anom:period + ti(mean_station
 summary(tmod5E.1M_lin)
 plot(tmod5E.1M_lin)
 visreg(tmod5E.1M_lin, "bottemp_anom", "period")
+big3 <- getViz(tmod5E.1M_lin)
+plot(sm(big3, 1))
 
 #and drop periods
 tmod5E.1M_drop <- gam(log_sum_WGTCPUE_LEN ~  ti(mean_station_bottemp, BOT_DEPTH) +
@@ -1467,6 +1472,10 @@ tmod5E.1M_drop <- gam(log_sum_WGTCPUE_LEN ~  ti(mean_station_bottemp, BOT_DEPTH)
 summary(tmod5E.1M_drop)
 plot(tmod5E.1M_drop)
 visreg(tmod5E.1M_drop, "bottemp_anom")
+
+big4 <- getViz(tmod5E.1M_drop)
+plot(sm(big4, 1))
+
 AIC(tmod5E.1M, tmod5E.1M_lin, tmod5E.1M_drop) #linear model with period interaction is better by just a little than gam w interaction
 
 

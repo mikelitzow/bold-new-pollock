@@ -159,15 +159,90 @@ short_NMDS <- metaMDS(short.rel, # Our community-by-species matrix
                       distance = "bray",
                              k=2, # The number of reduced dimensions
                              na.rm=TRUE) 
+summary(short_NMDS)
+short_NMDS$stress
+shortptsall<-scores(short_NMDS)
+scores(shortptsall, display="species")
+ordiplot(short_NMDS)
+goodness(short_NMDS) # Produces a results of test statistics for goodness of fit for each point
+stressplot(short_NMDS) # Produces a Shepards diagram
+
+#some do distance first, try that way
+short_distmat <- 
+  vegdist(short.rel, method = "bray")
+short_DistanceMatrix <- 
+  as.matrix(short_distmat, labels = T)
+short_NMDS2 <- metaMDS(short_DistanceMatrix, # Our community-by-species matrix
+                      distance = "bray",
+                      k=2, # The number of reduced dimensions
+                      na.rm=TRUE) 
+summary(short_NMDS2)
+short_NMDS2$stress
+shortptsall2<-scores(short_NMDS2)
+scores(shortptsall2, display="species")
+ordiplot(short_NMDS2)
+goodness(short_NMDS2) # Produces a results of test statistics for goodness of fit for each point
+stressplot(short_NMDS2)
+
+
+lessshort_early_mat <- early_comm_mat[1:5000,]
+lessshort.rel <- decostand(lessshort_early_mat, method = "total")
+
+lessshort_NMDS <- metaMDS(lessshort.rel, # Our community-by-species matrix
+                      distance = "bray",
+                      k=2, # The number of reduced dimensions
+                      na.rm=TRUE) 
+summary(lessshort_NMDS)
+lessshort_NMDS$stress
+lessshortptsall<-scores(lessshort_NMDS)
+scores(lessshortptsall, display="species")
+ordiplot(lessshort_NMDS)
+
+
+
 
 #CAUTION SUPER SLOW
 exampleearly_NMDS <- metaMDS(early_comm_mat, # Our community-by-species matrix
                      k=2, # The number of reduced dimensions
-                     na.rm=TRUE) 
+                     na.rm=TRUE,
+                     trymax=50,
+                     maxit=50) 
 
 
+exampleearly_NMDSk3 <- metaMDS(early_comm_mat, # Our community-by-species matrix
+                             k=3, # The number of reduced dimensions
+                             na.rm=TRUE,
+                             trymax=20,
+                             maxit=20) 
+#k=3 leads to far worse stress on most runs but lower overall? Still no convergence
+
+#should add autotranform=FALSE to all these
+
+exampleearly_NMDSk3_2 <- metaMDS(early_comm_mat, # Our community-by-species matrix
+                               k=3, # The number of reduced dimensions
+                               na.rm=TRUE,
+                               trymax=40,
+                               maxit=40) 
+
+exampleearly_NMDSk3_3 <- metaMDS(early_comm_mat, # Our community-by-species matrix
+                                 k=3, # The number of reduced dimensions
+                                 na.rm=TRUE,
+                                 trymax=60,
+                                 maxit=60) 
 
 
+#this one runs out of memory
+exampleearly_NMDSk3_A <- metaMDS(early_comm_mat, # Our community-by-species matrix
+                                 k=3, # The number of reduced dimensions
+                                 na.rm=TRUE, noshare=0.2,
+                                 trymax=20,
+                                 maxit=20) 
+
+exampleearly_NMDSk3_B <- metaMDS(early_comm_mat, # Our community-by-species matrix
+                                 k=3, # The number of reduced dimensions
+                                 na.rm=TRUE, autotransform=FALSE,
+                                 trymax=3,
+                                 maxit=3) 
 
 
 #plot climate variables========
@@ -1399,6 +1474,7 @@ tmod1Edropp <- gamm(logCPUE_Gadus_chalcogrammus ~  ti(mean_station_bottemp, BOT_
 
 AIC(tmod1E[[1]], tmod1Edropp[[1]])
 
+
 tmod1E.1dropp <- gam(logCPUE_Gadus_chalcogrammus ~  ti(mean_station_bottemp, BOT_DEPTH) +
                   s(bottemp_anom) + s(YEAR_factor, bs="re"), 
                 correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE),
@@ -1409,6 +1485,18 @@ summary(tmod1E.1)
 AIC(tmod1E.1, tmod1E.1dropp) #in both cases model WITH period does better
 
 
+#what about linear interaction?
+tmod1E.1L <- gam(logCPUE_Gadus_chalcogrammus ~ bottemp_anom:period + ti(mean_station_bottemp, BOT_DEPTH) +
+                s(YEAR_factor, bs="re"), 
+                correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE),
+                data=periods_analysis_dat)
+summary(tmod1E.1L)
+plot(tmod1E.1L)
+visreg(tmod1E.1L, "bottemp_anom", "period") #no data with low anom in late period??
+visreg(tmod1E.1L, "bottemp_anom", "period", ylim=c(-5,15))
+visreg(tmod1E.1L, "mean_station_bottemp", "BOT_DEPTH")
+
+AIC(tmod1E.1, tmod1E.1dropp, tmod1E.1L)
 #try plotting spatially
 
 res3 <- residuals(tmod1E.1, type = "pearson")
