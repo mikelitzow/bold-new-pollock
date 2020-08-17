@@ -48,18 +48,20 @@ trawljoin <- left_join(sel.trawl.dat[which(sel.trawl.dat$SCIENTIFIC=="Gadus chal
 fuzziertestjoin <- left_join(sel.trawl.dat[which(sel.trawl.dat$SCIENTIFIC=="Gadus chalcogrammus"),c(1:6,9:18,20:21)], 
                                  sex.dat, by = c("LATITUDE", "LONGITUDE", "YEAR", "VESSEL", "HAUL"))
 length(fuzziertestjoin$YEAR) #no new rows
-#are haul codes unique within a year???
+
 
 View(sex.dat[is.na(sex.dat$STRATUM),])
 
 #for now going to proceed - the rows that are not matching actually don't seem to have a good match
-#in the trawl data, maybe removed before the dataset was made?
+
 
 #test join to see if rows really don't match
 secondtest <- left_join(sel.trawl.dat[which(sel.trawl.dat$SCIENTIFIC=="Gadus chalcogrammus"),c(5,15:17)], 
                         sex.dat, by = c( "YEAR", "VESSEL", "HAUL"))
 length(secondtest$YEAR)
 length(sex.dat$YEAR)
+
+#just troubleshooting
 
 antitest <- anti_join( sex.dat, sel.trawl.dat[which(sel.trawl.dat$SCIENTIFIC=="Gadus chalcogrammus"),c(5,15:17)], 
                      by = c( "YEAR", "VESSEL", "HAUL"))
