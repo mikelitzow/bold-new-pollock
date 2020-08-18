@@ -96,7 +96,12 @@ trawljoin$bin[which(trawljoin$LENGTH>500)]<- "500+"
 trawljoin <- trawljoin[which(is.finite(trawljoin$SEX)==TRUE),]
 trawljoin <- droplevels(trawljoin)
 
-binneddat <- trawljoin %>% group_by(YEAR, STATION, STRATUM, SCIENTIFIC, VESSEL, CRUISE, HAUL, SEX, bin) %>%
+# binneddat <- trawljoin %>% group_by(YEAR, STATION, STRATUM, SCIENTIFIC, VESSEL, CRUISE, HAUL, SEX, bin) %>%
+#   summarize(bin_sum_WGTCPUE_LEN=sum(WGTCPUE_LENGTH, na.rm=TRUE), bin_sum_NUMCPUE_LEN=sum(NUMCPUE_LENGTH, na.rm=TRUE),
+#             n=n()) 
+
+#try without sex
+binneddat <- trawljoin %>% group_by(YEAR, STATION, STRATUM, SCIENTIFIC, VESSEL, CRUISE, HAUL, bin) %>%
   summarize(bin_sum_WGTCPUE_LEN=sum(WGTCPUE_LENGTH, na.rm=TRUE), bin_sum_NUMCPUE_LEN=sum(NUMCPUE_LENGTH, na.rm=TRUE),
             n=n()) 
 
