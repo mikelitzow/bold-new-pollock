@@ -3,40 +3,8 @@
 #using binmeta from join_CPUEdat_w_sizeCPUEdat.R
 library(ggplot2)
 
-ex1 <- ggplot(binmeta, aes( YEAR, bin_sum_WGTCPUE_LEN))
-ex1 + geom_point() + facet_wrap(~bin, scales="free") #one super high value in 500+ bin
-#log??
-
 binmeta$log_sum_WGTCPUE_LEN <- log(binmeta$bin_sum_WGTCPUE_LEN)
 binmeta2$log_sum_WGTCPUE_LEN <- log(binmeta2$bin_sum_WGTCPUE_LEN)
-ex1.5 <- ggplot(binmeta, aes( YEAR, log_sum_WGTCPUE_LEN))
-ex1.5 + geom_point() + facet_wrap(~bin, scales="free")
-
-ex2 <- ggplot(binmeta, aes( BOT_DEPTH, bin_sum_WGTCPUE_LEN))
-ex2 + geom_point() + facet_wrap(~bin, scales="free")
-
-ex2.5 <- ggplot(binmeta, aes( BOT_DEPTH, log_sum_WGTCPUE_LEN))
-ex2.5 + geom_point() + facet_wrap(~bin, scales="free")
-
-ex3 <- ggplot(binmeta, aes( BOT_TEMP, bin_sum_WGTCPUE_LEN))
-ex3 + geom_point() + facet_wrap(~bin, scales="free")
-
-ex3.5 <- ggplot(binmeta, aes( BOT_TEMP, log_sum_WGTCPUE_LEN))
-ex3.5 + geom_point() + facet_wrap(~bin, scales="free")
-
-ex4 <- ggplot(binmeta, aes( long_albers, bin_sum_WGTCPUE_LEN))
-ex4 + geom_point() + facet_wrap(~bin, scales="free")
-
-ex4.5 <- ggplot(binmeta, aes( long_albers, log_sum_WGTCPUE_LEN))
-ex4.5 + geom_point() + facet_wrap(~bin, scales="free")
-
-ex5 <- ggplot(binmeta, aes( lat_albers, bin_sum_WGTCPUE_LEN))
-ex5 + geom_point() + facet_wrap(~bin, scales="free")
-
-ex5.5 <- ggplot(binmeta, aes( lat_albers, log_sum_WGTCPUE_LEN))
-ex5.5 + geom_point() + facet_wrap(~bin, scales="free")
-
-hist(binmeta$n) #bins with just one fish very common
 
 
 binmeta$STATION <- as.factor(binmeta$STATION)
@@ -88,6 +56,12 @@ bin1datM <- bin1dat[which(bin1dat$SEX==1),]
   bin5datM <- bin5dat[which(bin5dat$SEX==1),]
   bin5datF <- bin5dat[which(bin5dat$SEX==2),]
   bin5datUK <- bin5dat[which(bin5dat$SEX==3),]
+  
+  
+  #skip to section 'models without sex'
+  
+  
+  
 
 #first bin======
   #MALE
@@ -1701,7 +1675,7 @@ joinstat <- left_join(binmeta, station_bin)
 bin_analysis_dat <- joinstat[which(joinstat$n_yrs>5),] #is this too liberal?
 table(joinstat$STATION, joinstat$bin)
 
-
+binmeta2$bin <- as.factor(binmeta2$bin)
 
 z11 <- ggplot(bin_analysis_dat[which(bin_analysis_dat$YEAR==2000),], aes(LONGITUDE, LATITUDE, 
                                                                          colour=log_sum_WGTCPUE_LEN))
@@ -1718,3 +1692,68 @@ bin4dat <- binmeta2[which(binmeta2$bin=="400-500"),]
 bin5dat <- binmeta2[which(binmeta2$bin=="500+"),]
 
 
+ggplot(binmeta2, aes(bin, log_sum_WGTCPUE_LEN)) + geom_boxplot()
+
+ggplot(binmeta2, aes(bottemp_anom, log_sum_WGTCPUE_LEN, colour=bin)) + geom_point() + geom_smooth()
+
+#models
+
+
+bigG <- gam(log_sum_WGTCPUE_LEN ~ bin + ti(mean_station_bottemp, BOT_DEPTH) +
+                  s(bottemp_anom, bin, by=as.factor(period), bs="fs") + s(YEAR_factor, bs="re"), 
+                correlation = corGaus(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE),
+                data=binmeta2)
+summary(bigG) 
+plot(bigG)
+visreg(bigG, "bottemp_anom", "bin")
+visreg(bigG, "bottemp_anom", "period")
+
+table(bin1datM$YEAR)
+
+bigR <- gam(log_sum_WGTCPUE_LEN ~ bin + ti(mean_station_bottemp, BOT_DEPTH) +
+              s(bottemp_anom, bin, by=as.factor(period), bs="fs") + s(YEAR_factor, bs="re"), 
+            correlation = corRatio(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE),
+            data=binmeta2)
+summary(bigR) 
+plot(bigR)
+visreg(bigR, "bottemp_anom", "bin")
+visreg(bigR, "bottemp_anom", "period")
+
+
+bigE <- gam(log_sum_WGTCPUE_LEN ~ bin + ti(mean_station_bottemp, BOT_DEPTH) +
+              s(bottemp_anom, bin, by=as.factor(period), bs="fs") + s(YEAR_factor, bs="re"), 
+            correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE),
+            data=binmeta2)
+summary(bigE) 
+plot(bigE)
+visreg(bigE, "bottemp_anom", "bin")
+visreg(bigE, "bottemp_anom", "period")
+
+
+AIC(bigG, bigR, bigE) #all same?
+
+bigEL <- gam(log_sum_WGTCPUE_LEN ~ bin + bottemp_anom:bin:period +ti(mean_station_bottemp, BOT_DEPTH) +
+                 s(YEAR_factor, bs="re"), 
+            correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE),
+            data=binmeta2)
+summary(bigEL) 
+plot(bigEL)
+visreg(bigEL, "bottemp_anom", "bin")
+visreg(bigEL, "bottemp_anom", "period")
+
+
+bigEdrop <- gam(log_sum_WGTCPUE_LEN ~ bin + ti(mean_station_bottemp, BOT_DEPTH) +
+              s(bottemp_anom, bin, bs="fs") + s(YEAR_factor, bs="re"), 
+            correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE),
+            data=binmeta2)
+summary(bigEdrop) 
+plot(bigEdrop)
+visreg(bigEdrop, "bottemp_anom", "bin")
+visreg(bigEdrop, "bottemp_anom", "period")
+
+AIC(bigE, bigEL, bigEdrop, bigEdrop2) #drop by far the best
+
+bigEdrop2 <- gam(log_sum_WGTCPUE_LEN ~ bin + ti(mean_station_bottemp, BOT_DEPTH) +
+                  s(bottemp_anom, by=bin, bs="fs") + s(YEAR_factor, bs="re"), 
+                correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE),
+                data=binmeta2)
