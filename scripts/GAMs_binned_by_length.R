@@ -1751,9 +1751,16 @@ plot(bigEdrop)
 visreg(bigEdrop, "bottemp_anom", "bin")
 visreg(bigEdrop, "bottemp_anom", "period")
 
+big_1 <- getViz(bigEdrop)
+plot(sm(big_1, 1))
+plot(sm(big_1, 2))
+plot(sm(big_1, 3))
+
 AIC(bigE, bigEL, bigEdrop, bigEdrop2) #drop by far the best
 
 bigEdrop2 <- gam(log_sum_WGTCPUE_LEN ~ bin + ti(mean_station_bottemp, BOT_DEPTH) +
                   s(bottemp_anom, by=bin, bs="fs") + s(YEAR_factor, bs="re"), 
                 correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE),
                 data=binmeta2)
+
+
