@@ -245,6 +245,20 @@ exampleearly_NMDSk3_B <- metaMDS(early_comm_mat, # Our community-by-species matr
                                  maxit=3) 
 
 
+
+#OK what about MDS
+d <- dist(early_comm_mat ) # euclidean distances between the rows
+fit1 <- cmdscale(d,eig=TRUE, k=2) # k is the number of dim 
+#IMMEDIATELY CRASHED LAPTOP
+fit1 # view results
+
+short_early_mat
+d2 <- dist(short_early_mat) # euclidean distances between the rows
+fit1 <- cmdscale(d2,eig=TRUE, k=2) # k is the number of dim, start Sunday 11:30AM
+fit1 # view results
+
+
+
 #plot climate variables========
 # load environmental data
 climdat <- read.csv("data/climate data.csv")
