@@ -264,8 +264,12 @@ fit3 # view results - runs fine and under a minute!
 
 short_early_mat5 <- early_comm_mat[1:5000,]
 d5 <- dist(short_early_mat5) # euclidean distances between the rows
-fit5 <- cmdscale(d5,eig=TRUE, k=2) # k is the number of dim
+fit5 <- cmdscale(d5,eig=TRUE, k=2) # k is the number of dim, 3 minute run time
 fit5
+
+#try running in R itself
+#earlydf <- as.data.frame(early_comm_mat)
+write.csv(early_wide[,c(38:48)], "data/early_community_df.csv", row.names=FALSE)
 
 #plot climate variables========
 # load environmental data
