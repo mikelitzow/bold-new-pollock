@@ -252,12 +252,20 @@ fit1 <- cmdscale(d,eig=TRUE, k=2) # k is the number of dim
 #IMMEDIATELY CRASHED LAPTOP
 fit1 # view results
 
-short_early_mat
+#try with short_early_mat
 d2 <- dist(short_early_mat) # euclidean distances between the rows
-fit1 <- cmdscale(d2,eig=TRUE, k=2) # k is the number of dim, start Sunday 11:30AM
+fit1 <- cmdscale(d2,eig=TRUE, k=2) # k is the number of dim
 fit1 # view results
 
+short_early_mat3 <- early_comm_mat[1:3000,]
+d3 <- dist(short_early_mat3) # euclidean distances between the rows
+fit3 <- cmdscale(d3,eig=TRUE, k=2) # k is the number of dim
+fit3 # view results - runs fine and under a minute!
 
+short_early_mat5 <- early_comm_mat[1:5000,]
+d5 <- dist(short_early_mat5) # euclidean distances between the rows
+fit5 <- cmdscale(d5,eig=TRUE, k=2) # k is the number of dim
+fit5
 
 #plot climate variables========
 # load environmental data
