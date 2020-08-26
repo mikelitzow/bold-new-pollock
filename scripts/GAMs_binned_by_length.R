@@ -2,6 +2,7 @@
 
 #using binmeta from join_CPUEdat_w_sizeCPUEdat.R
 library(ggplot2)
+library(sjPlot)
 
 binmeta$log_sum_WGTCPUE_LEN <- log(binmeta$bin_sum_WGTCPUE_LEN)
 binmeta2$log_sum_WGTCPUE_LEN <- log(binmeta2$bin_sum_WGTCPUE_LEN)
@@ -1729,6 +1730,11 @@ plot(bigE)
 visreg(bigE, "bottemp_anom", "bin")
 visreg(bigE, "bottemp_anom", "period")
 
+big_e <- getViz(bigE)
+plot(sm(big_e, 1))
+plot(sm(big_e, 2))
+plot(sm(big_e, 3))
+
 
 AIC(bigG, bigR, bigE) #all same?
 
@@ -1740,6 +1746,7 @@ summary(bigEL)
 plot(bigEL)
 visreg(bigEL, "bottemp_anom", "bin")
 visreg(bigEL, "bottemp_anom", "period")
+plot_model(bigEL, type="int")
 
 
 bigEdrop <- gam(log_sum_WGTCPUE_LEN ~ bin + ti(mean_station_bottemp, BOT_DEPTH) +
@@ -1756,11 +1763,34 @@ plot(sm(big_1, 1))
 plot(sm(big_1, 2))
 plot(sm(big_1, 3))
 
-AIC(bigE, bigEL, bigEdrop, bigEdrop2) #drop by far the best
+
+bigELdrop <- gam(log_sum_WGTCPUE_LEN ~ bin + bottemp_anom:bin +ti(mean_station_bottemp, BOT_DEPTH) +
+               s(YEAR_factor, bs="re"), 
+             correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE),
+             data=binmeta2)
+summary(bigELdrop) 
+plot(bigELdrop)
+visreg(bigELdrop, "bottemp_anom", "bin")
+visreg(bigELdrop, "bottemp_anom", "period")
+
+
+
 
 bigEdrop2 <- gam(log_sum_WGTCPUE_LEN ~ bin + ti(mean_station_bottemp, BOT_DEPTH) +
                   s(bottemp_anom, by=bin, bs="fs") + s(YEAR_factor, bs="re"), 
                 correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE),
                 data=binmeta2)
 
+AIC(bigE, bigEL, bigEdrop, bigEdrop2, bigELdrop) #full by far the best
 
+bigEL3way <- gam(log_sum_WGTCPUE_LEN ~ bin + bottemp_anom*bin*period +ti(mean_station_bottemp, BOT_DEPTH) +
+               s(YEAR_factor, bs="re"), 
+             correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE),
+             data=binmeta2)
+summary(bigEL3way) 
+plot(bigEL3way)
+visreg(bigEL3way, "bottemp_anom", "bin")
+visreg(bigEL3way, "bottemp_anom", "period")
+plot_model(bigEL3way, type="int")
+
+AIC(bigE, bigEL, bigEdrop, bigEdrop2, bigELdrop, bigEL3way)

@@ -250,7 +250,18 @@ exampleearly_NMDSk3_B <- metaMDS(early_comm_mat, # Our community-by-species matr
 d <- dist(early_comm_mat ) # euclidean distances between the rows
 fit1 <- cmdscale(d,eig=TRUE, k=2) # k is the number of dim 
 #IMMEDIATELY CRASHED LAPTOP
+#second attempt about A half hour to run
 fit1 # view results
+
+x1 <- fit1$points[,1]
+y1 <- fit1$points[,2]
+plot(x1, y1,  xlab="Coordinate 1", ylab="Coordinate 2", 
+     main="Metric MDS", type="n")
+text(x1, y1, labels = row.names(early_comm_mat), cex=.7)
+
+fitdf <- as.data.frame(fit1$points)
+
+ggplot(fitdf, aes(V1, V2)) + geom_point() 
 
 #try with short_early_mat
 d2 <- dist(short_early_mat) # euclidean distances between the rows
@@ -266,6 +277,13 @@ short_early_mat5 <- early_comm_mat[1:5000,]
 d5 <- dist(short_early_mat5) # euclidean distances between the rows
 fit5 <- cmdscale(d5,eig=TRUE, k=2) # k is the number of dim, 3 minute run time
 fit5
+
+#is the problem at the end? Running in R says there are NAs in the matrix
+11833
+short_end <- early_comm_mat[5000:11833,]
+de <- dist(short_end) # euclidean distances between the rows
+fite <- cmdscale(de,eig=TRUE, k=2) # k is the number of dim, 3 minute run time
+fite
 
 #try running in R itself
 #earlydf <- as.data.frame(early_comm_mat)
