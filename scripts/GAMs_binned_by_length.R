@@ -1735,6 +1735,9 @@ plot(sm(big_e, 1))
 plot(sm(big_e, 2))
 plot(sm(big_e, 3))
 
+plot(bigE, select = 2)
+plot(bigE, select = 3)
+
 
 AIC(bigG, bigR, bigE) #all same?
 
@@ -1794,3 +1797,42 @@ visreg(bigEL3way, "bottemp_anom", "period")
 plot_model(bigEL3way, type="int")
 
 AIC(bigE, bigEL, bigEdrop, bigEdrop2, bigELdrop, bigEL3way)
+
+
+#does limiting k remove that spike down?
+bigEk <- gam(log_sum_WGTCPUE_LEN ~ bin + ti(mean_station_bottemp, BOT_DEPTH) +
+              s(bottemp_anom, bin, by=as.factor(period), bs="fs", k=5) + s(YEAR_factor, bs="re"), 
+            correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE),
+            data=binmeta2)
+summary(bigEk) 
+plot(bigEk)
+visreg(bigEk, "bottemp_anom", "bin")
+visreg(bigEk, "bottemp_anom", "period")
+
+big_ek <- getViz(bigEk)
+plot(sm(big_ek, 1))
+plot(sm(big_ek, 2))
+plot(sm(big_ek, 3))
+
+plot(bigEk, select = 2)
+plot(bigEk, select = 3)
+
+
+bigEk3 <- gam(log_sum_WGTCPUE_LEN ~ bin + ti(mean_station_bottemp, BOT_DEPTH) +
+               s(bottemp_anom, bin, by=as.factor(period), bs="fs", k=3) + s(YEAR_factor, bs="re"), 
+             correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE),
+             data=binmeta2)
+summary(bigEk3) 
+plot(bigEk3)
+visreg(bigEk3, "bottemp_anom", "bin")
+visreg(bigEk3, "bottemp_anom", "period")
+
+big_ek3 <- getViz(bigEk3)
+plot(sm(big_ek3, 1))
+plot(sm(big_ek3, 2))
+plot(sm(big_ek3, 3))
+
+plot(bigEk3, select = 2)
+plot(bigEk3, select = 3)
+
+AIC(bigE, bigEk, bigEk3) #gets worse as k is decreased
