@@ -1738,6 +1738,10 @@ plot(sm(big_e, 3))
 plot(bigE, select = 2)
 plot(bigE, select = 3)
 
+visreg(bigE, 'bottemp_anom', by='bin', cond=list(period="early"), layout=c(5,1))
+visreg(bigE, 'bottemp_anom', by='bin', cond=list(period="late"), layout=c(5,1))
+
+#what does raw data look like?
 
 AIC(bigG, bigR, bigE) #all same?
 
