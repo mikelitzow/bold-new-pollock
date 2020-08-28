@@ -1703,7 +1703,7 @@ ggplot(binmeta2, aes(bottemp_anom, log_sum_WGTCPUE_LEN, colour=bin)) + geom_poin
 bigG <- gam(log_sum_WGTCPUE_LEN ~ bin + ti(mean_station_bottemp, BOT_DEPTH) +
                   s(bottemp_anom, bin, by=as.factor(period), bs="fs") + s(YEAR_factor, bs="re"), 
                 correlation = corGaus(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE),
-                data=binmeta2)
+                data=binmeta2) #hessian not positive definite, k maybe too low
 summary(bigG) 
 plot(bigG)
 visreg(bigG, "bottemp_anom", "bin")
@@ -1714,7 +1714,7 @@ table(bin1datM$YEAR)
 bigR <- gam(log_sum_WGTCPUE_LEN ~ bin + ti(mean_station_bottemp, BOT_DEPTH) +
               s(bottemp_anom, bin, by=as.factor(period), bs="fs") + s(YEAR_factor, bs="re"), 
             correlation = corRatio(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE),
-            data=binmeta2)
+            data=binmeta2) #hessian not positive definite, k maybe too low
 summary(bigR) 
 plot(bigR)
 visreg(bigR, "bottemp_anom", "bin")
@@ -1724,11 +1724,13 @@ visreg(bigR, "bottemp_anom", "period")
 bigE <- gam(log_sum_WGTCPUE_LEN ~ bin + ti(mean_station_bottemp, BOT_DEPTH) +
               s(bottemp_anom, bin, by=as.factor(period), bs="fs") + s(YEAR_factor, bs="re"), 
             correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE),
-            data=binmeta2)
+            data=binmeta2) #hessian not positive definite, k maybe too low
 summary(bigE) 
 plot(bigE)
 visreg(bigE, "bottemp_anom", "bin")
 visreg(bigE, "bottemp_anom", "period")
+
+gam.check(bigE)
 
 big_e <- getViz(bigE)
 plot(sm(big_e, 1))
@@ -1738,10 +1740,22 @@ plot(sm(big_e, 3))
 plot(bigE, select = 2)
 plot(bigE, select = 3)
 
-visreg(bigE, 'bottemp_anom', by='bin', cond=list(period="early"), layout=c(5,1))
-visreg(bigE, 'bottemp_anom', by='bin', cond=list(period="late"), layout=c(5,1))
+
+v1 <- visreg(bigE, 'bottemp_anom', by='bin', cond=list(period="early"), layout=c(5,1))
+v2 <- visreg(bigE, 'bottemp_anom', by='bin', cond=list(period="late"), layout=c(5,1))
+
+#replot with predicted values instead of partials?
+
 
 #what does raw data look like?
+e1 <- ggplot(binmeta2, aes(bottemp_anom,log_sum_WGTCPUE_LEN, col=bin))
+e1 + geom_point() + facet_wrap(~interaction(period, bin)) + geom_smooth()
+
+e1 <- ggplot(binmeta2, aes(bottemp_anom,log_sum_WGTCPUE_LEN))
+e1 + geom_point() + facet_wrap(~interaction(bin, period), ncol=5) + geom_smooth()
+
+e2 <- ggplot(binmeta2, aes(bottemp_anom,log_sum_WGTCPUE_LEN))
+e2 + geom_point() + facet_wrap(~interaction(bin, period), ncol=5) + geom_smooth(method="lm")
 
 AIC(bigG, bigR, bigE) #all same?
 
@@ -1780,6 +1794,7 @@ plot(bigELdrop)
 visreg(bigELdrop, "bottemp_anom", "bin")
 visreg(bigELdrop, "bottemp_anom", "period")
 
+gam.check(bigELdrop) #good hessian
 
 
 
@@ -1787,6 +1802,7 @@ bigEdrop2 <- gam(log_sum_WGTCPUE_LEN ~ bin + ti(mean_station_bottemp, BOT_DEPTH)
                   s(bottemp_anom, by=bin, bs="fs") + s(YEAR_factor, bs="re"), 
                 correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE),
                 data=binmeta2)
+gam.check(bigEdrop2) #bad hessian, k likely too low
 
 AIC(bigE, bigEL, bigEdrop, bigEdrop2, bigELdrop) #full by far the best
 
