@@ -1723,7 +1723,7 @@ visreg(bigR, "bottemp_anom", "period")
 
 bigE <- gam(log_sum_WGTCPUE_LEN ~ bin + ti(mean_station_bottemp, BOT_DEPTH) +
               s(bottemp_anom, bin, by=as.factor(period), bs="fs") + s(YEAR_factor, bs="re"), 
-            correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE),
+            cor = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE),
             data=binmeta2) #hessian not positive definite, k maybe too low
 summary(bigE) 
 plot(bigE)
@@ -1816,6 +1816,8 @@ visreg(bigEL3way, "bottemp_anom", "bin")
 visreg(bigEL3way, "bottemp_anom", "period")
 plot_model(bigEL3way, type="int")
 
+gam.check(bigEL3way) #good hessian
+
 AIC(bigE, bigEL, bigEdrop, bigEdrop2, bigELdrop, bigEL3way)
 
 
@@ -1856,3 +1858,37 @@ plot(bigEk3, select = 2)
 plot(bigEk3, select = 3)
 
 AIC(bigE, bigEk, bigEk3) #gets worse as k is decreased
+
+
+
+#attempt two at big model selection======
+
+#start full model
+full_mm <- gamm(log_sum_WGTCPUE_LEN ~ bin + ti(mean_station_bottemp, BOT_DEPTH) +
+              s(bottemp_anom, bin, by=as.factor(period), bs="fs"), random=list(YEAR_factor=~1), 
+            cor = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE),
+            data=binmeta2) #
+summary(full_mm[2]) 
+summary(full_mm[1]) 
+plot(full_mm[2])
+visreg(full_mm[2], "bottemp_anom", "bin")
+visreg(full_mm, "bottemp_anom", "period")
+
+gam.check(summary(full_mm[2]) )
+
+fullviz1 <- getViz(full_mm)
+plot(sm(fullviz1 , 1))
+plot(sm(fullviz1 , 2))
+plot(sm(fullviz1 , 3))
+
+plot(full_mm, select = 2)
+plot(full_mm, select = 3)
+
+
+v1 <- visreg(full_mm, 'bottemp_anom', by='bin', cond=list(period="early"), layout=c(5,1))
+v2 <- visreg(full_mm, 'bottemp_anom', by='bin', cond=list(period="late"), layout=c(5,1))
+
+
+
+
+
