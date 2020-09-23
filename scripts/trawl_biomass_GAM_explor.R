@@ -45,7 +45,7 @@ sel.trawl.dat$long_albers <- x$x
 sel.trawl.dat$lat_albers <- x$y
 
 
-#select data======================================================
+#select early data======================================================
 
 #we only want data pre2014
 early_dat <- sel.trawl.dat[which(sel.trawl.dat$YEAR<2014),]
@@ -110,6 +110,80 @@ station_summary2 <- early_wide %>% group_by(STATION) %>%
 joinearly <- left_join(early_wide, station_summary2)
 
 analysis_dat <- joinearly[which(joinearly$n_yrs>5),]
+
+
+#select full data=============================================
+
+#full_dat <- sel.trawl.dat[,-c(9,11)] #drop columns that repeat info
+full_dat <- sel.trawl.dat
+
+full_dat <- full_dat[!duplicated(full_dat),] #there are 4 duplicate rows form 2016
+
+#widen dataframe to have columns for each sps
+
+
+full_wide <- full_dat %>% pivot_wider(names_from=SCIENTIFIC, 
+                                        values_from=c(WTCPUE, NUMCPUE, logCPUE),
+                                      values_fill=list(WTCPUE=0, NUMCPUE=0, logCPUE=0))
+
+# full_wide <- full_dat %>% pivot_wider(names_from=SCIENTIFIC, 
+#                                      # id_cols=c(CRUISE,HAUL,SID),
+#                                       values_from=c(logCPUE),
+#                                     #  values_fn = list(logCPUE = length),
+#                                       values_fill=list(logCPUE=0)) 
+
+
+#eek this causes some bad column names!
+full_wide <- full_wide %>% rename(WTCPUE_Chionoecetes_bairdi = "WTCPUE_Chionoecetes bairdi",            
+                                    WTCPUE_Atheresthes_stomia = "WTCPUE_Atheresthes stomias",             
+                                    WTCPUE_Hippoglossus_stenolepis = "WTCPUE_Hippoglossus stenolepis",
+                                    WTCPUE_Limanda_aspera = "WTCPUE_Limanda aspera",         
+                                    WTCPUE_Lepidopsetta_sp= "WTCPUE_Lepidopsetta sp.",               
+                                    WTCPUE_Chionoecetes_opilio = "WTCPUE_Chionoecetes opilio",             
+                                    WTCPUE_Gadus_macrocephalus = "WTCPUE_Gadus macrocephalus",            
+                                    WTCPUE_Hippoglossoides_elassodon = "WTCPUE_Hippoglossoides elassodon",  
+                                    WTCPUE_Pleuronectes_quadrituberculatus = "WTCPUE_Pleuronectes quadrituberculatus", 
+                                    WTCPUE_Lepidopsetta_polyxystra = "WTCPUE_Lepidopsetta polyxystra", 
+                                    WTCPUE_Gadus_chalcogrammus = "WTCPUE_Gadus chalcogrammus", 
+                                    NUMCPUE_Gadus_chalcogrammus = "NUMCPUE_Gadus chalcogrammus",        
+                                    NUMCPUE_Chionoecetes_bairdi = "NUMCPUE_Chionoecetes bairdi",            
+                                    NUMCPUE_Atheresthes_stomias = "NUMCPUE_Atheresthes stomias",           
+                                    NUMCPUE_Hippoglossus_stenolepis = "NUMCPUE_Hippoglossus stenolepis",        
+                                    NUMCPUE_Limanda_aspera = "NUMCPUE_Limanda aspera",                
+                                    NUMCPUE_Lepidopsetta_sp = "NUMCPUE_Lepidopsetta sp.",               
+                                    NUMCPUE_Chionoecetes_opilio = "NUMCPUE_Chionoecetes opilio",           
+                                    NUMCPUE_Gadus_macrocephalus = "NUMCPUE_Gadus macrocephalus",            
+                                    NUMCPUE_Hippoglossoides_elassodon = "NUMCPUE_Hippoglossoides elassodon",     
+                                    NUMCPUE_Pleuronectes_quadrituberculatus = "NUMCPUE_Pleuronectes quadrituberculatus",
+                                    NUMCPUE_Lepidopsetta_polyxystra = "NUMCPUE_Lepidopsetta polyxystra",
+                                    logCPUE_Gadus_chalcogrammus = "logCPUE_Gadus chalcogrammus",        
+                                    logCPUE_Chionoecetes_bairdi = "logCPUE_Chionoecetes bairdi",           
+                                    logCPUE_Atheresthes_stomias = "logCPUE_Atheresthes stomias",            
+                                    logCPUE_Hippoglossus_stenolepis = "logCPUE_Hippoglossus stenolepis", 
+                                    logCPUE_Limanda_aspera = "logCPUE_Limanda aspera",        
+                                    logCPUE_Lepidopsetta_sp = "logCPUE_Lepidopsetta sp.",              
+                                    logCPUE_Chionoecetes_opilio = "logCPUE_Chionoecetes opilio",            
+                                    logCPUE_Gadus_macrocephalus = "logCPUE_Gadus macrocephalus",           
+                                    logCPUE_Hippoglossoides_elassodon = "logCPUE_Hippoglossoides elassodon",      
+                                    logCPUE_Pleuronectes_quadrituberculatus = "logCPUE_Pleuronectes quadrituberculatus" ,
+                                    logCPUE_Lepidopsetta_polyxystra = "logCPUE_Lepidopsetta polyxystra") 
+
+
+
+
+#exclusion criteria===============
+
+station_summaryF <- full_wide %>% group_by(STATION, LONGITUDE, LATITUDE) %>%
+  summarize(n_yrs=n())
+
+station_summaryF2 <- full_wide %>% group_by(STATION) %>%
+  summarize(n_yrs=n())
+
+joinfull <- left_join(full_wide, station_summaryF2)
+
+#analysis_dat <- joinearly[which(joinearly$n_yrs>5),]
+
+
 
 #plot CPUE maps======
 
@@ -252,12 +326,21 @@ fit1 <- cmdscale(d,eig=TRUE, k=2) # k is the number of dim
 #IMMEDIATELY CRASHED LAPTOP
 #second attempt about A half hour to run
 fit1 # view results
+saveRDS(fit1, file="scripts/MDS_early_output.RDS")
+
+rownames(early_comm_mat) <- paste(early_wide$CRUISE, early_wide$HAUL, sep="-")
 
 x1 <- fit1$points[,1]
 y1 <- fit1$points[,2]
 plot(x1, y1,  xlab="Coordinate 1", ylab="Coordinate 2", 
      main="Metric MDS", type="n")
 text(x1, y1, labels = row.names(early_comm_mat), cex=.7)
+#perhaps paste rownames split into year and haul and colour by year
+mat2plot <- as.data.frame(early_comm_mat)
+mat2plot$rowname <- paste(rownames(mat2plot))
+mat2plot$year <- str_sub(mat2plot$rowname, 2, 5)
+
+text(x1, y1, labels = row.names(mat2plot), cex=.7, col=mat2plot$year)
 
 fitdf <- as.data.frame(fit1$points)
 
@@ -285,9 +368,39 @@ de <- dist(short_end) # euclidean distances between the rows
 fite <- cmdscale(de,eig=TRUE, k=2) # k is the number of dim, 3 minute run time
 fite
 
-#try running in R itself
-#earlydf <- as.data.frame(early_comm_mat)
-write.csv(early_wide[,c(38:48)], "data/early_community_df.csv", row.names=FALSE)
+
+#MDS with full data====
+
+# full_wide <- as.data.frame(full_wide)
+# summary(full_wide) 
+
+full_comm_mat <- as.matrix(full_wide[,c(40:50)])
+
+#write to csv to run in R itself
+#write.csv(full_comm_mat, file="/Users/krista/Dropbox/Work folder/Pollock Analyses/bold-new-pollock/data/full_comm_mat.csv")
+
+dfull <- dist(full_comm_mat) # euclidean distances between the rows
+fitfull <- cmdscale(dfull,eig=TRUE, k=2) # k is the number of dim 
+#start1:13
+fitfull # view results
+saveRDS(fitfull, file="scripts/MDS_full_output.RDS")
+
+
+rownames(early_comm_mat) <- paste(early_wide$CRUISE, early_wide$HAUL, sep="-")
+
+x1 <- fit1$points[,1]
+y1 <- fit1$points[,2]
+plot(x1, y1,  xlab="Coordinate 1", ylab="Coordinate 2", 
+     main="Metric MDS", type="n")
+text(x1, y1, labels = row.names(early_comm_mat), cex=.7)
+#perhaps paste rownames split into year and haul and colour by year
+mat2plot <- as.data.frame(early_comm_mat)
+mat2plot$rowname <- paste(rownames(mat2plot))
+mat2plot$year <- str_sub(mat2plot$rowname, 2, 5)
+
+text(x1, y1, labels = row.names(mat2plot), cex=.7, col=mat2plot$year)
+
+
 
 #plot climate variables========
 # load environmental data
