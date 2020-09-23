@@ -2058,9 +2058,11 @@ plot(sm(linviz1g , 1))
 lin_mm_exp <- gamm(log_sum_WGTCPUE_LEN ~ bin + bottemp_anom*bin*period  +
                  ti(mean_station_bottemp, BOT_DEPTH),
                random=list(YEAR_factor=~1), 
-                 cor = corExp(form=~ adj_long_albers + adj_lat_albers|YEAR_factor, nugget=TRUE),
+                 cor = corExp(form=~ adj_long_albers + adj_lat_albers|YEAR_factor, nugget=TRUE),   #what is nugget again?
                data=binmeta2, method="REML") #start Tues 9:44
 saveRDS(lin_mm_exp, file="~/Dropbox/Work folder/Pollock Analyses/bold-new-pollock/scripts/linear-mixed_Exp-cor_model.RDS")
+
+#should cor be by year + bin??
 
 lin_mm_exp <- readRDS(file="~/Dropbox/Work folder/Pollock Analyses/bold-new-pollock/scripts/linear-mixed_Exp-cor_model.RDS")
 
@@ -2206,6 +2208,24 @@ overlap_exp <- gamm(log_sum_WGTCPUE_LEN ~ bin + bottemp_anom*bin*period  +
                      ti(mean_station_bottemp, BOT_DEPTH),
                    random=list(YEAR_factor=~1), 
                    cor = corExp(form=~ adj_long_albers + adj_lat_albers|YEAR_factor, nugget=TRUE),
-                   data=overlapdat, method="REML") #start Tues 9:44
-saveRDSoverlap_exp, file="~/Dropbox/Work folder/Pollock Analyses/bold-new-pollock/scripts/overlap_Exp-cor_model.RDS")
+                   data=overlapdat, method="REML") #start Tues 4:52pm
+saveRDS(overlap_exp, file="~/Dropbox/Work folder/Pollock Analyses/bold-new-pollock/scripts/overlap_Exp-cor_model.RDS")
+
+summary(overlap_exp[[2]])
+anova(overlap_exp[[2]])
+plot(overlap_exp[[2]])
+
+summary(overlap_exp[[1]])
+anova(overlap_exp[[1]])
+
+plot_model(overlap_exp[[2]], type="int")
+
+
+overlap_exp[[1]] %>% augment() %>% 
+  ggplot(., aes(x = bottemp_anom,
+                y = log_sum_WGTCPUE_LEN,
+                col = bin)) +
+  geom_smooth(method="lm") +
+  facet_grid(. ~ period) +
+  theme_classic()
 
