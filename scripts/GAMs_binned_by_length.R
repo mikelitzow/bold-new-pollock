@@ -2180,6 +2180,26 @@ AIC(lin_mm[[1]], lin_mm_gau[[1]], lin_mm_exp[[1]], lin_mm_rat[[1]], lin_mm_shr[[
 s1 <- ggplot(binmeta2[which(binmeta2$bin=="500+"),], aes(lat_albers, long_albers, col=log_sum_WGTCPUE_LEN)) 
   s1 + geom_point(alpha=0.9) + facet_wrap(~YEAR) + scale_color_distiller(palette = "Spectral")
 
+#model on only overlapping temp values======
+  
+min(binmeta2$bottemp_anom[which(binmeta2$period=="early")])  
+  min(binmeta2$bottemp_anom[which(binmeta2$period=="late")])  
+  
+  max(binmeta2$bottemp_anom[which(binmeta2$period=="early")])  
+  max(binmeta2$bottemp_anom[which(binmeta2$period=="late")])  
+  
+  ggplot(binmeta2, aes(period, bottemp_anom)) + geom_boxplot()
+  
+  tempsummary <- binmeta2 %>% group_by(period) %>%
+    summarize(mean_Btempanom=mean(bottemp_anom, na.rm=TRUE),
+              q_05=quantile(bottemp_anom, 0.05, na.rm=TRUE),
+              q_95=quantile(bottemp_anom, 0.95, na.rm=TRUE))
+  
+#analyze only data that falls within the 5th and 95th quantile of both 
+overlapdat <- binmeta2[which(binmeta2$bottemp_anom<1.56 & binmeta2$bottemp_anom>-0.595),]
+
+e2 <- ggplot(overlapdat, aes(bottemp_anom, log_sum_WGTCPUE_LEN, colour=period))
+e2 + geom_point(alpha=0.2) + geom_smooth(method="lm") + facet_wrap(~bin)
 
 
 
