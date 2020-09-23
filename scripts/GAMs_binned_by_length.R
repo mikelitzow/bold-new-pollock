@@ -1863,18 +1863,23 @@ AIC(bigE, bigEk, bigEk3) #gets worse as k is decreased
 
 #attempt two at big model selection======
 
+binmeta2$bin <- as.factor(binmeta2$bin)
+
 #start full model
 full_mm <- gamm(log_sum_WGTCPUE_LEN ~ bin + ti(mean_station_bottemp, BOT_DEPTH) +
               s(bottemp_anom, bin, by=as.factor(period), bs="fs"), random=list(YEAR_factor=~1), 
-            cor = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE),
-            data=binmeta2) #
-summary(full_mm[2]) 
-summary(full_mm[1]) 
-plot(full_mm[2])
-visreg(full_mm[2], "bottemp_anom", "bin")
+          #  cor = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE),
+            data=binmeta2, method="REML") #
+summary(full_mm[[2]]) 
+summary(full_mm[[1]]) 
+plot(full_mm[[2]])
+visreg(full_mm[[2]], "bottemp_anom", "bin")
 visreg(full_mm, "bottemp_anom", "period")
 
-gam.check(summary(full_mm[2]) )
+#model creates a bunch of NaNs, are there NAs in period?
+#no NAs so issue with interaction
+
+gam.check(summary(full_mm[[2]]))
 
 fullviz1 <- getViz(full_mm)
 plot(sm(fullviz1 , 1))
@@ -1888,6 +1893,292 @@ plot(full_mm, select = 3)
 v1 <- visreg(full_mm, 'bottemp_anom', by='bin', cond=list(period="early"), layout=c(5,1))
 v2 <- visreg(full_mm, 'bottemp_anom', by='bin', cond=list(period="late"), layout=c(5,1))
 
+
+
+red_2way_mm <- gamm(log_sum_WGTCPUE_LEN ~ bin + ti(mean_station_bottemp, BOT_DEPTH) +
+                      s(bin, by=as.factor(period), bs="fs") +
+                  s(bottemp_anom, by=as.factor(period), bs="fs"), random=list(YEAR_factor=~1), 
+                #  cor = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE),
+                data=binmeta2)
+summary(red_2way_mm[[2]])
+plot(red_2way_mm[[2]])
+
+
+
+lin_mm <- gamm(log_sum_WGTCPUE_LEN ~ bin + bottemp_anom*bin*period  +
+                 ti(mean_station_bottemp, BOT_DEPTH),
+                  random=list(YEAR_factor=~1), 
+                #  cor = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE),
+                data=binmeta2, method="REML") #
+summary(lin_mm[[2]]) 
+summary(lin_mm[[1]]) 
+# AIC        BIC      logLik
+# 177722.2  177939.4 -88836.11
+plot(lin_mm[[2]])
+anova(lin_mm[[2]])
+
+
+gam.check(summary(lin_mm[[2]]))
+
+linviz1 <- getViz(lin_mm[[2]])
+plot(sm(linviz1 , 1))
+
+LE1 <- resid(lin_mm$lme, type="normalized")
+LF1 <- fitted(lin_mm$lme)
+
+plot(lin_mm$lme, resid(., type="n") ~ fitted(.), abline = 0, col=1)
+plot(lin_mm$lme, resid(., type="n") ~ bottemp_anom, abline = 0, col=1)
+plot(lin_mm$lme, resid(., type="n") ~ fitted(.)|bin, abline = 0, col=1, par.strip.text=list(cex=0.75))
+plot(lin_mm$lme, resid(., type="n") ~ fitted(.)|period, abline = 0, col=1, par.strip.text=list(cex=0.75))
+
+
+lin <- gamm(log_sum_WGTCPUE_LEN ~ bin + bottemp_anom*bin*period  +
+                 ti(mean_station_bottemp, BOT_DEPTH),
+             #  random=list(YEAR_factor=~1), 
+               #  cor = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE),
+               data=binmeta2, method="REML") #
+summary(lin[[2]]) 
+summary(lin[[1]]) 
+# AIC      BIC    logLik
+# 178531 178739.6 -89241.52
+plot(lin[[2]])
+anova(lin[[2]])
+
+anova(lin[[2]], lin_mm[[2]], test="F")
+
+#comparing using AIC with random year is better than without
+#no nosig linear terms to drop
+#spatial correlation??
+
+library(nlme)
+
+reslinm <- residuals(lin_mm[[2]], type = "pearson")
+var <- Variogram(reslinm ~ long_albers + lat_albers,  data=linmdat)    #what dist???
+plot(var)
+var <- Variogram(lin_mm$lme, form=~long_albers + lat_albers|YEAR_factor, robust=TRUE, smooth=FALSE)    #what dist???
+plot(var)
+#linmdat <- periods_analysis_dat[is.na(periods_analysis_dat$logCPUE_Gadus_chalcogrammus)==FALSE,]
+linmdat <- binmeta2
+linmdat$residual <- NA
+linmdat$residual <- reslinm
+z1 <- ggplot(linmdat[which(linmdat$YEAR==2000),], aes(LONGITUDE, LATITUDE, colour=residual))
+z1 + geom_point() +   scale_colour_gradient2(low="blue", high="red", guide="colorbar")
+
+z1 <- ggplot(linmdat[which(linmdat$YEAR==2010),], aes(LONGITUDE, LATITUDE, colour=residual))
+z1 + geom_point() +   scale_colour_gradient2(low="blue", high="red", guide="colorbar")
+
+z1 <- ggplot(linmdat[which(linmdat$YEAR==1990),], aes(LONGITUDE, LATITUDE, colour=residual))
+z1 + geom_point() +   scale_colour_gradient2(low="blue", high="red", guide="colorbar")
+
+#yes, certainly looks like spatial autocorrelation
+
+#and fixed portion:
+reslinlme <- residuals(lin_mm[[1]], type = "normalized")
+#var <- Variogram(reslinm ~ long_albers + lat_albers, data=linmdat)    #what dist???
+plot(var)
+#linmdat <- periods_analysis_dat[is.na(periods_analysis_dat$logCPUE_Gadus_chalcogrammus)==FALSE,]
+#linmdat <- binmeta2
+linmdat$residual_lme_norm <- NA
+linmdat$residual_lme_norm <- reslinlme
+z1 <- ggplot(linmdat[which(linmdat$YEAR==2000),], aes(LONGITUDE, LATITUDE, colour=residual_lme_norm))
+z1 + geom_point() +   scale_colour_gradient2(low="blue", high="red", guide="colorbar")
+
+z1 <- ggplot(linmdat[which(linmdat$YEAR==2010),], aes(LONGITUDE, LATITUDE, colour=residual_lme_norm))
+z1 + geom_point() +   scale_colour_gradient2(low="blue", high="red", guide="colorbar")
+
+z1 <- ggplot(linmdat[which(linmdat$YEAR==1990),], aes(LONGITUDE, LATITUDE, colour=residual_lme_norm))
+z1 + geom_point() +   scale_colour_gradient2(low="blue", high="red", guide="colorbar")
+
+#also spatial autocorrelation maybe not as bad
+
+
+#fit correlation structures
+
+#how many repeated lat-longs within a given year?
+yr_loc <- binmeta2 %>% group_by(long_albers, lat_albers, YEAR, STATION) %>% summarize(n=n())
+#of course, this is the binned data so tonnes of repeats
+#add a teeny tiny bit to each coordinate so they aren't identical w/in a year?
+
+binmeta2$adj_long_albers <- NA
+binmeta2$adj_lat_albers <- NA
+
+#lat
+binmeta2$adj_lat_albers[which(binmeta2$bin=="0-200")] <- binmeta2$lat_albers[which(binmeta2$bin=="0-200")] + 
+                                                            0.0000001
+binmeta2$adj_lat_albers[which(binmeta2$bin=="200-300")] <- binmeta2$lat_albers[which(binmeta2$bin=="200-300")] - 
+  0.0000001
+binmeta2$adj_lat_albers[which(binmeta2$bin=="300-400")] <- binmeta2$lat_albers[which(binmeta2$bin=="300-400")] + 
+  0.0000002
+binmeta2$adj_lat_albers[which(binmeta2$bin=="400-500")] <- binmeta2$lat_albers[which(binmeta2$bin=="400-500")] - 
+  0.0000002
+binmeta2$adj_lat_albers[which(binmeta2$bin=="500+")] <- binmeta2$lat_albers[which(binmeta2$bin=="500+")] + 
+  0.0000003
+
+#long
+
+binmeta2$adj_long_albers[which(binmeta2$bin=="0-200")] <- binmeta2$long_albers[which(binmeta2$bin=="0-200")] + 
+  0.00000001
+binmeta2$adj_long_albers[which(binmeta2$bin=="200-300")] <- binmeta2$long_albers[which(binmeta2$bin=="200-300")] - 
+  0.00000001
+binmeta2$adj_long_albers[which(binmeta2$bin=="300-400")] <- binmeta2$long_albers[which(binmeta2$bin=="300-400")] + 
+  0.00000002
+binmeta2$adj_long_albers[which(binmeta2$bin=="400-500")] <- binmeta2$long_albers[which(binmeta2$bin=="400-500")] - 
+  0.00000002
+binmeta2$adj_long_albers[which(binmeta2$bin=="500+")] <- binmeta2$long_albers[which(binmeta2$bin=="500+")] + 
+  0.00000003
+
+#for correlation structure use adj_ coordinates, which are jittered just a little
+
+lin_mm_gau <- gamm(log_sum_WGTCPUE_LEN ~ bin + bottemp_anom*bin*period  +
+                     ti(mean_station_bottemp, BOT_DEPTH),
+                   random=list(YEAR_factor=~1), 
+                   cor = corGaus(form=~ adj_long_albers + adj_lat_albers|YEAR_factor, nugget=TRUE),
+                   data=binmeta2, method="REML") #
+saveRDS(lin_mm_gau, file="~/Dropbox/Work folder/Pollock Analyses/bold-new-pollock/scripts/linear-mixed_Gaus-cor_model.RDS")
+
+lin_mm_gau <- readRDS(file="~/Dropbox/Work folder/Pollock Analyses/bold-new-pollock/scripts/linear-mixed_Gaus-cor_model.RDS")
+
+
+summary(lin_mm_gau[[2]]) 
+summary(lin_mm_gau[[1]]) 
+# AIC      BIC    logLik
+# 171405.6 171640.2 -85675.81
+
+plot(lin_mm_gau[[2]])
+anova(lin_mm_gau[[2]])
+
+
+gam.check(summary(lin_mm_gau[[2]]))
+
+linviz1g <- getViz(lin_mm_gau[[2]])
+plot(sm(linviz1g , 1))
+
+
+
+lin_mm_exp <- gamm(log_sum_WGTCPUE_LEN ~ bin + bottemp_anom*bin*period  +
+                 ti(mean_station_bottemp, BOT_DEPTH),
+               random=list(YEAR_factor=~1), 
+                 cor = corExp(form=~ adj_long_albers + adj_lat_albers|YEAR_factor, nugget=TRUE),
+               data=binmeta2, method="REML") #start Tues 9:44
+saveRDS(lin_mm_exp, file="~/Dropbox/Work folder/Pollock Analyses/bold-new-pollock/scripts/linear-mixed_Exp-cor_model.RDS")
+
+lin_mm_exp <- readRDS(file="~/Dropbox/Work folder/Pollock Analyses/bold-new-pollock/scripts/linear-mixed_Exp-cor_model.RDS")
+
+summary(lin_mm_exp[[2]]) 
+summary(lin_mm_exp[[1]]) 
+
+# AIC      BIC    logLik
+# 167389.5 167624.1 -83667.76     #definite improvement
+
+plot(lin_mm_exp[[2]])
+anova(lin_mm_exp[[2]])
+summary(lin_mm_exp[[2]])
+
+library(car)
+Anova(lin_mm_exp[[2]], type="III")
+
+library(sjPlot)
+library(sjmisc)
+
+plot_model(lin_mm_exp[[2]], type="int")
+plot_model(lin_mm_exp[[2]], type = "pred", terms = c("bottemp_anom", "bin", "period"))
+
+library(broom)
+lin_mm_exp[[1]] %>% augment() %>% 
+  ggplot(., aes(x = bottemp_anom,
+                y = log_sum_WGTCPUE_LEN,
+                col = bin)) +
+  geom_smooth(method="lm") +
+  facet_grid(. ~ period) +
+  theme_classic()
+
+
+lin_mm_exp[[1]] %>% augment() %>% 
+  ggplot(., aes(x = bottemp_anom,
+                y = log_sum_WGTCPUE_LEN,
+                col = bin)) +
+  geom_line(aes(group=bin)) +
+  facet_grid(. ~ period) +
+  theme_classic()
+
+
+#hmm plotting interaction looks different based on whether I use the gam or lme portion of the model
+
+gam.check(summary(lin_mm_exp[[2]]))
+
+linviz1e <- getViz(lin_mm_exp[[2]])
+plot(sm(linviz1e , 1))
+
+Pred.exp <- predict(lin_mm_exp$gam, binmeta2,
+                 type = "response")
+bin_w_pred <- binmeta2
+bin_w_pred$predicted_exp <- Pred.exp
+
+ggplot(bin_w_pred, aes(bottemp_anom, log_sum_WGTCPUE_LEN, col=period)) + geom_point() + 
+  +   geom_smooth(predicted_exp, method="lm")
+
+plot(bin_w_pred$bottemp_anom, bin_w_pred$log_sum_WGTCPUE_LEN)
+lines(bin_w_pred$predicted_exp, col=interaction(bin_w_pred$bin, bin_w_pred$period))
+
+ggplot(bin_w_pred, aes(long_albers, lat_albers, col=predicted_exp)) + geom_point() 
+
+
+#what does the 3-way interaction look like in raw data?
+e1 <- ggplot(binmeta2, aes(bottemp_anom, log_sum_WGTCPUE_LEN, colour=period))
+e1 + geom_point(alpha=0.2) + geom_smooth(method="lm") + facet_wrap(~bin)
+
+
+
+lin_mm_rat <- gamm(log_sum_WGTCPUE_LEN ~ bin + bottemp_anom*bin*period  +
+                     ti(mean_station_bottemp, BOT_DEPTH),
+                   random=list(YEAR_factor=~1), 
+                   cor = corRatio(form=~ adj_long_albers + adj_lat_albers|YEAR_factor, nugget=TRUE),
+                   data=binmeta2, method="REML") #
+saveRDS(lin_mm_rat, file="~/Dropbox/Work folder/Pollock Analyses/bold-new-pollock/scripts/linear-mixed_Ratio-cor_model.RDS")
+
+summary(lin_mm_rat[[2]]) 
+summary(lin_mm_rat[[1]]) 
+
+plot(lin_mm_rat[[2]])
+anova(lin_mm_rat[[2]])
+
+
+gam.check(summary(lin_mm_rat[[2]]))
+
+linviz1r <- getViz(lin_mm_rat[[2]])
+plot(sm(linviz1r , 1))
+
+
+
+lin_mm_shr <- gamm(log_sum_WGTCPUE_LEN ~ bin + bottemp_anom*bin*period  +
+                     ti(mean_station_bottemp, BOT_DEPTH),
+                   random=list(YEAR_factor=~1), 
+                   cor = corSpher(form=~ adj_long_albers + adj_lat_albers|YEAR_factor, nugget=TRUE),
+                   data=binmeta2, method="REML") #
+saveRDS(lin_mm_shr, file="~/Dropbox/Work folder/Pollock Analyses/bold-new-pollock/scripts/linear-mixed_spher-cor_model.RDS")
+
+summary(lin_mm_shr[[2]]) 
+summary(lin_mm_shr[[1]]) 
+
+plot(lin_mm_shr[[2]])
+anova(lin_mm_shr[[2]])
+
+
+gam.check(summary(lin_mm_shr[[2]]))
+
+linviz1s <- getViz(lin_mm_shr[[2]])
+plot(sm(linviz1s , 1))
+
+
+
+
+AIC(lin_mm[[1]], lin_mm_gau[[1]], lin_mm_exp[[1]], lin_mm_rat[[1]], lin_mm_shr[[1]])
+#exp is by far the best
+
+#CPUE by bin spatially?======
+
+s1 <- ggplot(binmeta2[which(binmeta2$bin=="500+"),], aes(lat_albers, long_albers, col=log_sum_WGTCPUE_LEN)) 
+  s1 + geom_point(alpha=0.9) + facet_wrap(~YEAR) + scale_color_distiller(palette = "Spectral")
 
 
 
