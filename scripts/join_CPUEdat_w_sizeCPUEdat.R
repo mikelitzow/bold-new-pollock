@@ -121,3 +121,6 @@ periods_meta <- periods_analysis_dat[,c(1:15, 49:52)]
 binjoin2 <- left_join(periods_meta, binneddat)
 binmeta2 <- binjoin2[!duplicated(binjoin2),] #check length is same as binneddat
 #there are some rows here that don't match for sure, return to this
+#going to remove 562 rows that have NAs in all columns from binned dat, these seem to be hauls in periods_meta that have no match
+#in binneddat, but do we want to retain these? Are they zeros?
+binmeta2 <- binmeta2[which(is.finite(binmeta2$bin_sum_WGTCPUE_LEN)==TRUE),]
