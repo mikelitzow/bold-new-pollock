@@ -2229,3 +2229,28 @@ overlap_exp[[1]] %>% augment() %>%
   facet_grid(. ~ period) +
   theme_classic()
 
+
+#drop period interactions from exp model=======
+
+dropP_exp <- gamm(log_sum_WGTCPUE_LEN ~ bin + bottemp_anom*bin  +
+                     ti(mean_station_bottemp, BOT_DEPTH),
+                   random=list(YEAR_factor=~1), 
+                   cor = corExp(form=~ adj_long_albers + adj_lat_albers|YEAR_factor, nugget=TRUE),   #what is nugget again?
+                   data=binmeta2, method="REML") #start Tues 9:44
+saveRDS(dropP_exp, file="~/Dropbox/Work folder/Pollock Analyses/bold-new-pollock/scripts/linear-mixed_Exp-cor_model_NOPERIOD.RDS")
+
+
+dropP_exp[[1]] %>% augment() %>% 
+  ggplot(., aes(x = bottemp_anom,
+                y = log_sum_WGTCPUE_LEN,
+                col = bin)) +
+  geom_smooth(method="lm") +
+
+  theme_classic()
+
+summary(dropP_exp[[1]])
+summary(dropP_exp[[2]])
+anova(dropP_exp[[2]])
+
+AIC(dropP_exp[[1]], lin_mm_exp[[1]]) #WITH period is better but diff # of obs??
+
