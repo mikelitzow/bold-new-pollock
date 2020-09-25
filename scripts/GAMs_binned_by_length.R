@@ -2254,3 +2254,13 @@ anova(dropP_exp[[2]])
 
 AIC(dropP_exp[[1]], lin_mm_exp[[1]]) #WITH period is better but diff # of obs??
 
+
+#what about without a nugget?
+
+nonug_exp <- gamm(log_sum_WGTCPUE_LEN ~ bin + bottemp_anom*bin*period  +
+                     ti(mean_station_bottemp, BOT_DEPTH),
+                   random=list(YEAR_factor=~1), 
+                   cor = corExp(form=~ adj_long_albers + adj_lat_albers|YEAR_factor, nugget=FALSE),   #what is nugget again?
+                   data=binmeta2, method="REML") #start Tues 9:44
+saveRDS(nonug_exp, file="~/Dropbox/Work folder/Pollock Analyses/bold-new-pollock/scripts/linear-mixed_Exp-cor_model_nonugget.RDS")
+
