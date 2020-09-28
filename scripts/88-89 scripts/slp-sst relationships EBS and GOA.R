@@ -33,10 +33,11 @@ slp <- matrix(slp, nrow=dim(slp)[1], ncol=prod(dim(slp)[2:3]))
 # plot to confirm that everything is ok
 z <- colMeans(slp, na.rm=T) # mean value for each cell
 z <- t(matrix(z, length(y)))  # Convert vector to matrix and transpose for plotting
-image(x,y,z, col=tim.colors(64), xlab = "", ylab = "", yaxt="n", xaxt="n")
+image(x,y,z, col=tim.colors(64), xlab = "", ylab = "", xlim=c(160,220), ylim=c(50,70))
 
 contour(x,y,z, add=T, col="white",vfont=c("sans serif", "bold"))
 map('world2Hires', add=T, lwd=1)
+
 
 # now sst
 dat2 <- read.csv("data/climate data.csv")
@@ -69,6 +70,28 @@ lon <- rep(x, each = length(y))
 
 dimnames(slp) <- list(as.character(d), paste("N", lat, "E", lon, sep=""))
 
+# limit to EBS!
+
+poly.x <- c(360-169, 360-169, 360-153, 360-153, 360-169) 
+poly.y <- c(47, 57, 57, 47, 47)
+
+ebs.slp <- slp
+
+xp <- cbind(poly.x, poly.y)
+loc=cbind(lon, lat)
+check <- in.poly(loc, xp=xp)
+
+ebs.slp[,!check] <- NA
+
+# plot to check
+
+z <- colMeans(ebs.slp, na.rm=T) # mean value for each cell
+z <- t(matrix(z, length(y)))  # Convert vector to matrix and transpose for plotting
+image(x,y,z, col=tim.colors(64), xlab = "", ylab = "", xlim=c(160,220), ylim=c(40,70))
+
+contour(x,y,z, add=T, col="white",vfont=c("sans serif", "bold"))
+map('world2Hires', add=T, lwd=1)
+
 # now define winter
 win <- c("Nov", "Dec", "Jan", "Feb", "Mar")
 
@@ -76,7 +99,9 @@ win <- c("Nov", "Dec", "Jan", "Feb", "Mar")
 win.yr <- ifelse(m %in% c("Nov", "Dec"), yr+1, yr) 
 # and restrict both winter year and slp to the winter months
 win.yr <- win.yr[m %in% win]
-win.slp <- slp[m %in% win,]
+win.slp <- ebs.slp[m %in% win,]
+
+
 
 # now get annual winter means for each cell
 ff <- function(x) tapply(x, win.yr, mean)
@@ -85,6 +110,43 @@ win.slp <- apply(win.slp, 2, ff)
 
 # drop winter 2020, whixh is incomplete
 win.slp <- win.slp[rownames(win.slp) < 2020,]
+ebs.win.slp <- rowMeans(win.slp, na.rm = T)
+
+
+# quick plot!
+plot(ebs.win.slp[names(ebs.win.slp) %in% 1951:2019], sst$EBS.sst[sst$year %in% 1951:2019], type="n")
+text(ebs.win.slp[names(ebs.win.slp) %in% 1951:1988], sst$EBS.sst[sst$year %in% 1951:1988], labels=1951:1988, col="blue")
+text(ebs.win.slp[names(ebs.win.slp) %in% 1989:2012], sst$EBS.sst[sst$year %in% 1989:2012], labels=1989:2012, col="red")
+
+
+plot.dat <- data.frame(year=1951:2019,
+                       slp=ebs.win.slp[names(ebs.win.slp) %in% 1951:2019],
+                       sst=sst$EBS.sst[sst$year %in% 1951:2019])
+
+plot.dat$era <- as.factor(ifelse(plot.dat$year < 1989, 1, 
+                       ifelse(plot.dat$year %in% 1989:2013, 2, 3)))
+
+
+ggplot(filter(plot.dat, era != 3), aes(slp, sst, color=era)) +
+  theme_bw() +
+  geom_point() +
+  geom_smooth(method="lm")
+
+
+plot.dat$slp <- scale(plot.dat$slp)
+new.dat <- plot.dat %>%
+  pivot_longer(cols=c(-year, -era))
+
+ggplot(new.dat, aes(year, value, color=name)) +
+  theme_bw() +
+  geom_line() + 
+  geom_vline(xintercept = 1988.5, lty=2)
+
+ggplot(new.dat, aes(value, fill=era)) +
+  theme_bw() +
+  geom_density(alpha=0.2) +
+  facet_wrap(~name) +
+  xlim(-3,3)
 
 # separate SLP, PDO, and NPGO into era-specific chunks for regression maps
 win.slp1 <- win.slp[rownames(win.slp) %in% 1951:1988,]
