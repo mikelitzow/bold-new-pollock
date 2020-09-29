@@ -2265,3 +2265,37 @@ nonug_exp <- gamm(log_sum_WGTCPUE_LEN ~ bin + bottemp_anom*bin*period  +
 saveRDS(nonug_exp, file="~/Dropbox/Work folder/Pollock Analyses/bold-new-pollock/scripts/linear-mixed_Exp-cor_model_nonugget.RDS")
 
 AIC(nonug_exp[[1]], lin_mm_exp[[1]]) #AIC is much worse without nugget
+
+
+
+
+ggplot(binmeta2, aes(bottemp_anom, log_sum_WGTCPUE_LEN, col=bin)) + geom_point() + facet_wrap(~YEAR) + geom_smooth(method="lm")
+
+
+
+#playing with breakpoint
+
+dat_brkpnt <- binmeta2
+
+dat_brkpnt$break2011 <- NA
+dat_brkpnt$break2011[which(dat_brkpnt$YEAR<2011)]<-"prebreak"
+dat_brkpnt$break2011[which(dat_brkpnt$YEAR>2010)]<-"postbreak"
+
+dat_brkpnt$break2012 <- NA
+dat_brkpnt$break2012[which(dat_brkpnt$YEAR<2012)]<-"prebreak"
+dat_brkpnt$break2012[which(dat_brkpnt$YEAR>2011)]<-"postbreak"
+
+dat_brkpnt$break2013 <- NA
+dat_brkpnt$break2013[which(dat_brkpnt$YEAR<2013)]<-"prebreak"
+dat_brkpnt$break2013[which(dat_brkpnt$YEAR>2012)]<-"postbreak"
+
+dat_brkpnt$break2010 <- NA
+dat_brkpnt$break2010[which(dat_brkpnt$YEAR<2010)]<-"prebreak"
+dat_brkpnt$break2010[which(dat_brkpnt$YEAR>2009 )]<-"postbreak"
+
+
+
+
+
+
+
