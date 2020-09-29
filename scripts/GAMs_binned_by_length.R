@@ -2295,7 +2295,13 @@ dat_brkpnt$break2010[which(dat_brkpnt$YEAR>2009 )]<-"postbreak"
 
 
 
-
+#2010
+exp10 <- gamm(log_sum_WGTCPUE_LEN ~ bin + bottemp_anom*bin*break2010  +
+                     ti(mean_station_bottemp, BOT_DEPTH),
+                   random=list(YEAR_factor=~1), 
+                   cor = corExp(form=~ adj_long_albers + adj_lat_albers|YEAR_factor, nugget=TRUE),  
+                   data=dat_brkpnt, method="REML") #start Mon 4:15
+saveRDS(exp10, file="~/Dropbox/Work folder/Pollock Analyses/bold-new-pollock/scripts/linear-mixed_Exp-cor_model_2010break.RDS")
 
 
 
