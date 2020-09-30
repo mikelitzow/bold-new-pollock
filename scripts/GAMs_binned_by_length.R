@@ -32,32 +32,7 @@ z11 <- ggplot(bin_analysis_dat, aes(LONGITUDE, LATITUDE,
                                                                          colour=log_sum_WGTCPUE_LEN))
 z11 + geom_point() +   scale_colour_gradient2(low="blue", high="red", guide="colorbar")
 
-bin1dat <- binmeta2[which(binmeta2$bin=="0-200"),]
-bin2dat <- binmeta2[which(binmeta2$bin=="200-300"),]
-bin3dat <- binmeta2[which(binmeta2$bin=="300-400"),]
-bin4dat <- binmeta2[which(binmeta2$bin=="400-500"),]
-bin5dat <- binmeta2[which(binmeta2$bin=="500+"),]
 
-bin1datM <- bin1dat[which(bin1dat$SEX==1),]
-  bin1datF <- bin1dat[which(bin1dat$SEX==2),]
-  bin1datUK <- bin1dat[which(bin1dat$SEX==3),]
-  
-  bin2datM <- bin2dat[which(bin2dat$SEX==1),]
-  bin2datF <- bin2dat[which(bin2dat$SEX==2),]
-  bin2datUK <- bin2dat[which(bin2dat$SEX==3),]
-  
-  bin3datM <- bin3dat[which(bin3dat$SEX==1),]
-  bin3datF <- bin3dat[which(bin3dat$SEX==2),]
-  bin3datUK <- bin3dat[which(bin3dat$SEX==3),]
-  
-  bin4datM <- bin4dat[which(bin4dat$SEX==1),]
-  bin4datF <- bin4dat[which(bin4dat$SEX==2),]
-  bin4datUK <- bin4dat[which(bin4dat$SEX==3),]
-  
-  bin5datM <- bin5dat[which(bin5dat$SEX==1),]
-  bin5datF <- bin5dat[which(bin5dat$SEX==2),]
-  bin5datUK <- bin5dat[which(bin5dat$SEX==3),]
-  
   
  
 #Models without sex=======
