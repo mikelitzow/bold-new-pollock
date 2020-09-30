@@ -47,7 +47,7 @@ sel.trawl.dat$lat_albers <- x$y
 
 #select early data======================================================
 
-#we only want data pre2014
+#we only want data pre2014 in the early period
 early_dat <- sel.trawl.dat[which(sel.trawl.dat$YEAR<2014),]
 early_dat <- early_dat[,-c(9,11)] #drop columns that repeat info
 
@@ -423,372 +423,6 @@ p5 + geom_smooth() + geom_point()
 
 
 
-
-
-#GAMs w year random===================================================================================
-#random intercept, will deal with mean diff among years but allow out of sample prediction
-
-ran1 <- gamm(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP), random=list(YEAR_factor=~1),
-            data=analysis_dat) #AIC is 44471.99 compared to 44364.46 for small1
-summary(ran1)
-summary(ran1[[1]])
-summary(ran1[[2]])
-plot(ran1[[2]])
-gam.check(ran1[[2]]) #looks pretty bad
-
-ran2 <- gamm(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP) +
-              t2(LONGITUDE, LATITUDE), random=list(YEAR_factor=~1), 
-            data=analysis_dat)
-summary(ran2[[1]]) #AIC 40857.67
-summary(ran2[[2]])
-plot(ran2[[2]])
-gam.check(ran2[[2]]) #k too low
-# ran2k <- gamm(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP) +
-#                t2(LONGITUDE, LATITUDE, k=17), random=list(YEAR_factor=~1), 
-#              data=analysis_dat)
-# gam.check(ran2k[[2]])#k too low
-# ran2k2 <- gamm(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP) +
-#                 t2(LONGITUDE, LATITUDE, k=18), random=list(YEAR_factor=~1), 
-#               data=analysis_dat)
-# gam.check(ran2k2[[2]]) #k too low
-# ran2k3 <- gamm(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP) +
-#                  t2(LONGITUDE, LATITUDE, k=19), random=list(YEAR_factor=~1), 
-#                data=analysis_dat)
-# gam.check(ran2k3[[2]]) #k too low
-# ran2k4 <- gamm(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP) +
-#                  t2(LONGITUDE, LATITUDE, k=20), random=list(YEAR_factor=~1), 
-#                data=analysis_dat)
-# gam.check(ran2k4[[2]])#k too low
-# ran2k5 <- gamm(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP) +
-#                  t2(LONGITUDE, LATITUDE, k=21), random=list(YEAR_factor=~1), 
-#                data=analysis_dat)
-# gam.check(ran2k5[[2]]) #k too low
-# ran2k6 <- gamm(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP) +
-#                  t2(LONGITUDE, LATITUDE, k=22), random=list(YEAR_factor=~1), 
-#                data=analysis_dat)
-# gam.check(ran2k6[[2]]) #k too low
-# ran2k7 <- gamm(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP) +
-#                  t2(LONGITUDE, LATITUDE, k=23), random=list(YEAR_factor=~1), 
-#                data=analysis_dat)
-# gam.check(ran2k7[[2]]) #k too low
-# ran2k8 <- gamm(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP) +
-#                  t2(LONGITUDE, LATITUDE, k=24), random=list(YEAR_factor=~1), 
-#                data=analysis_dat)
-# gam.check(ran2k8[[2]]) #k too low
-# ran2k9 <- gamm(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP) +
-#                  t2(LONGITUDE, LATITUDE, k=25), random=list(YEAR_factor=~1), 
-#                data=analysis_dat)
-# gam.check(ran2k9[[2]]) #k too low
-# ran2k10 <- gamm(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP) +
-#                  t2(LONGITUDE, LATITUDE, k=30), random=list(YEAR_factor=~1), 
-#                data=analysis_dat) #k too low
-# gam.check(ran2k10[[2]])
-# ran2k11 <- gamm(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP) +
-#                   t2(LONGITUDE, LATITUDE, k=35), random=list(YEAR_factor=~1), 
-#                 data=analysis_dat)
-# gam.check(ran2k11[[2]]) #k too low
-# ran2k12 <- gamm(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP) +
-#                   t2(LONGITUDE, LATITUDE, k=40), random=list(YEAR_factor=~1), 
-#                 data=analysis_dat)
-# gam.check(ran2k12[[2]]) #k still too low!
-# ran2k13 <- gamm(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP) +
-#                   t2(LONGITUDE, LATITUDE, k=45), random=list(YEAR_factor=~1), 
-#                 data=analysis_dat)
-# gam.check(ran2k13[[2]]) #still too low
-ran2k14 <- gamm(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP) +
-                  t2(LONGITUDE, LATITUDE, k=47), random=list(YEAR_factor=~1), 
-                data=analysis_dat)
-gam.check(ran2k14[[2]]) #still too low, hmmm might be something wrong
-plot(ran2k14[[2]])
-vis.gam(ran2k14[[2]], view=c("LATITUDE", "LONGITUDE"))
-big2 <- getViz(ran2k14[[2]])
-plot(sm(big2, 2))
-AIC(small2k_import, noy2k3, ran2k14[[1]]) #seems worse than other models, not sure if this is whole model AIC
-
-ran3 <- gamm(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP) +
-              t2(LONGITUDE, LATITUDE) + t2(LONGITUDE, LATITUDE, by=factor(YEAR)), random=list(YEAR_factor=~1), 
-            data=analysis_dat) #singularity in backsolve error, looking into stack overflow suggests this is lack of main year effect?
-
-
-ran4 <- gamm(logCPUE_Gadus_chalcogrammus ~ s(BOT_TEMP) +
-              t2(LONGITUDE, LATITUDE) + t2(LONGITUDE, LATITUDE, BOT_TEMP), random=list(YEAR_factor=~1), 
-            data=analysis_dat)
-#singular convergence error
-
-ran4.5 <- gamm(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP) +
-                t2(LONGITUDE, LATITUDE, BOT_TEMP), random=list(YEAR_factor=~1), 
-              data=analysis_dat)
-summary(ran4.5)
-summary(ran4.5[[1]])#AIC 40498.14
-summary(ran4.5[[2]])
-plot(ran4.5[[2]])
-gam.check(ran4.5[[2]]) #k too low
-
-ran4.6 <- gamm(logCPUE_Gadus_chalcogrammus ~  BOT_TEMP +
-                t2(LONGITUDE, LATITUDE, BOT_TEMP), random=list(YEAR_factor=~1), 
-              data=analysis_dat)
-#Singularity in backsolve
-
-ran5 <- gamm(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP) +
-              t2(LONGITUDE, LATITUDE, by=factor(YEAR)), random=list(YEAR_factor=~1), 
-            data=analysis_dat) #reaches iteration limit without convergence
-
-ran6 <- gamm(logCPUE_Gadus_chalcogrammus ~  BOT_TEMP +
-               t2(LONGITUDE, LATITUDE, by=factor(YEAR)), random=list(YEAR_factor=~1), 
-             data=analysis_dat) #ktoo low
-ran6 <- gamm(logCPUE_Gadus_chalcogrammus ~  BOT_TEMP +
-               t2(LONGITUDE, LATITUDE, by=factor(YEAR), k=18), random=list(YEAR_factor=~1), 
-             data=analysis_dat) #ktoo low
-
-
-#random year with gam()=======
-#if you have R version >4.0
-# install.packages(install.packages("https://jacolienvanrij.com/Rpackages/itsadug/package/itsadug_2.4.tar.gz", repos=NULL))
-
-#if you have R version <4.0
-# require(devtools)
-# install_version("itsadug", version = "2.3", repos = "http://cran.us.r-project.org")
-library(itsadug)
-
-rangam1 <- gam(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP) + s(YEAR_factor, bs="re"),
-             data=analysis_dat) 
-summary(rangam1)
-plot_smooth(rangam1, view="BOT_TEMP", plot_all = "YEAR_factor") #pretty
-
-plot(rangam1)
-gam.check(rangam1) #GOOD
-
-
-rangam2 <- gam(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP) +
-               t2(LONGITUDE, LATITUDE)+ s(YEAR_factor, bs="re"), 
-             data=analysis_dat)
-summary(rangam2) #
-plot(rangam2)
-gam.check(rangam2) #k too low
-plot_smooth(rangam2, view="BOT_TEMP", plot_all = "YEAR_factor") 
-plot_smooth(rangam2, view="LATITUDE", plot_all = "YEAR_factor") 
-plot_smooth(rangam2, view="LONGITUDE", plot_all = "YEAR_factor")
-r2 <- getViz(rangam2)
-plot(sm(r2, 2), residuals = TRUE)
-plot(sm(r2, 1), fix = c("YEAR" = 2000), residuals = TRUE)
-print(plot(r2, allTerms = T), pages = 1)
-
-# rangam2k <- gam(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP) +
-#                  t2(LONGITUDE, LATITUDE, k=20)+ s(YEAR_factor, bs="re"), 
-#                data=analysis_dat)
-# gam.check(rangam2k) #k too low bad hessian
-# rangam2k2 <- gam(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP) +
-#                   t2(LONGITUDE, LATITUDE, k=21)+ s(YEAR_factor, bs="re"), 
-#                 data=analysis_dat)
-# gam.check(rangam2k2) #k ok bad hessian
-# rangam2k3 <- gam(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP) +
-#                    t2(LONGITUDE, LATITUDE, k=22)+ s(YEAR_factor, bs="re"), 
-#                  data=analysis_dat)
-# gam.check(rangam2k3) #still bad hessian
-# rangam2k4 <- gam(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP, k=15) +
-#                    t2(LONGITUDE, LATITUDE)+ s(YEAR_factor, bs="re"), 
-#                  data=analysis_dat)
-# gam.check(rangam2k4) #lat long k too low
-# rangam2k5 <- gam(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP, k=10) +
-#                    t2(LONGITUDE, LATITUDE)+ s(YEAR_factor, bs="re"), 
-#                  data=analysis_dat)
-# gam.check(rangam2k5)#lat long k too low
-# rangam2k6 <- gam(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP, k=8) +
-#                    t2(LONGITUDE, LATITUDE)+ s(YEAR_factor, bs="re"), 
-#                  data=analysis_dat)
-# gam.check(rangam2k6)#bad hessian
-# rangam2k7 <- gam(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP, k=9) +
-#                    t2(LONGITUDE, LATITUDE)+ s(YEAR_factor, bs="re"), 
-#                  data=analysis_dat)
-# gam.check(rangam2k7)#bad hessian
-rangam2k8 <- gam(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP, k=9) +
-                   t2(LONGITUDE, LATITUDE, k=25)+ s(YEAR_factor, bs="re"), 
-                 data=analysis_dat) #about 1 hr run time
-gam.check(rangam2k8) #GOOD
-rangam2k9 <- gam(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP, k=10) +
-                   t2(LONGITUDE, LATITUDE, k=20)+ s(YEAR_factor, bs="re"), 
-                 data=analysis_dat) 
-gam.check(rangam2k9) #GOOD
-summary(rangam2k8)
-plot_smooth(rangam2k8, view="BOT_TEMP", plot_all = "YEAR_factor") 
-plot_smooth(rangam2k8, view="LATITUDE", plot_all = "YEAR_factor") 
-plot_smooth(rangam2k8, view="LONGITUDE", plot_all = "YEAR_factor")
-r2k8 <- getViz(rangam2k8)
-plot(sm(r2k8, 2), residuals = TRUE)
-plot(sm(r2k8, 1), fix = c("YEAR" = 2000), residuals = TRUE)
-print(plot(r2k8, allTerms = T), pages = 1)
-
-acf(residuals(rangam2k8))
-pacf(residuals(rangam2k8))
-
-res1 <- residuals(rangam2k8, type = "pearson")
- var <- variogram(res1 ~ LONGITUDE + LATITUDE, data=analysis_dat)    
- plot(var)
- 
- resapend <- analysis_dat[which(is.na(analysis_dat$BOT_TEMP)==FALSE &
-            is.na(analysis_dat$logCPUE_Gadus_chalcogrammus)==FALSE),] #missing bottom temps leads to difference 
- #in length residuals v original dataset
- resapend$residual <- res1
- z1 <- ggplot(resapend, aes(LONGITUDE, LATITUDE, colour=residual))
-z1 + geom_point() +   scale_colour_gradient2(low="blue", high="red", guide="colorbar")
-#definitely looks like there is spatial patterns in residuals!
-
-z2 <- ggplot(resapend, aes(LONGITUDE, LATITUDE, colour=BOT_DEPTH))
-z2 + geom_point() +   scale_colour_gradient2(low="blue", high="red", guide="colorbar")
-
-z3 <- ggplot(resapend, aes(LONGITUDE, LATITUDE, colour=BOT_TEMP))
-z3 + geom_point() +   scale_colour_gradient2(low="blue", high="red", guide="colorbar")
- 
-library(geoR)  
-
-coords <- matrix(0, length(resapend$logCPUE_Gadus_chalcogrammus), 2)
-coords[,1] <- resapend$LONGITUDE
-coords[,2] <- resapend$LATITUDE
-
-gb <- list(data=resapend$logCPUE_Gadus_chalcogrammus, cords=coords)
-plot(variog(gb))
-
-Variogram(rangam2k8, form =~ LONGITUDE + LATITUDE, data=analysis_dat, nugget=TRUE, maxDist=200000)
-
-#try refitting with gamm so I can get a variogram
-gamm2k9 <- gamm(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP, k=10) +
-                  t2(LONGITUDE, LATITUDE, k=20), random=list(YEAR_factor=~1), 
-                data=analysis_dat)
-
-mmvar <- Variogram(gamm2k9$lme, form=~ LONGITUDE + LATITUDE, nugget=TRUE, data=analysis_dat)
-plot(mmvar)
-gam.check(gamm2k9[[2]]) #k little too low but keep same for now to keep parallel w previous
-
-
-resapend$r <- resid(gamm2k9[[2]])   # Extract residuals
-coordinates(resapend) <- c("LONGITUDE","LATITUDE")
-j <- resapend$YEAR == 2010  # Extract 2010 data only
-bubble(resapend[j,], zcol="r")
-k <- resapend$YEAR == 1982  # Extract 2010 data only
-bubble(resapend[k,], zcol="r")
-l <- resapend$YEAR == 1990  # Extract 2010 data only
-bubble(resapend[l,], zcol="r")
-m <- resapend$YEAR == 2000  # Extract 2010 data only
-bubble(resapend[m,], zcol="r")
-
-
-# examine autocorrelation for one year at a time because the spatial 
-# autocorrelation, if present, should be evident within years only 
-
-r <- resid(gamm2k9[[2]])[j]   # Extract residuals
-# Compute pairwise distances among logations based on distances in 'x'
-d <- dist(coordinates(resapend)[j,])
-d  # Large matrix of pairwise distances (values below diagonal only!)
-d <- as.vector(d)   # Need to convert to a vector for 'Variogram' function
-# The vector d, contains only one set of pairwise distances (values from below
-# the diagonal) and has length: n * (n-1) / 2, where n is the number of observations
-# (see help files for 'dist' and 'Variogram')
-
-SemiVar <- Variogram(r, d)
-head(SemiVar, 10) 
-
-plot(SemiVar, xlim=c(0,0.1))
-plot(SemiVar, xlim=c(0,25))
-
-bins <- cut(SemiVar$dist, seq(0,25, by=1))  
-plot(bins, SemiVar$variog)
-
-cgmod <- gamm(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP, k=10) +
-                  t2(LONGITUDE, LATITUDE, k=20), random=list(YEAR_factor=~1), 
-              correlation = corGaus(form=~ LONGITUDE + LATITUDE, nugget=TRUE),
-                data=analysis_dat)
-plot(Variogram(cgmod$lme, form=~ LONGITUDE + LATITUDE, nugget=TRUE, data=analysis_dat))
-gam.check(cgmod[[2]])
-summary(cgmod[[1]]) #AIC 35898.18 compared to 37302.43 for rangam2k9 or  37859.72 for gamm2k9
-csmod <- gamm(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP, k=10) +
-                t2(LONGITUDE, LATITUDE, k=20), random=list(YEAR_factor=~1), 
-              correlation = corSpher(form=~ LONGITUDE + LATITUDE, nugget=TRUE),
-              data=analysis_dat) #no covergence
-crmod <- gamm(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP, k=10) +
-                t2(LONGITUDE, LATITUDE, k=20), random=list(YEAR_factor=~1), 
-              correlation = corRatio(form=~ LONGITUDE + LATITUDE, nugget=TRUE),
-              data=analysis_dat)
-plot(Variogram(crmod$lme, form=~ LONGITUDE + LATITUDE, nugget=TRUE, data=analysis_dat))
-gam.check(crmod[[2]])
-summary(crmod[[1]]) #AIC 35786.53
-cemod <- gamm(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP, k=10) +
-                t2(LONGITUDE, LATITUDE, k=20), random=list(YEAR_factor=~1), 
-              correlation = corExp(form=~ LONGITUDE + LATITUDE, nugget=TRUE),
-              data=analysis_dat)
-plot(Variogram(cemod$lme, form=~ LONGITUDE + LATITUDE, nugget=TRUE, data=analysis_dat))
-gam.check(cemod[[2]])
-summary(cemod[[1]]) #AIC 35777.97
-
-
-#compared to no random?
-noyr2k8 <- gam(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP, k=9) +
-                   t2(LONGITUDE, LATITUDE, k=25), 
-                 data=analysis_dat)
-AIC(rangam2k8,noyr2k8) #yes better with random yr effect
-
-
-AIC(rangam1, rangam2k8)
-
-#RERUN THE NEXT THREE!!
-rangam3 <- gam(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP) +
-               t2(LONGITUDE, LATITUDE) + t2(LONGITUDE, LATITUDE, by=factor(YEAR_factor))+ s(YEAR, bs="re"), 
-             data=analysis_dat) 
-gam.check(rangam3)#bad hessian, k too low
-rangam3k <- gam(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP) +
-                 t2(LONGITUDE, LATITUDE, k=17) + t2(LONGITUDE, LATITUDE, by=factor(YEAR_factor))+ s(YEAR, bs="re"), 
-               data=analysis_dat) 
-gam.check(rangam3k) #k fine, bad hessian
-rangam3k2 <- gam(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP) +
-                  t2(LONGITUDE, LATITUDE, k=15) + t2(LONGITUDE, LATITUDE, by=factor(YEAR_factor))+ s(YEAR, bs="re"), 
-                data=analysis_dat) 
-gam.check(rangam3k2) #k too low, bad hessian
-rangam3k3 <- gam(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP) +
-                   t2(LONGITUDE, LATITUDE, k=16) + t2(LONGITUDE, LATITUDE, by=factor(YEAR_factor))+ s(YEAR, bs="re"), 
-                 data=analysis_dat) 
-gam.check(rangam3k3) #k too low bad hessian
-
-rangam3k4 <- gam(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP) +
-                   t2(LONGITUDE, LATITUDE) + t2(LONGITUDE, LATITUDE, by=factor(YEAR_factor), k=25)+ s(YEAR, bs="re"), 
-                 data=analysis_dat) 
-gam.check(rangam3k4) #memory issue
-rangam3k5 <- bam(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP) +
-                   t2(LONGITUDE, LATITUDE) + t2(LONGITUDE, LATITUDE, by=factor(YEAR_factor), k=20)+ s(YEAR, bs="re"), 
-                 data=analysis_dat) 
-gam.check(rangam3k5)
-
-rangam4 <- gam(logCPUE_Gadus_chalcogrammus ~ s(BOT_TEMP) +
-               t2(LONGITUDE, LATITUDE) + t2(LONGITUDE, LATITUDE, BOT_TEMP)+ s(YEAR_factor, bs="re"), 
-             data=analysis_dat)
-gam.check(rangam4)#k too low
-
-
-rangam4.5 <- gam(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP) +
-                 t2(LONGITUDE, LATITUDE, BOT_TEMP)+ s(YEAR_factor, bs="re"), 
-               data=analysis_dat)
-gam.check(rangam4.5) #k too low bad hessian
-
-rangam4.6 <- gam(logCPUE_Gadus_chalcogrammus ~  BOT_TEMP +
-                 t2(LONGITUDE, LATITUDE, BOT_TEMP)+ s(YEAR_factor, bs="re"), 
-               data=analysis_dat)
-gam.check(rangam4.6) # k too low
-
-
-
-
-rangam5 <- gam(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP) +
-               t2(LONGITUDE, LATITUDE, by=factor(YEAR))+ s(YEAR_factor, bs="re"), 
-             data=analysis_dat) 
-gam.check(rangam5) #bad hessian, k too low
-
-rangam6 <- gam(logCPUE_Gadus_chalcogrammus ~  BOT_TEMP +
-               t2(LONGITUDE, LATITUDE, by=factor(YEAR))+ s(YEAR_factor, bs="re"), 
-             data=analysis_dat)
-summary(rangam6)
-gam.check(rangam6) #bad hessian, low k except for yr
-plot(rangam6)
-rangam6k <- gam(logCPUE_Gadus_chalcogrammus ~  BOT_TEMP +
-               t2(LONGITUDE, LATITUDE, by=factor(YEAR), k=18)+ s(YEAR_factor, bs="re"), 
-             data=analysis_dat)
 
 
 
@@ -1643,10 +1277,12 @@ AIC(tmod1E.1, tmod1E.1dropp) #in both cases model WITH period does better
 
 
 #what about linear interaction?
-tmod1E.1L <- gam(logCPUE_Gadus_chalcogrammus ~ bottemp_anom:period + ti(mean_station_bottemp, BOT_DEPTH) +
+tmod1E.1L <- gamm(logCPUE_Gadus_chalcogrammus ~ bottemp_anom:period + ti(mean_station_bottemp, BOT_DEPTH) +
                 s(YEAR_factor, bs="re"), 
                 correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE),
                 data=periods_analysis_dat)
+
+plot_model(tmod1E.1L[[2]], type="int")
 summary(tmod1E.1L)
 plot(tmod1E.1L)
 visreg(tmod1E.1L, "bottemp_anom", "period") #no data with low anom in late period??
@@ -1655,6 +1291,13 @@ visreg(tmod1E.1L, "mean_station_bottemp", "BOT_DEPTH")
 
 AIC(tmod1E.1, tmod1E.1dropp, tmod1E.1L)
 #try plotting spatially
+
+tmod1E.1Ldrop <- gamm(logCPUE_Gadus_chalcogrammus ~ bottemp_anom + ti(mean_station_bottemp, BOT_DEPTH) +
+                    s(YEAR_factor, bs="re"), 
+                  correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE),
+                  data=periods_analysis_dat)
+plot_model(tmod1E.1Ldrop[[2]], type = "pred", terms = "bottemp_anom")
+AIC(tmod1E.1Ldrop[[1]], tmod1E.1L[[1]])
 
 res3 <- residuals(tmod1E.1, type = "pearson")
 
