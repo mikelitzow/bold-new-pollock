@@ -1067,54 +1067,6 @@ write.csv(periods_analysis_dat, file=paste(wd,"/data/processed_periods_analysis_
 
 #===***===***===
 
-pg1 <- gamm(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP, by=as.factor(period), bs="fs"), random=list(YEAR_factor=~1), 
-            correlation = corGaus(form=~ LONGITUDE + LATITUDE|YEAR_factor, nugget=TRUE),
-            data=periods_analysis_dat)
-plot(Variogram(pg1$lme, form=~ LONGITUDE + LATITUDE|YEAR_factor, nugget=TRUE, data=periods_analysis_dat))
-gam.check(pg1[[2]])
-summary(pg1[[1]]) #44182.43 is this for the whole model though??
-
-pggam1 <- gam(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP, by=as.factor(period), bs="fs") + s(YEAR_factor, bs="re"), 
-              correlation = corGaus(form=~ LONGITUDE + LATITUDE|YEAR_factor, nugget=TRUE),
-              data=periods_analysis_dat)
-gam.check(pggam1)
-plot(pggam1)
-AIC(pggam1) #49624.98
-summary(pggam1)
-
-ps1 <- gamm(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP, by=as.factor(period), bs="fs"), random=list(YEAR_factor=~1), 
-            correlation = corSpher(form=~ LONGITUDE + LATITUDE|YEAR_factor, nugget=TRUE),
-            data=periods_analysis_dat) #
-
-pr1 <- gamm(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP, by=as.factor(period), bs="fs"), random=list(YEAR_factor=~1), 
-            correlation = corRatio(form=~ LONGITUDE + LATITUDE|YEAR_factor, nugget=TRUE),
-            data=periods_analysis_dat)
-plot(Variogram(pr1$lme, form=~ LONGITUDE + LATITUDE|YEAR_factor, nugget=TRUE, data=periods_dat))
-gam.check(pr1[[2]]) #
-summary(cr1[[1]]) #
-
-prgam1 <- gam(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP, by=as.factor(period), bs="fs") + s(YEAR_factor, bs="re"), 
-              correlation = corRatio(form=~ LONGITUDE + LATITUDE|YEAR_factor, nugget=TRUE),
-              data=periods_analysis_dat)
-gam.check(prgam1)
-plot(prgam1)
-AIC(prgam1) #
-
-
-pe1 <- gamm(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP, by=as.factor(period), bs="fs"), random=list(YEAR_factor=~1), 
-            correlation = corExp(form=~ LONGITUDE + LATITUDE|YEAR_factor, nugget=TRUE),
-            data=periods_analysis_dat)
-plot(Variogram(pe1$lme, form=~ LONGITUDE + LATITUDE|YEAR_factor, nugget=TRUE, data=periods_dat))
-gam.check(pe1[[2]])
-summary(pe1[[1]])
-plot(pe1[[2]])
-
-pegam1 <- gam(logCPUE_Gadus_chalcogrammus ~  s(BOT_TEMP, by=as.factor(period), bs="fs") + s(YEAR_factor, bs="re"), 
-              correlation = corExp(form=~ LONGITUDE + LATITUDE|YEAR_factor, nugget=TRUE),
-              data=periods_analysis_dat)
-gam.check(pegam1)
-plot(pegam1)
-AIC(pegam1) #
 
 
 #models w temp and temp anom==================================================================
