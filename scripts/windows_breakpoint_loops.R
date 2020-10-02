@@ -26,7 +26,10 @@ for(i in 1:length(possible_breaks)){
   
   temp_dat$split <- as.factor(temp_dat$split)
   
-  
+  temp_mod <- gamm(logCPUE_Gadus_chalcogrammus ~ bottemp_anom:split + ti(mean_station_bottemp, BOT_DEPTH) +
+                     s(YEAR_factor, bs="re"), 
+                   correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE),
+                   data=temp_dat)
   
 }
 
