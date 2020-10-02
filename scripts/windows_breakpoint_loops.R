@@ -18,6 +18,16 @@ possible_breaks <- yrs[which(yrs>(1982+5) & yrs<(2019-5))]
 i<-1
 for(i in 1:length(possible_breaks)){
   print(possible_breaks[i])
+  temp_break <- possible_breaks[i]
+  temp_dat <- loops_dat
+  temp_dat$split <- NA
+  temp_dat$split[which(temp_dat$YEAR>(temp_break-1))] <- "post"
+  temp_dat$split[which(temp_dat$YEAR<(temp_break))] <- "pre"
+  
+  temp_dat$split <- as.factor(temp_dat$split)
+  
+  
+  
 }
 
 
