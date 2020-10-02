@@ -15,8 +15,19 @@ yrs <- unique(loops_dat$YEAR)
 n_yrs <- length(yrs)
 possible_breaks <- yrs[which(yrs>(1982+5) & yrs<(2019-5))]
 
+
+#starting with breakpoint
+#will try all possible breakpoints with at least 6 yrs data on either side 
+#(b/c don't want a smaller # yrs in either levels than the 2014 breakpoint)
+
+breakpoint_vec <- vector(mode="numeric", length=length(possible_breaks))
+AIC_split_vec <- vector(mode="numeric", length=length(possible_breaks))
+AIC_drop_vec <- vector(mode="numeric", length=length(possible_breaks))
+
+
 i<-1
 for(i in 1:length(possible_breaks)){
+  #set up data with new breakpoint
   print(possible_breaks[i])
   temp_break <- possible_breaks[i]
   temp_dat <- loops_dat
@@ -26,10 +37,27 @@ for(i in 1:length(possible_breaks)){
   
   temp_dat$split <- as.factor(temp_dat$split)
   
+  #run model
   temp_mod <- gamm(logCPUE_Gadus_chalcogrammus ~ bottemp_anom:split + ti(mean_station_bottemp, BOT_DEPTH) +
                      s(YEAR_factor, bs="re"), 
                    correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE),
                    data=temp_dat)
+  
+  #save output
+  breakpoint_vec[i] <- temp_break      
+  AIC_split_vec[i] <- AIC(temp_mod[[1]])
+  saveRDS(temp_mod, file=paste(wd,"/data/breakpoint_model", temp_break, ".csv", sep=""))
+  
+  
+  #run drop model
+  temp_drop <- gamm(logCPUE_Gadus_chalcogrammus ~ bottemp_anom + ti(mean_station_bottemp, BOT_DEPTH) +
+                     s(YEAR_factor, bs="re"), 
+                   correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE),
+                   data=temp_dat)
+  
+  #save output
+  AIC_drop_vec[i] <- AIC(temp_drop[[1]])
+  saveRDS(temp_drop, file=paste(wd,"/data/breakpoint_drop_model", temp_break, ".csv", sep=""))
   
 }
 
