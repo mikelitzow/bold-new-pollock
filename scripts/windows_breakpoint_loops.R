@@ -80,7 +80,7 @@ for(i in 1:length(possible_breaks)){
   #set up data with new breakpoint
   print(possible_breaks[i])
   temp_break <- possible_breaks[i]
-  temp_dat <- loops_dat[which(loops_dat$YEAR<(temp_break+5))]
+  temp_dat <- loops_dat[which(loops_dat$YEAR<(temp_break+5)),]
   temp_dat$split <- NA
   temp_dat$split[which(temp_dat$YEAR>(temp_break-1))] <- "post"
   temp_dat$split[which(temp_dat$YEAR<(temp_break))] <- "pre"
