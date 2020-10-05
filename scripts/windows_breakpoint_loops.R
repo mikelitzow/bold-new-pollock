@@ -116,5 +116,48 @@ outputdf_six <- as.data.frame(cbind(breakpoint_six_vec, AIC_split_six_vec, AIC_d
 outputdf_six$difference_AIC <- outputdf_six$AIC_split_six_vec - outputdf_six$AIC_drop_six_vec
 
 
+AIC(tmod1E.1L[[1]]) - AIC(tmod1E.1Ldrop[[1]]) #-21 so comparable to values through 2005-2008/9
+
+#let's look at models with significant period
+mod05 <- readRDS(paste(wd,"/data/breakpoint_six_model", "2005", ".csv", sep=""))
+plot_model(mod05[[2]], type="int") #acutally MORE positive in post period
+
+
+mod06 <- readRDS(paste(wd,"/data/breakpoint_six_model", "2006", ".csv", sep=""))
+plot_model(mod06[[2]], type="int") #acutally MORE positive in post period
+
+
+mod07 <- readRDS(paste(wd,"/data/breakpoint_six_model", "2007", ".csv", sep=""))
+plot_model(mod07[[2]], type="int") #acutally MORE positive in post period
+
+
+mod08 <- readRDS(paste(wd,"/data/breakpoint_six_model", "2008", ".csv", sep=""))
+plot_model(mod08[[2]], type="int") #acutally MORE positive in post period
+
+
+mod09 <- readRDS(paste(wd,"/data/breakpoint_six_model", "2009", ".csv", sep=""))
+plot_model(mod09[[2]], type="int") #acutally MORE positive in post period
+
+
+mod13 <- readRDS(paste(wd,"/data/breakpoint_six_model", "2013", ".csv", sep=""))
+plot_model(mod13[[2]], type="int") #2013 is similar to 2014 plot
+
+#smaller AIC differences
+
+mod94 <- readRDS(paste(wd,"/data/breakpoint_six_model", "1994", ".csv", sep=""))
+plot_model(mod94[[2]], type="int") #acutally MORE positive in post period
+
+mod95 <- readRDS(paste(wd,"/data/breakpoint_six_model", "1995", ".csv", sep=""))
+plot_model(mod95[[2]], type="int") #acutally MORE positive in post period
+
+mod97 <- readRDS(paste(wd,"/data/breakpoint_six_model", "1997", ".csv", sep=""))
+plot_model(mod97[[2]], type="int") #acutally MORE positive in post period
+
+mod04 <- readRDS(paste(wd,"/data/breakpoint_six_model", "2004", ".csv", sep=""))
+plot_model(mod04[[2]], type="int") #acutally MORE positive in post period
+
+
+
+
 
 
