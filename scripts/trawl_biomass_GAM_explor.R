@@ -1067,6 +1067,55 @@ write.csv(periods_analysis_dat, file=paste(wd,"/data/processed_periods_analysis_
 
 #===***===***===
 
+#Maps=====
+
+library("rnaturalearth")
+library("rnaturalearthdata")
+library( "ggspatial" )
+library("sf")
+
+world <- ne_countries(scale = "medium", returnclass = "sf")
+ggplot(data = world) +
+  geom_sf() +
+  coord_sf(xlim = c(-180, -155), ylim = c(53, 63), expand = TRUE) +
+  annotation_scale(location = "bl", width_hint = 0.5) +
+  # annotation_north_arrow(location = "bl", which_north = "true", 
+  #                        pad_x = unit(0.75, "in"), pad_y = unit(0.5, "in"),
+  #                        style = north_arrow_fancy_orienteering) +  
+  geom_point(aes(LONGITUDE, LATITUDE, colour=logCPUE_Gadus_chalcogrammus)), data=periods_analysis_dat) +   
+  scale_colour_gradient2(low="blue", high="red", guide="colorbar") + facet_wrap(~period) 
+
+ggplot(data = world) +
+  geom_sf() +
+  coord_sf(xlim = c(-180, -155), ylim = c(53, 63), expand = TRUE) +
+  annotation_scale(location = "bl", width_hint = 0.5) +
+  geom_point(aes(LONGITUDE, LATITUDE, colour=logCPUE_Gadus_chalcogrammus), data=periods_analysis_dat) + 
+  facet_wrap(~period) +
+  scale_colour_gradient2(low="blue", high="red")
+
+#also depth/temp
+
+ggplot(data = world) +
+  geom_sf() +
+  coord_sf(xlim = c(-180, -155), ylim = c(53, 63), expand = TRUE) +
+  annotation_scale(location = "bl", width_hint = 0.5) +
+  geom_point(aes(LONGITUDE, LATITUDE, colour=BOT_DEPTH), data=periods_analysis_dat) + 
+  scale_colour_gradient2(low="blue", high="red")
+
+ggplot(data = world) +
+  geom_sf() +
+  coord_sf(xlim = c(-180, -155), ylim = c(53, 63), expand = TRUE) +
+  annotation_scale(location = "bl", width_hint = 0.5) +
+  geom_point(aes(LONGITUDE, LATITUDE, colour=mean_station_bottemp), data=periods_analysis_dat) + 
+  scale_colour_gradient2(low="blue", high="red")
+
+ggplot(data = world) +
+  geom_sf() +
+  coord_sf(xlim = c(-180, -155), ylim = c(53, 63), expand = TRUE) +
+  annotation_scale(location = "bl", width_hint = 0.5) +
+  geom_point(aes(LONGITUDE, LATITUDE, colour=mean_station_bottemp, size=BOT_DEPTH), data=periods_analysis_dat) + 
+  scale_colour_gradient2(low="blue", high="red")
+
 
 
 #models w temp and temp anom==================================================================
@@ -1175,8 +1224,8 @@ AIC(tmod1E.1, tmod1E.1dropp) #in both cases model WITH period does better
 
 
 #what about linear interaction?
-tmod1E.1L <- gamm(logCPUE_Gadus_chalcogrammus ~ bottemp_anom:period + ti(mean_station_bottemp, BOT_DEPTH) +
-                s(YEAR_factor, bs="re"), 
+tmod1E.1L <- gamm(logCPUE_Gadus_chalcogrammus ~ bottemp_anom:period + ti(mean_station_bottemp, BOT_DEPTH),
+                  random=list(YEAR_factor=~1), 
                 correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE),
                 data=periods_analysis_dat)
 
@@ -1187,11 +1236,13 @@ visreg(tmod1E.1L, "bottemp_anom", "period") #no data with low anom in late perio
 visreg(tmod1E.1L, "bottemp_anom", "period", ylim=c(-5,15))
 visreg(tmod1E.1L, "mean_station_bottemp", "BOT_DEPTH")
 
+gam.check(tmod1E.1L[[2]])
+
 AIC(tmod1E.1, tmod1E.1dropp, tmod1E.1L)
 #try plotting spatially
 
-tmod1E.1Ldrop <- gamm(logCPUE_Gadus_chalcogrammus ~ bottemp_anom + ti(mean_station_bottemp, BOT_DEPTH) +
-                    s(YEAR_factor, bs="re"), 
+tmod1E.1Ldrop <- gamm(logCPUE_Gadus_chalcogrammus ~ bottemp_anom + ti(mean_station_bottemp, BOT_DEPTH) ,
+                      random=list(YEAR_factor=~1), 
                   correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE),
                   data=periods_analysis_dat)
 plot_model(tmod1E.1Ldrop[[2]], type = "pred", terms = "bottemp_anom")
@@ -1212,6 +1263,28 @@ z1 + geom_point() +   scale_colour_gradient2(low="blue", high="red", guide="colo
 
 z1 <- ggplot(tgamdat3, aes(LONGITUDE, LATITUDE, colour=residual))
 z1 + geom_point() +   scale_colour_gradient2(low="blue", high="red", guide="colorbar")
+
+
+
+tmod1E.1Ldome <- gamm(logCPUE_Gadus_chalcogrammus ~ s(bottemp_anom, k=4) + ti(mean_station_bottemp, BOT_DEPTH) ,
+                      random=list(YEAR_factor=~1), 
+                      correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE),
+                      data=periods_analysis_dat)
+plot_model(tmod1E.1Ldome[[2]], type = "pred", terms = "bottemp_anom")
+AIC(tmod1E.1Ldrop[[1]], tmod1E.1L[[1]], tmod1E.1Ldome[[1]])
+anova( tmod1E.1L[[1]], tmod1E.1Ldome[[1]], tmod1E.1Ldomeint[[1]])
+anova( tmod1E.1L[[1]], tmod1E.1Ldome[[1]])
+plot(tmod1E.1Ldome[[2]])
+gam.check(tmod1E.1Ldome[[2]])
+
+
+tmod1E.1Ldomeint <- gamm(logCPUE_Gadus_chalcogrammus ~ s(bottemp_anom, by=as.factor(period), k=4) + ti(mean_station_bottemp, BOT_DEPTH) ,
+                      random=list(YEAR_factor=~1), 
+                      correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE),
+                      data=periods_analysis_dat)
+plot_model(tmod1E.1Ldomeint[[2]], type = "pred", terms = "bottemp_anom")
+AIC(tmod1E.1Ldrop[[1]], tmod1E.1L[[1]], tmod1E.1Ldome[[1]], tmod1E.1Ldomeint[[1]])
+plot(tmod1E.1Ldomeint[[2]])
 
 library("rnaturalearth")
 library("rnaturalearthdata")
