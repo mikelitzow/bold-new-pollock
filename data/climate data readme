@@ -1,0 +1,19 @@
+Description of time series in climate data.csv - data sources and processing.
+
+Script for downloading / processing data is in scripts/climate.downloads.R (the "query script").
+
+SST data are ERSSTv5. N/S division is 63°N (i.e., cells centered at 62°N are in the southern area, cells centered at 64°N are in the northern area). Map of the query area is in the query script.
+
+SE/NW winds are the proportion of daily NCEP/NCAR Reanalysis wind data at 60°N 170°W blowing from each direction. Used as a simple index for changes in Bering Sea advection: Danielson, S., Hedstrom, K., Aagaard, K., Weingartner, T., & Curchitser, E. (2012). Wind-induced reorganization of the Bering shelf circulation. Geophysical Research Letters, 39(8), L08601. https://doi.org/10.1029/2012gl051231
+
+SUmmer cold pool extent and summer bottom temperature are from the NMFS bottom trawl survey (regular southeast Bering Sea grid): Fedewa, E. J., Jackson, T. M., Richar, J. I., Gardner, J. L., & Litzow, M. A. (2020). Recent shifts in northern Bering Sea snow crab (Chionoecetes opilio) size structure and the potential role of climate-mediated range contraction. Deep-Sea Research Part II: Topical Studies in Oceanography. https://doi.org/10.1016/j.dsr2.2020.104878
+
+Ice area is ice-covered area in the entire Bering Sea from the National Snow and Ice Data Center (NSID; https://nsidc.org/data/NSIDC-0192/versions/3). Jan-Apr was selected as the season with the largest ice-covered area in the climatology.
+
+m4 - m5 - m8 March ice is the ice concentration for each of these mooring sites, also from NSIDC.
+
+Maisie ice extent is also from NSIDC (https://nsidc.org/data/masie/), and is also the ice covered area for the entire Bering Sea. This is a satelite-derived time series, and so is shorter than the other ice-covered area, but is also updated in near-real time.
+
+Wind stress data are the magnitude of wind stress (no direction data) from the NCEP/NCAR Reanalysis, north and south of 60°N. This is intended as an index of total wind mixing.
+
+M2 temperature and salinity data are from PMEL. N.B.: CONFIRM THESE VALUES WITH LITZOW OR PMEL BEFORE USING! There may be unresolved problems with data processing. Processing for the M2 data are in scripts/mooring data processing.R
