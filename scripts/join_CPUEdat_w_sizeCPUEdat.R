@@ -122,8 +122,16 @@ binneddat <- trawljoin %>% group_by(YEAR, STATION, STRATUM, SCIENTIFIC, VESSEL, 
 
 #going to need to be a for loop instead I think
 
+#create some output objects, separate objects by bin should be fine since analyzing separately
+output <- data.frame(year = character(length(trawljoin$YEAR)),
+                      haul = character(length(trawljoin$YEAR)),
+                     bin = character(length(trawljoin$YEAR)),
+                     sum_wgtCPUE_len = integer(length(trawljoin$YEAR)),
+                      stringsAsFactors = FALSE)
 yrs <- unique(trawljoin$YEAR)
+bins <- unique(trawljoin$bin)
 
+k<-1
 i<-1
 for(i in 1:length(yrs)){
   temp.yr <- yrs[i]
@@ -133,23 +141,33 @@ for(i in 1:length(yrs)){
   yr_hauls <- unique(temp_yr_dat$HAUL)
   
   j<-1
-  for(j in length(yr_hauls)){
+  for(j in 1:length(yr_hauls)){
     temp_haul <- yr_hauls[j]
     temp_haul_dat <- temp_yr_dat[which(temp_yr_dat$HAUL==temp_haul),]
     
     #now sum within a haul for each bin 
     
-    #update the output format, placeholder for now
-    bin1_sum_wgtCPUE_len <- sum(temp_haul_dat$WGTCPUE_LENGTH[which(temp_haul_dat$bin=="0-200")])
-    bin2_sum_wgtCPUE_len <- sum(temp_haul_dat$WGTCPUE_LENGTH[which(temp_haul_dat$bin=="200-300")])
-    bin3_sum_wgtCPUE_len <- sum(temp_haul_dat$WGTCPUE_LENGTH[which(temp_haul_dat$bin=="300-400")])
-    bin4_sum_wgtCPUE_len <- sum(temp_haul_dat$WGTCPUE_LENGTH[which(temp_haul_dat$bin=="400-500")])
-    bin5_sum_wgtCPUE_len <- sum(temp_haul_dat$WGTCPUE_LENGTH[which(temp_haul_dat$bin=="500+")])
+    for(l in 1:5){
+      temp_bin <- bins[l]
+      temp_bin_dat <- temp_haul_dat[which(temp_haul_dat$bin==temp_bin),]
+      
+      #NO NAs in WGTCPUE_LENGTH, so not going to na.rm  
+      output$sum_wgtCPUE_len[k] <- sum(temp_bin_dat$WGTCPUE_LENGTH)
+      output$year[k] <- temp.yr 
+      output$haul[k] <- temp_haul
+      output$bin[k] <- temp_bin
+      
+      k<-k+1
+    }
+    k<-k+1
   }
+  k<-k+1
 }
 
 
+#seems to work but need to double check
 
+#SHOULD BE ABLE TO REMOVE THIS if loop works
 binjoin <- left_join(trawljoin[,c(1:21)], binneddat) #this creates a ton of duplicate rows
 #I tried everything I could think of to stop them form being created but can't figure it out
 #I'll just remove the duplicates, this is a bit clumbsy but kind of stuck otherwise
