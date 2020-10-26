@@ -104,6 +104,50 @@ trawljoin <- droplevels(trawljoin)
 binneddat <- trawljoin %>% group_by(YEAR, STATION, STRATUM, SCIENTIFIC, VESSEL, CRUISE, HAUL, bin) %>%
   summarize(bin_sum_WGTCPUE_LEN=sum(WGTCPUE_LENGTH, na.rm=TRUE), bin_sum_NUMCPUE_LEN=sum(NUMCPUE_LENGTH, na.rm=TRUE),
             n=n()) 
+#new trying to retain missing rows
+binneddat <- trawljoin %>% group_by(YEAR, STATION, STRATUM, SCIENTIFIC, VESSEL, CRUISE, HAUL, bin) %>%
+  summarize(bin_sum_WGTCPUE_LEN=sum(WGTCPUE_LENGTH, na.rm=TRUE), bin_sum_NUMCPUE_LEN=sum(NUMCPUE_LENGTH, na.rm=TRUE),
+            n=n()) 
+
+binneddat <- trawljoin %>% group_by(YEAR, STATION, STRATUM, SCIENTIFIC, VESSEL, CRUISE, HAUL, bin) %>%
+  summarize(bin_sum_WGTCPUE_LEN=sum(WGTCPUE_LENGTH, na.rm=TRUE), bin_sum_NUMCPUE_LEN=sum(NUMCPUE_LENGTH, na.rm=TRUE),
+            n=n(), .drop = FALSE)
+
+trawljoin$bin <- as.factor(trawljoin$bin)
+binneddat <- trawljoin %>% group_by(YEAR, STATION, STRATUM, SCIENTIFIC, VESSEL, CRUISE, HAUL, bin) %>%
+  summarize(bin_sum_WGTCPUE_LEN=sum(WGTCPUE_LENGTH, na.rm=TRUE, .drop = FALSE), 
+            bin_sum_NUMCPUE_LEN=sum(NUMCPUE_LENGTH, na.rm=TRUE, .drop = FALSE),
+            count=count(bin , .drop = FALSE))
+
+
+#going to need to be a for loop instead I think
+
+yrs <- unique(trawljoin$YEAR)
+
+i<-1
+for(i in 1:length(yrs)){
+  temp.yr <- yrs[i]
+  print(temp.yr)
+  
+  temp_yr_dat <- trawljoin[which(trawljoin$YEAR==temp.yr),]
+  yr_hauls <- unique(temp_yr_dat$HAUL)
+  
+  j<-1
+  for(j in length(yr_hauls)){
+    temp_haul <- yr_hauls[j]
+    temp_haul_dat <- temp_yr_dat[which(temp_yr_dat$HAUL==temp_haul),]
+    
+    #now sum within a haul for each bin 
+    
+    #update the output format, placeholder for now
+    bin1_sum_wgtCPUE_len <- sum(temp_haul_dat$WGTCPUE_LENGTH[which(temp_haul_dat$bin=="0-200")])
+    bin2_sum_wgtCPUE_len <- sum(temp_haul_dat$WGTCPUE_LENGTH[which(temp_haul_dat$bin=="200-300")])
+    bin3_sum_wgtCPUE_len <- sum(temp_haul_dat$WGTCPUE_LENGTH[which(temp_haul_dat$bin=="300-400")])
+    bin4_sum_wgtCPUE_len <- sum(temp_haul_dat$WGTCPUE_LENGTH[which(temp_haul_dat$bin=="400-500")])
+    bin5_sum_wgtCPUE_len <- sum(temp_haul_dat$WGTCPUE_LENGTH[which(temp_haul_dat$bin=="500+")])
+  }
+}
+
 
 
 binjoin <- left_join(trawljoin[,c(1:21)], binneddat) #this creates a ton of duplicate rows
