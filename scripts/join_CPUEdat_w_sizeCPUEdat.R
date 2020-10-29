@@ -123,10 +123,14 @@ binneddat <- trawljoin %>% group_by(YEAR, STATION, STRATUM, SCIENTIFIC, VESSEL, 
 #going to need to be a for loop instead I think
 
 #create some output objects, separate objects by bin should be fine since analyzing separately
-output <- data.frame(year = character(length(trawljoin$YEAR)),
-                      haul = character(length(trawljoin$YEAR)),
-                     bin = character(length(trawljoin$YEAR)),
-                     sum_wgtCPUE_len = integer(length(trawljoin$YEAR)),
+
+outlen <- length(unique(trawljoin$YEAR))*length(unique(trawljoin$HAUL))*length(unique(trawljoin$bin))
+#will be a little long, assumes all hauls in all years
+
+output <- data.frame(year = character(outlen),
+                      haul = character(outlen),
+                     bin = character(outlen),
+                     sum_wgtCPUE_len = integer(outlen),
                       stringsAsFactors = FALSE)
 yrs <- unique(trawljoin$YEAR)
 bins <- unique(trawljoin$bin)
@@ -159,13 +163,13 @@ for(i in 1:length(yrs)){
       
       k<-k+1
     }
-    k<-k+1
+   # k<-k+1
   }
-  k<-k+1
+ # k<-k+1
 }
 
 
-#seems to work but need to double check
+
 
 #SHOULD BE ABLE TO REMOVE THIS if loop works
 binjoin <- left_join(trawljoin[,c(1:21)], binneddat) #this creates a ton of duplicate rows
