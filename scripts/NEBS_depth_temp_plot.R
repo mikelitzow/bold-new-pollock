@@ -72,9 +72,36 @@ ggplot(data = world) +
   coord_sf(xlim = c(-180, -155), ylim = c(53, 65), expand = TRUE) +
   annotation_scale(location = "bl", width_hint = 0.5) +
   geom_point(aes(LONGITUDE, LATITUDE, colour=mean_station_bottemp), data=all_analysis_dat) +   
-  scale_colour_gradient2(low="blue", high="red", guide="colorbar")  
+  scale_colour_gradient2(low="blue", high="red", guide="colorbar") 
 
+ggplot(data = world) +
+  geom_sf() +
+  coord_sf(xlim = c(-180, -155), ylim = c(53, 65), expand = TRUE) +
+  annotation_scale(location = "bl", width_hint = 0.5) +
+  # geom_point(aes(LONGITUDE, LATITUDE, colour=mean_station_bottemp), data=all_analysis_dat) +   
+  # scale_colour_gradient2(low="blue", high="red", guide="colorbar") + 
+  geom_text(aes(LONGITUDE, LATITUDE, 
+                         label=STATION), data=all_analysis_dat)
 
+ggplot(data = world) +
+  geom_sf() +
+  coord_sf(xlim = c(-180, -155), ylim = c(53, 65), expand = TRUE) +
+  annotation_scale(location = "bl", width_hint = 0.5) +
+  # geom_point(aes(LONGITUDE, LATITUDE, colour=mean_station_bottemp), data=all_analysis_dat) +   
+  # scale_colour_gradient2(low="blue", high="red", guide="colorbar") + 
+  geom_text(aes(LONGITUDE, LATITUDE, 
+                label=STRATUM), data=all_analysis_dat)
 
+post2010 <- all_analysis_dat[which(all_analysis_dat$YEAR>2009),]
 
-
+ggplot(data = world) +
+  geom_sf() +
+  coord_sf(xlim = c(-180, -155), ylim = c(53, 65), expand = TRUE) +
+  annotation_scale(location = "bl", width_hint = 0.5) +
+  # geom_point(aes(LONGITUDE, LATITUDE, colour=mean_station_bottemp), data=all_analysis_dat) +   
+  # scale_colour_gradient2(low="blue", high="red", guide="colorbar") + 
+  geom_text(aes(LONGITUDE, LATITUDE, 
+                label=STATION), data=post2010[which(post2010$YEAR=="2010"|
+                                                      post2010$YEAR=="2017"|
+                                                      post2010$YEAR=="2018"|
+                                                      post2010$YEAR=="2019"),]) + facet_wrap(~YEAR)
