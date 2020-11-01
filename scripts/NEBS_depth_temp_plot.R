@@ -51,4 +51,30 @@ pol.trawl.dat$lat_albers <- x$y
 
 
 #do I need the section 'deal w missing data'?
-#yes, then bot temp anom calcs
+#going to guess no so that it doesn't fill in NEBS stations for early period
+
+#calculate anomalies and means=====================================================================
+
+#annual 'global' (w/in dataset) mean
+poltempmeans <- pol.trawl.dat %>% group_by(STATION) %>% summarize(mean_station_bottemp=mean(BOT_TEMP, na.rm=TRUE))
+poltempmeans <- left_join(pol.trawl.dat, poltempmeans )
+
+poltempmeans$bottemp_anom <- poltempmeans$BOT_TEMP - poltempmeans$mean_station_bottemp
+
+all_analysis_dat <- poltempmeans
+
+
+
+
+
+ggplot(data = world) +
+  geom_sf() +
+  coord_sf(xlim = c(-180, -155), ylim = c(53, 65), expand = TRUE) +
+  annotation_scale(location = "bl", width_hint = 0.5) +
+  geom_point(aes(LONGITUDE, LATITUDE, colour=mean_station_bottemp), data=all_analysis_dat) +   
+  scale_colour_gradient2(low="blue", high="red", guide="colorbar")  
+
+
+
+
+
