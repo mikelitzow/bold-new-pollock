@@ -16,6 +16,7 @@ unique(trawl.data$COMMON)
 unique(trawl.data$SCIENTIFIC) #WOW a lot of sps!!
 
 pol.trawl.dat <- trawl.data[which(trawl.data$SCIENTIFIC=="Gadus chalcogrammus"),]
+pol.trawl.dat$logCPUE <- log(pol.trawl.dat$WTCPUE + 1)
 
 ggplot(pol.trawl.dat, aes(WTCPUE)) + geom_histogram() + facet_wrap(~YEAR, scales="free")
 
@@ -33,7 +34,7 @@ ggplot(pol.trawl.dat, aes(YEAR, WTCPUE)) + geom_point() + theme(legend.position 
 
 
 
-pol.trawl.dat$logCPUE <- log(pol.trawl.dat$WTCPUE + 1)
+
 
 ggplot(pol.trawl.dat, aes(YEAR, logCPUE)) + geom_point() + theme(legend.position = "none") +
   geom_smooth() + facet_wrap(~STRATUM)
