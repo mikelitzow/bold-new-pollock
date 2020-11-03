@@ -2,7 +2,7 @@
 
 #using joinboth from trawl_biomass_GAM_explor.R
 #hmm still seems to remove NEBS
-#use pol.trawl.dat instead
+#use pol.trawl.dat instead from data_explor_survey.R
 
 #to do this I am going to need to:
 # 1 - get mean station temp for NEBS
@@ -65,8 +65,6 @@ all_analysis_dat <- poltempmeans
 
 
 
-
-
 ggplot(data = world) +
   geom_sf() +
   coord_sf(xlim = c(-180, -155), ylim = c(53, 65), expand = TRUE) +
@@ -105,3 +103,66 @@ ggplot(data = world) +
                                                       post2010$YEAR=="2017"|
                                                       post2010$YEAR=="2018"|
                                                       post2010$YEAR=="2019"),]) + facet_wrap(~YEAR)
+
+
+#sort into NEBS and SEBS
+
+all_analysis_dat$region <- "SEBS"
+all_analysis_dat$region[which(all_analysis_dat$STRATUM==81 | 
+                                all_analysis_dat$STRATUM==70 |
+                                all_analysis_dat$STRATUM==71)] <- "NEBS"
+
+ggplot(data = world) +
+  geom_sf() +
+  coord_sf(xlim = c(-180, -155), ylim = c(53, 65), expand = TRUE) +
+  annotation_scale(location = "bl", width_hint = 0.5) +
+  # geom_point(aes(LONGITUDE, LATITUDE, colour=mean_station_bottemp), data=all_analysis_dat) +   
+  # scale_colour_gradient2(low="blue", high="red", guide="colorbar") + 
+  geom_point(aes(LONGITUDE, LATITUDE, 
+                col=region), data=all_analysis_dat) 
+
+#add shelves 
+#based on table 1 in Laurth et al 2019 NOAA Technical Memorandum NMFS-AFSC-396
+
+all_analysis_dat$shelf <- NA
+all_analysis_dat$shelf[which(all_analysis_dat$STRATUM==81 | 
+                                all_analysis_dat$STRATUM==70 |
+                                all_analysis_dat$STRATUM==71)] <- "NEBS"
+all_analysis_dat$shelf[which(all_analysis_dat$STRATUM==10 | 
+                               all_analysis_dat$STRATUM==20)] <- "EBS_inner"
+all_analysis_dat$shelf[which(all_analysis_dat$STRATUM==31 | 
+                               all_analysis_dat$STRATUM==32 | 
+                               all_analysis_dat$STRATUM==41 | 
+                               all_analysis_dat$STRATUM==42 | 
+                               all_analysis_dat$STRATUM==43 | 
+                               all_analysis_dat$STRATUM==82)] <- "EBS_middle"
+all_analysis_dat$shelf[which(all_analysis_dat$STRATUM==50 | 
+                               all_analysis_dat$STRATUM==61 | 
+                               all_analysis_dat$STRATUM==62 | 
+                               all_analysis_dat$STRATUM==90)] <- "EBS_outer"
+
+ggplot(data = world) +
+  geom_sf() +
+  coord_sf(xlim = c(-180, -155), ylim = c(53, 65), expand = TRUE) +
+  annotation_scale(location = "bl", width_hint = 0.5) +
+  # geom_point(aes(LONGITUDE, LATITUDE, colour=mean_station_bottemp), data=all_analysis_dat) +   
+  # scale_colour_gradient2(low="blue", high="red", guide="colorbar") + 
+  geom_point(aes(LONGITUDE, LATITUDE, 
+                 col=shelf), data=all_analysis_dat) 
+
+
+#plot temps * depth=================
+
+r1 <- ggplot(all_analysis_dat, aes(mean_station_bottemp, BOT_DEPTH))
+r1 + geom_point() + facet_wrap(~region)
+
+
+r2 <- ggplot(all_analysis_dat, aes(mean_station_bottemp, BOT_DEPTH, col=region))
+r2 + geom_point()
+
+r3 <- ggplot(all_analysis_dat, aes(mean_station_bottemp, BOT_DEPTH))
+r3 + geom_point() + facet_wrap(~shelf)
+
+r4 <- ggplot(all_analysis_dat, aes(mean_station_bottemp, BOT_DEPTH, col=shelf))
+r4 + geom_point() 
+
