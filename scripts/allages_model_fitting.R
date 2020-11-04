@@ -405,6 +405,47 @@ anova(repeat_tek3corR[[2]])
 plot(repeat_tek3corR[[2]])
 
 
+repeat_tek3corE <- gamm(logCPUE_Gadus_chalcogrammus ~  te(mean_station_bottemp, BOT_DEPTH, k=29) +
+                          s(bottemp_anom, by=as.factor(period), bs="fs"), random=list(YEAR_factor=~1), 
+                        correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE),
+                        data=periods_analysis_dat, method="REML")
+gam.check(repeat_tek3corE[[2]]) 
+summary(repeat_tek3corE[[1]]) #   44060.55 44165.84 -22016.27 BEST
+summary(repeat_tek3corE[[2]]) #rsq 0.35
+
+gamobj_tek3corE <- repeat_tek3corE$gam
+
+draw(gamobj_tek3corR, select = 1)
+draw(gamobj_tek3corR, select = 1, dist=0.05)
+draw(gamobj_tek3corR, select = 1, dist=0.01)
+
+appraise(repeat_tek3corR$gam)
+
+
+anova(repeat_tek3corR[[2]])
+plot(repeat_tek3corR[[2]])
+
+
+repeat_tek3corS <- gamm(logCPUE_Gadus_chalcogrammus ~  te(mean_station_bottemp, BOT_DEPTH, k=29) +
+                          s(bottemp_anom, by=as.factor(period), bs="fs"), random=list(YEAR_factor=~1), 
+                        correlation = corSpher(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE),
+                        data=periods_analysis_dat, method="REML")
+gam.check(repeat_tek3corS[[2]]) 
+summary(repeat_tek3corS[[1]]) #  44202.74 44308.04 -22087.37
+summary(repeat_tek3corS[[2]]) #r sq 0.352
+
+
+repeat_tek3corG <- gamm(logCPUE_Gadus_chalcogrammus ~  te(mean_station_bottemp, BOT_DEPTH, k=29) +
+                          s(bottemp_anom, by=as.factor(period), bs="fs"), random=list(YEAR_factor=~1), 
+                        correlation = corGaus(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE),
+                        data=periods_analysis_dat, method="REML")
+gam.check(repeat_tek3corG[[2]]) 
+summary(repeat_tek3corG[[1]]) #   44237.67 44342.97 -22104.84
+summary(repeat_tek3corG[[2]]) #r sq 0.353
+
+
+
+
 #how does bottom depth only w cor but no lat*long compare?
 
 repeat_corD <- gamm(logCPUE_Gadus_chalcogrammus ~  s(BOT_DEPTH) + 
@@ -465,3 +506,132 @@ visreg(base_t2, "mean_station_bottemp", "BOT_DEPTH")
 viz_bt2 <- getViz(repeat_t2[[2]])
 plot(sm(viz_bt2 , 1))
 check.gamViz(viz_bt2)
+
+
+#best model w ML=====
+
+best_tek3corE <- gamm(logCPUE_Gadus_chalcogrammus ~  te(mean_station_bottemp, BOT_DEPTH, k=29) +
+                          s(bottemp_anom, by=as.factor(period), bs="fs"), random=list(YEAR_factor=~1), 
+                        correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE),
+                        data=periods_analysis_dat, method="ML")
+gam.check(best_tek3corE[[2]]) 
+summary(best_tek3corE[[1]]) #   44074.69 44179.99 -22023.34
+summary(best_tek3corE[[2]]) #rsq 0.351
+
+gambest_tek3corE <- best_tek3corE$gam
+
+draw(gambest_tek3corE, select = 1)
+draw(gambest_tek3corE, select = 1, dist=0.05)
+draw(gambest_tek3corE, select = 1, dist=0.01)
+
+appraise(best_tek3corE$gam)
+
+anova(best_tek3corE[[2]])
+plot(best_tek3corE[[2]])
+
+
+#drop interaction
+drop_tek3corE <- gamm(logCPUE_Gadus_chalcogrammus ~  te(mean_station_bottemp, BOT_DEPTH, k=29) +
+                        s(bottemp_anom), random=list(YEAR_factor=~1), 
+                      correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE),
+                      data=periods_analysis_dat, method="ML")
+gam.check(drop_tek3corE[[2]]) 
+summary(drop_tek3corE[[1]]) #   44078.57 44168.83 -22027.29
+summary(drop_tek3corE[[2]]) #rsq 0.354 
+
+gamdrop_tek3corE <- drop_tek3corE$gam
+
+draw(gamdrop_tek3corE, select = 1)
+draw(gamdrop_tek3corE, select = 1, dist=0.05)
+draw(gamdrop_tek3corE, select = 1, dist=0.01)
+draw(gamdrop_tek3corE, select = 2)
+
+appraise(drop_tek3corE$gam)
+
+anova(drop_tek3corE[[2]])
+plot(drop_tek3corE[[2]])
+
+
+#drop interaction AND limit k
+dropk_tek3corE <- gamm(logCPUE_Gadus_chalcogrammus ~  te(mean_station_bottemp, BOT_DEPTH, k=29) +
+                        s(bottemp_anom, k=4), random=list(YEAR_factor=~1), 
+                      correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE),
+                      data=periods_analysis_dat, method="ML")
+gam.check(dropk_tek3corE[[2]]) 
+summary(dropk_tek3corE[[1]]) #   44081.24 44171.5 -22028.62
+summary(dropk_tek3corE[[2]]) #rsq 0.352 
+
+gamdropk_tek3corE <- dropk_tek3corE$gam
+
+draw(gamdropk_tek3corE, select = 1)
+draw(gamdropk_tek3corE, select = 1, dist=0.05)
+draw(gamdropk_tek3corE, select = 1, dist=0.01)
+draw(gamdropk_tek3corE, select = 2)
+
+appraise(dropk_tek3corE$gam)
+
+anova(dropk_tek3corE[[2]])
+plot(dropk_tek3corE[[2]])
+
+
+#linear interaction
+
+lin_tek3corE <- gamm(logCPUE_Gadus_chalcogrammus ~ bottemp_anom*period +
+                       te(mean_station_bottemp, BOT_DEPTH, k=29), random=list(YEAR_factor=~1), 
+                      correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE),
+                      data=periods_analysis_dat, method="ML")
+gam.check(lin_tek3corE[[2]]) 
+summary(lin_tek3corE[[1]]) #  44063.32 44161.09 -22018.66
+summary(lin_tek3corE[[2]]) #rsq 0.366
+
+gamlin_tek3corE <- lin_tek3corE$gam
+
+draw(gamlin_tek3corE, select = 1)
+draw(gamlin_tek3corE, select = 1, dist=0.05)
+draw(gamlin_tek3corE, select = 1, dist=0.01)
+
+appraise(lin_tek3corE$gam)
+
+anova(lin_tek3corE[[2]])
+plot(lin_tek3corE[[2]])
+visreg(lin_tek3corE$lme, "bottemp_anom", "period")
+visreg(lin_tek3corE[[2]], "bottemp_anom", "period")
+
+linviz1 <- getViz(lin_tek3corE$gam)
+plot(sm(linviz1 , 1))
+
+library(sjPlot)
+library(sjmisc)
+
+plot_model(lin_tek3corE[[2]], type="int") #conditioned on fixed effects
+plot_model(lin_tek3corE[[2]], type="int", pred.type = "re") #conditioned on random effects
+plot_model(lin_tek3corE[[2]], type="int", pred.type = "re",
+           show.data = TRUE) #conditioned on random effects
+plot_model(lin_tek3corE[[2]], type="int", pred.type = "re",
+           show.values = TRUE) 
+plot_model(lin_tek3corE[[2]], type="resid")
+
+#anova(best_tek3corE$gam, dropk_tek3corE$gam, lin_tek3corE$gam)
+
+
+#drop anom completely
+drop_anom <- gamm(logCPUE_Gadus_chalcogrammus ~  te(mean_station_bottemp, BOT_DEPTH, k=29),
+                  random=list(YEAR_factor=~1), 
+                      correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE),
+                      data=periods_analysis_dat, method="ML")
+gam.check(drop_anom[[2]]) 
+summary(drop_anom[[1]]) #   
+summary(drop_anom[[2]]) #rsq 0.
+
+gamdropanom <- drop_anom$gam
+
+draw(gamdropanom, select = 1)
+draw(gamdropanom, select = 1, dist=0.05)
+draw(gamdropanom, select = 1, dist=0.01)
+draw(gamdropanom, select = 2)
+
+appraise(drop_anom$gam)
+
+anova(drop_anom[[2]])
+plot(drop_anom[[2]])
+
