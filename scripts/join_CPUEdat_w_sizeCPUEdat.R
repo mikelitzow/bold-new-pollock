@@ -55,25 +55,6 @@ View(sex.dat[is.na(sex.dat$STRATUM),])
 #for now going to proceed - the rows that are not matching actually don't seem to have a good match
 
 
-#test join to see if rows really don't match
-secondtest <- left_join(sel.trawl.dat[which(sel.trawl.dat$SCIENTIFIC=="Gadus chalcogrammus"),c(5,15:17)], 
-                        sex.dat, by = c( "YEAR", "VESSEL", "HAUL"))
-length(secondtest$YEAR)
-length(sex.dat$YEAR)
-
-#just troubleshooting
-
-antitest <- anti_join( sex.dat, sel.trawl.dat[which(sel.trawl.dat$SCIENTIFIC=="Gadus chalcogrammus"),c(5,15:17)], 
-                     by = c( "YEAR", "VESSEL", "HAUL"))
-
-antitestfull <- anti_join( sex.dat, sel.trawl.dat[which(sel.trawl.dat$SCIENTIFIC=="Gadus chalcogrammus"),], 
-                        by = c( "YEAR", "VESSEL", "HAUL"))
-
-antistratum <- anti_join( sex.dat, sel.trawl.dat[which(sel.trawl.dat$SCIENTIFIC=="Gadus chalcogrammus"),c(5,15:17)], 
-                       by = c( "YEAR", "STRATUM", "VESSEL", "HAUL"))
-
-antistratum <- anti_join( sex.dat, sel.trawl.dat[which(sel.trawl.dat$SCIENTIFIC=="Gadus chalcogrammus"),c(1:6,9:18,20:21)],
-                          by = c( "YEAR", "STRATUM", "VESSEL", "HAUL")   )
 
 
 #bin into size classes========================================================================================
@@ -168,7 +149,7 @@ for(i in 1:length(yrs)){
  # k<-k+1
 }
 
-
+#oop need to finish this
 
 
 #SHOULD BE ABLE TO REMOVE THIS if loop works
