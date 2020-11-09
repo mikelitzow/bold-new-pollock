@@ -4,25 +4,25 @@
 library(ggplot2)
 library(sjPlot)
 
-binmeta_clean$log_sum_WGTCPUE_LEN <- log(binmeta_clean$sum_wgtCPUE_len + 1)
+binmeta_clean_anom$log_sum_WGTCPUE_LEN <- log(binmeta_clean_anom$sum_wgtCPUE_len + 1)
 
 
-binmeta_clean$STATION <- as.factor(binmeta_clean$STATION)
-binmeta_clean$VESSEL <- as.factor(binmeta_clean$VESSEL)
-binmeta_clean$CRUISE <- as.factor(binmeta_clean$CRUISE)
-binmeta_clean$HAUL <- as.factor(binmeta_clean$HAUL)
-binmeta_clean$bin <- as.factor(binmeta_clean$bin)
+binmeta_clean_anom$STATION <- as.factor(binmeta_clean_anom$STATION)
+binmeta_clean_anom$VESSEL <- as.factor(binmeta_clean_anom$VESSEL)
+binmeta_clean_anom$CRUISE <- as.factor(binmeta_clean_anom$CRUISE)
+binmeta_clean_anom$HAUL <- as.factor(binmeta_clean_anom$HAUL)
+binmeta_clean_anom$bin <- as.factor(binmeta_clean_anom$bin)
 
 ##exclusion criteria===============
 
 #how to exclude stations w few obs? Maybe n in a single bin? yeah do once split out
 
 
-bin1dat <- binmeta_clean[which(binmeta_clean$bin=="0-200"),]
-bin2dat <- binmeta_clean[which(binmeta_clean$bin=="200-300"),]
-bin3dat <- binmeta_clean[which(binmeta_clean$bin=="300-400"),]
-bin4dat <- binmeta_clean[which(binmeta_clean$bin=="400-500"),]
-bin5dat <- binmeta_clean[which(binmeta_clean$bin=="500+"),]
+bin1dat <- binmeta_clean_anom[which(binmeta_clean_anom$bin=="0-200"),]
+bin2dat <- binmeta_clean_anom[which(binmeta_clean_anom$bin=="200-300"),]
+bin3dat <- binmeta_clean_anom[which(binmeta_clean_anom$bin=="300-400"),]
+bin4dat <- binmeta_clean_anom[which(binmeta_clean_anom$bin=="400-500"),]
+bin5dat <- binmeta_clean_anom[which(binmeta_clean_anom$bin=="500+"),]
 
 #exclude by bin
 
