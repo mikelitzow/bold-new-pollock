@@ -620,8 +620,8 @@ drop_anom <- gamm(logCPUE_Gadus_chalcogrammus ~  te(mean_station_bottemp, BOT_DE
                       correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE),
                       data=periods_analysis_dat, method="ML")
 gam.check(drop_anom[[2]]) 
-summary(drop_anom[[1]]) #   
-summary(drop_anom[[2]]) #rsq 0.
+summary(drop_anom[[1]]) #   44160.35 44235.56 -22070.17
+summary(drop_anom[[2]]) #rsq 0.325
 
 gamdropanom <- drop_anom$gam
 
@@ -634,4 +634,130 @@ appraise(drop_anom$gam)
 
 anova(drop_anom[[2]])
 plot(drop_anom[[2]])
+
+
+
+
+#drop depth * temp surface
+drop_surf <- gamm(logCPUE_Gadus_chalcogrammus ~   bottemp_anom*period,
+                  random=list(YEAR_factor=~1), 
+                  correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE),
+                  data=periods_analysis_dat, method="ML")
+gam.check(drop_surf[[2]]) 
+summary(drop_surf[[1]]) #   45793.21 45853.38 -22888.6
+summary(drop_surf[[2]]) # Rsq 0.0462 oof so mostly the depth by mean temp
+
+gamdropsurf <- drop_surf$gam
+
+draw(gamdropsurf, select = 1)
+draw(gamdropsurf, select = 1, dist=0.05)
+draw(gamdropsurf, select = 1, dist=0.01)
+draw(gamdropsurf, select = 2)
+
+appraise(drop_surf$gam)
+
+anova(drop_surf[[2]])
+plot(drop_surf[[2]])
+
+
+
+
+#only overlap============================================================================
+
+#get percentiles
+
+min(periods_analysis_dat$bottemp_anom[which(periods_analysis_dat$period=="early")])  
+min(periods_analysis_dat$bottemp_anom[which(periods_analysis_dat$period=="late")])  
+
+max(periods_analysis_dat$bottemp_anom[which(periods_analysis_dat$period=="early")])  
+max(periods_analysis_dat$bottemp_anom[which(periods_analysis_dat$period=="late")])  
+
+ggplot(periods_analysis_dat, aes(period, bottemp_anom)) + geom_boxplot()
+
+tempsummary <- periods_analysis_dat %>% group_by(period) %>%
+  summarize(mean_Btempanom=mean(bottemp_anom, na.rm=TRUE),
+            q_05=quantile(bottemp_anom, 0.05, na.rm=TRUE),
+            q_95=quantile(bottemp_anom, 0.95, na.rm=TRUE),
+            q_02=quantile(bottemp_anom, 0.02, na.rm=TRUE),
+            q_98=quantile(bottemp_anom, 0.98, na.rm=TRUE))
+
+
+
+#analyze only data that falls within the 5th and 95th quantile of both 
+overlapperiods <- periods_analysis_dat[which(periods_analysis_dat$bottemp_anom<1.52 & periods_analysis_dat$bottemp_anom>-0.591),]
+broadoverlapperiods <- periods_analysis_dat[which(periods_analysis_dat$bottemp_anom<1.91 & periods_analysis_dat$bottemp_anom>-1.07),]
+
+
+#run same model as the linear interaction model above
+overlap_allages <- gamm(logCPUE_Gadus_chalcogrammus ~ bottemp_anom*period +
+                           te(mean_station_bottemp, BOT_DEPTH, k=29), random=list(YEAR_factor=~1), 
+                         correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE),
+                         data=overlapperiods, method="ML") #
+saveRDS(overlap_allages, file="~/Dropbox/Work folder/Pollock Analyses/bold-new-pollock/scripts/overlap_allages_model.RDS")
+
+summary(overlap_allages[[2]])
+anova(overlap_allages[[2]])
+plot(overlap_allages[[2]])
+
+summary(overlap_allages[[1]])
+anova(overlap_allages[[1]])
+
+plot_model(overlap_allages[[2]], type="int") #both more shallow, but direction does not change
+
+gamover <- overlap_allages$gam
+
+draw(gamover, select = 1)
+draw(gamover, select = 1, dist=0.05)
+draw(gamover, select = 1, dist=0.01)
+draw(gamover, select = 2)
+
+appraise(drop_surf$gam) #oh doesn't look great
+
+
+#broader overlap
+
+braodoverlap_allages <- gamm(logCPUE_Gadus_chalcogrammus ~ bottemp_anom*period +
+                          te(mean_station_bottemp, BOT_DEPTH, k=29), random=list(YEAR_factor=~1), 
+                        correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE),
+                        data=broadoverlapperiods, method="ML") #
+saveRDS(broadoverlap_allages, file="~/Dropbox/Work folder/Pollock Analyses/bold-new-pollock/scripts/broaderoverlap_allages_model.RDS")
+
+summary(braodoverlap_allages[[2]])
+anova(braodoverlap_allages[[2]])
+plot(braodoverlap_allages[[2]])
+
+summary(braodoverlap_allages[[1]])
+anova(braodoverlap_allages[[1]])
+
+plot_model(braodoverlap_allages[[2]], type="int") #
+
+
+
+
+
+
+#plot residuals through time===================================================================
+
+
+res2 <- residuals(lin_tek3corE[[2]], type = "pearson")
+  
+plot(var)
+tgamdat <- periods_analysis_dat[is.na(periods_analysis_dat$logCPUE_Gadus_chalcogrammus)==FALSE,]
+tgamdat$residual <- res2
+
+z1 <- ggplot(tgamdat, aes(LONGITUDE, LATITUDE, colour=residual))
+z1 + geom_point() +   scale_colour_gradient2(low="blue", high="red", guide="colorbar") + facet_wrap(~YEAR)
+
+
+z2 <- ggplot(tgamdat, aes(LONGITUDE, LATITUDE, colour=logCPUE_Gadus_chalcogrammus))
+z2 + geom_point() +   scale_colour_gradient2(low="blue", high="red", guide="colorbar") + facet_wrap(~YEAR)
+
+#does this make sense?
+z3 <- ggplot(tgamdat, aes(LONGITUDE, LATITUDE, colour=residual - logCPUE_Gadus_chalcogrammus))
+z3 + geom_point() +   scale_colour_gradient2(low="blue", high="red", guide="colorbar") + facet_wrap(~YEAR)
+
+
+
+
+
 
