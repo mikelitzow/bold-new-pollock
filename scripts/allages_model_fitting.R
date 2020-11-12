@@ -567,6 +567,7 @@ draw(gamdropk_tek3corE, select = 1)
 draw(gamdropk_tek3corE, select = 1, dist=0.05)
 draw(gamdropk_tek3corE, select = 1, dist=0.01)
 draw(gamdropk_tek3corE, select = 2)
+draw(gamdropk_tek3corE, select = 2, show.data=TRUE)
 
 appraise(dropk_tek3corE$gam)
 
@@ -612,7 +613,7 @@ plot_model(lin_tek3corE[[2]], type="int", pred.type = "re",
 plot_model(lin_tek3corE[[2]], type="resid")
 
 #anova(best_tek3corE$gam, dropk_tek3corE$gam, lin_tek3corE$gam)
-
+anova(dropk_tek3corE$lme, lin_tek3corE$lme)
 
 #drop anom completely
 drop_anom <- gamm(logCPUE_Gadus_chalcogrammus ~  te(mean_station_bottemp, BOT_DEPTH, k=29),
