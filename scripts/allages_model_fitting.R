@@ -560,6 +560,7 @@ dropk_tek3corE <- gamm(logCPUE_Gadus_chalcogrammus ~  te(mean_station_bottemp, B
 gam.check(dropk_tek3corE[[2]]) 
 summary(dropk_tek3corE[[1]]) #   44081.24 44171.5 -22028.62
 summary(dropk_tek3corE[[2]]) #rsq 0.352 
+saveRDS(dropk_tek3corE, file="~/Dropbox/Work folder/Pollock Analyses/bold-new-pollock/scripts/lin-int_allages_model.RDS")
 
 gamdropk_tek3corE <- dropk_tek3corE$gam
 
