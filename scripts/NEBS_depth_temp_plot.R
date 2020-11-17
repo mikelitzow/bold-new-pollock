@@ -151,6 +151,15 @@ ggplot(data = world) +
                  col=shelf), data=all_analysis_dat) 
 
 
+all_analysis_dat$period <- NA
+
+all_analysis_dat$period[which(all_analysis_dat$YEAR<2014)] <- "early"
+all_analysis_dat$period[which(all_analysis_dat$YEAR>2013)] <- "late"
+
+x <- mapproject(all_analysis_dat$LONGITUDE, all_analysis_dat$LATITUDE, "albers", param=c(55.9, 60.8))
+all_analysis_dat$long_albers <- x$x
+all_analysis_dat$lat_albers <- x$y
+
 #plot temps * depth=================
 
 r1 <- ggplot(all_analysis_dat, aes(mean_station_bottemp, BOT_DEPTH))
