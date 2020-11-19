@@ -37,6 +37,8 @@ NEBSpredlme <- predict(pmod$lme, newdata = nebs_sel)    #doesn't work
 
 NEBSpred3 <- predicted_samples(pmod, newdata = nebs_sel)
 
+NEBSpredres <-  predict.gam(pmod$gam, newdata = nebs_sel, type="response") #same
+
 pdat_NEBS$predicted <- NEBSpred2
 
 pp1 <- ggplot(pdat_NEBS, aes(lat_albers, long_albers, col=predicted))
@@ -211,4 +213,55 @@ ggplot(data = world) +
   stat_summary_2d(aes(LONGITUDE,LATITUDE,  z=value), bins = 30, fun = mean, data=plot_pred_dat[which(plot_pred_dat$YEAR!="2019"),]) + 
   facet_wrap(~interaction(response_type, YEAR), nrow=3)  +
   scale_fill_distiller(palette = "Spectral")
+
+
+#hmm predicted always seems lower
+
+
+ggplot(data = world) +
+  geom_sf() +
+  coord_sf(xlim = c(-180, -155), ylim = c(58, 66), expand = TRUE) +
+  # annotation_scale(location = "bl", width_hint = 0.5) +
+  # annotation_north_arrow(location = "bl", which_north = "true", 
+  #                        pad_x = unit(0.75, "in"), pad_y = unit(0.5, "in"),
+  #                        style = north_arrow_fancy_orienteering) +  
+  stat_summary_2d(aes(LONGITUDE,LATITUDE,  z=(logCPUE-predicted), bins = 30, fun = mean, data=pdat_NEBS[which(pdat_NEBS$YEAR!="2019"),]) + 
+  facet_wrap(~YEAR, nrow=3)  +
+  scale_fill_distiller(palette = "Spectral")
+
+pdat_NEBS$proportion_diff_predvcpue <- (pdat_NEBS$logCPUE - pdat_NEBS$predicted)/pdat_NEBS$logCPUE #hmm might not be ideal?
+
+ggplot(data = world) +
+  geom_sf() +
+  coord_sf(xlim = c(-180, -155), ylim = c(58, 66), expand = TRUE) +
+  # annotation_scale(location = "bl", width_hint = 0.5) +
+  # annotation_north_arrow(location = "bl", which_north = "true", 
+  #                        pad_x = unit(0.75, "in"), pad_y = unit(0.5, "in"),
+  #                        style = north_arrow_fancy_orienteering) +  
+  stat_summary_2d(aes(LONGITUDE,LATITUDE,  z=proportion_diff_predvcpue), bins = 30, fun = mean, data=pdat_NEBS[which(pdat_NEBS$YEAR!="2019"),]) + 
+  facet_wrap(~YEAR, nrow=3)  +
+  scale_fill_distiller(palette = "Spectral")
+
+
+
+ggplot(pdat_NEBS, aes(predicted, logCPUE)) + geom_point() + geom_smooth(method="lm") + geom_abline(intercept=0)
+
+ggplot(pdat_NEBS, aes(predicted, logCPUE, col=YEAR_factor)) + geom_point() + geom_smooth(method="lm") + geom_abline(intercept=0)
+#OH this is interesting!!!!!
+
+ggplot(pdat_NEBS, aes(predicted, logCPUE, col=bottemp_anom)) + geom_point() + geom_smooth(method="lm") + geom_abline(intercept=0) +
+  scale_colour_distiller(palette = "Spectral")
+
+ggplot(pdat_NEBS, aes(predicted, logCPUE, col=BOT_DEPTH)) + geom_point() + geom_smooth(method="lm") + geom_abline(intercept=0)+
+  scale_colour_distiller(palette = "Spectral")
+
+ggplot(pdat_NEBS, aes(predicted, logCPUE, col=mean_station_bottemp)) + geom_point() + geom_smooth(method="lm") + geom_abline(intercept=0)+
+  scale_colour_distiller(palette = "Spectral") #hmm maybe underestimates cold stations (blue band near top)
+
+ggplot(pdat_NEBS, aes(predicted, logCPUE, col=long_albers)) + geom_point() + geom_smooth(method="lm") + geom_abline(intercept=0)+
+  scale_colour_distiller(palette = "Spectral") #hmm maybe underestimates cold stations (blue band near top)
+
+ggplot(pdat_NEBS, aes(predicted, logCPUE, col=lat_albers)) + geom_point() + geom_smooth(method="lm") + geom_abline(intercept=0)+
+  scale_colour_distiller(palette = "Spectral") #hmm maybe underestimates cold stations (blue band near top)
+
 
