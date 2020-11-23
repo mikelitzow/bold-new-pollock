@@ -39,7 +39,14 @@ NEBSpred3 <- predicted_samples(pmod, newdata = nebs_sel)
 
 NEBSpredres <-  predict.gam(pmod$gam, newdata = nebs_sel, type="response") #same
 
+smod <- read_rds("~/Dropbox/Work folder/Pollock Analyses/bold-new-pollock/scripts/smoothtemp_allages_model.RDS")
+summary(smod)
+
+smoothtemp_pred <- predict.gam(smod$gam, newdata = nebs_sel)
+
+
 pdat_NEBS$predicted <- NEBSpred2
+pdat_NEBS$smoothT_predicted <- smoothtemp_pred
 
 pp1 <- ggplot(pdat_NEBS, aes(lat_albers, long_albers, col=predicted))
 pp1 + geom_point()
@@ -188,7 +195,7 @@ plot_grid(p5, p6, p7, p8, p9, p10, nrow=2)
 
 #pivot longer so that can plot on same scale!
 
-plot_pred_dat <- pdat_NEBS[,c(1:3, 5, 20, 24:26, 29)] %>% pivot_longer(!c(LATITUDE, LONGITUDE, STATION, YEAR, region, period, shelf), 
+plot_pred_dat <- pdat_NEBS[,c(1:3, 5, 20, 24:26, 29, 31)] %>% pivot_longer(!c(LATITUDE, LONGITUDE, STATION, YEAR, region, period, shelf), 
                                                                        names_to="response_type", values_to="value")
 View(plot_pred_dat)
 
@@ -213,6 +220,18 @@ ggplot(data = world) +
   stat_summary_2d(aes(LONGITUDE,LATITUDE,  z=value), bins = 30, fun = mean, data=plot_pred_dat[which(plot_pred_dat$YEAR!="2019"),]) + 
   facet_wrap(~interaction(response_type, YEAR), nrow=3)  +
   scale_fill_distiller(palette = "Spectral")
+
+ggplot(data = world) +
+  geom_sf() +
+  coord_sf(xlim = c(-180, -155), ylim = c(58, 66), expand = TRUE) +
+  # annotation_scale(location = "bl", width_hint = 0.5) +
+  # annotation_north_arrow(location = "bl", which_north = "true", 
+  #                        pad_x = unit(0.75, "in"), pad_y = unit(0.5, "in"),
+  #                        style = north_arrow_fancy_orienteering) +  
+  stat_summary_2d(aes(LONGITUDE,LATITUDE,  z=value), bins = 20, fun = mean, data=plot_pred_dat[which(plot_pred_dat$YEAR!="2019"),]) + 
+  facet_wrap(~interaction( YEAR, response_type), nrow=3)  +
+  scale_fill_distiller(palette = "Spectral")
+
 
 
 #hmm predicted always seems lower

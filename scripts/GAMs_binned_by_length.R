@@ -82,8 +82,8 @@ modbin1 <- gamm(log_sum_WGTCPUE_LEN ~ bottemp_anom*period +
                      correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE),
                      data=bin1_analysis_dat, method="ML")
 gam.check(modbin1[[2]]) 
-summary(modbin1[[1]]) #  
-summary(modbin1[[2]]) #rsq 0.
+summary(modbin1[[1]]) #  12325.48 12423.15 -6149.742
+summary(modbin1[[2]]) #rsq 0.11
 
 gammodbin1 <- modbin1$gam
 
@@ -136,6 +136,27 @@ plot(dropdropbin1[[2]])
 
 
 
+#bin 1 linear no interaction
+droplinbin1 <- gamm(log_sum_WGTCPUE_LEN ~  bottemp_anom + te(mean_station_bottemp, BOT_DEPTH, k=29), random=list(YEAR_factor=~1), 
+                 correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE),
+                 data=bin1_analysis_dat, method="ML")
+gam.check(droplinbin1[[2]]) 
+summary(droplinbin1[[1]]) #   12321.99 12404.63 -6149.994
+summary(droplinbin1[[2]]) #rsq 0.
+
+gamdroplinbin1 <- droplinbin1$gam
+
+draw(gamdroplinbin1, select = 1)
+draw(gamdroplinbin1, select = 1, dist=0.05)
+draw(gamdroplinbin1, select = 1, dist=0.01)
+draw(gamdroplinbin1, select = 2)
+
+appraise(droplinbin1$gam)
+
+anova(droplinbin1[[2]])
+plot(droplinbin1[[2]])
+
+
 
 
 #bin 2
@@ -145,8 +166,8 @@ modbin2 <- gamm(log_sum_WGTCPUE_LEN ~ bottemp_anom*period +
                 correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE),
                 data=bin2_analysis_dat, method="ML")
 gam.check(modbin2[[2]]) 
-summary(modbin2[[1]]) #  
-summary(modbin2[[2]]) #rsq 0.
+summary(modbin2[[1]]) #  19009.5 19107.16 -9491.75
+summary(modbin2[[2]]) #rsq 0.176
 
 gammodbin2 <- modbin2$gam
 
@@ -182,8 +203,8 @@ dropbin2 <- gamm(log_sum_WGTCPUE_LEN ~  te(mean_station_bottemp, BOT_DEPTH, k=29
                  correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE),
                  data=bin2_analysis_dat, method="ML")
 gam.check(dropbin2[[2]]) 
-summary(dropbin2[[1]]) #   
-summary(dropbin2[[2]]) #rsq 0.
+summary(dropbin2[[1]]) #  19007.85 19098 -9491.926 
+summary(dropbin2[[2]]) #rsq 0.176
 
 gamdropbin2 <- dropbin2$gam
 
@@ -194,8 +215,33 @@ draw(gamdropbin2, select = 2)
 
 appraise(dropdropbin2$gam)
 
-anova(dropdropbin2[[2]])
-plot(dropdropbin2[[2]])
+anova(dropbin2[[2]])
+plot(dropbin2[[2]])
+
+
+
+#bin 2 linear no interaction
+droplinbin2 <- gamm(log_sum_WGTCPUE_LEN ~  bottemp_anom + te(mean_station_bottemp, BOT_DEPTH, k=29), random=list(YEAR_factor=~1), 
+                    correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE),
+                    data=bin2_analysis_dat, method="ML")
+gam.check(droplinbin2[[2]]) 
+summary(droplinbin2[[1]]) #  19005.85 19088.49 -9491.926
+summary(droplinbin2[[2]]) #rsq 0.176
+
+gamdroplinbin2 <- droplinbin2$gam
+
+draw(gamdroplinbin2, select = 1)
+draw(gamdroplinbin2, select = 1, dist=0.05)
+draw(gamdroplinbin2, select = 1, dist=0.01)
+draw(gamdroplinbin2, select = 2)
+
+appraise(droplinbin2$gam)
+
+anova(droplinbin2[[2]])
+plot(droplinbin2[[2]])
+
+
+
 
 
 
@@ -206,8 +252,8 @@ modbin3 <- gamm(log_sum_WGTCPUE_LEN ~ bottemp_anom*period +
                 correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE),
                 data=bin3_analysis_dat, method="ML")
 gam.check(modbin3[[2]]) 
-summary(modbin3[[1]]) #  
-summary(modbin3[[2]]) #rsq 0.
+summary(modbin3[[1]]) #  36183.35 36281.01 -18078.68
+summary(modbin3[[2]]) #rsq 0.293
 
 gammodbin3 <- modbin3$gam
 
@@ -243,8 +289,8 @@ dropbin3 <- gamm(log_sum_WGTCPUE_LEN ~  te(mean_station_bottemp, BOT_DEPTH, k=29
                  correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE),
                  data=bin3_analysis_dat, method="ML")
 gam.check(dropbin3[[2]]) 
-summary(dropbin3[[1]]) #   
-summary(dropbin3[[2]]) #rsq 0.
+summary(dropbin3[[1]]) #   36183.54 36273.69 -18079.77
+summary(dropbin3[[2]]) #rsq 0.291
 
 gamdropbin3 <- dropbin3$gam
 
@@ -255,8 +301,32 @@ draw(gamdropbin3, select = 2)
 
 appraise(dropdropbin3$gam)
 
-anova(dropdropbin3[[2]])
-plot(dropdropbin3[[2]])
+anova(dropbin3[[2]])
+plot(dropbin3[[2]])
+
+
+#bin 3 linear no interaction
+droplinbin3 <- gamm(log_sum_WGTCPUE_LEN ~  bottemp_anom + te(mean_station_bottemp, BOT_DEPTH, k=29), random=list(YEAR_factor=~1), 
+                    correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE),
+                    data=bin3_analysis_dat, method="ML")
+gam.check(droplinbin3[[2]]) 
+summary(droplinbin3[[1]]) #  36181.54 36264.18 -18079.77
+summary(droplinbin3[[2]]) #rsq 0.291
+
+gamdroplinbin3 <- droplinbin3$gam
+
+draw(gamdroplinbin3, select = 1)
+draw(gamdroplinbin3, select = 1, dist=0.05)
+draw(gamdroplinbin3, select = 1, dist=0.01)
+draw(gamdroplinbin3, select = 2)
+
+appraise(droplinbin3$gam)
+
+anova(droplinbin3[[2]])
+plot(droplinbin3[[2]])
+
+
+
 
 
 
@@ -269,8 +339,8 @@ modbin4 <- gamm(log_sum_WGTCPUE_LEN ~ bottemp_anom*period +
                 correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE),
                 data=bin4_analysis_dat, method="ML")
 gam.check(modbin4[[2]]) 
-summary(modbin4[[1]]) #  
-summary(modbin4[[2]]) #rsq 0.
+summary(modbin4[[1]]) #  43565.06 43662.72 -21769.53
+summary(modbin4[[2]]) #rsq 0.445
 
 gammodbin4 <- modbin4$gam
 
@@ -307,8 +377,8 @@ dropbin4 <- gamm(log_sum_WGTCPUE_LEN ~  te(mean_station_bottemp, BOT_DEPTH, k=29
                  correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE),
                  data=bin4_analysis_dat, method="ML")
 gam.check(dropbin4[[2]]) 
-summary(dropbin4[[1]]) #   
-summary(dropbin4[[2]]) #rsq 0.
+summary(dropbin4[[1]]) #   43598.86 43689.01 -21787.43
+summary(dropbin4[[2]]) #rsq 0.411
 
 gamdropbin1 <- dropbin1$gam
 
@@ -319,8 +389,33 @@ draw(gamdropbin4, select = 2)
 
 appraise(dropdropbin4$gam)
 
-anova(dropdropbin4[[2]])
-plot(dropdropbin4[[2]])
+anova(dropbin4[[2]])
+plot(dropbin4[[2]])
+
+
+#bin 4 linear no interaction
+droplinbin4 <- gamm(log_sum_WGTCPUE_LEN ~  bottemp_anom + te(mean_station_bottemp, BOT_DEPTH, k=29), random=list(YEAR_factor=~1), 
+                    correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE),
+                    data=bin4_analysis_dat, method="ML")
+gam.check(droplinbin4[[2]]) 
+summary(droplinbin4[[1]]) #   43596.86 43679.5 -21787.43
+summary(droplinbin4[[2]]) #rsq 0.411
+
+gamdroplinbin4 <- droplinbin4$gam
+
+draw(gamdroplinbin4, select = 1)
+draw(gamdroplinbin4, select = 1, dist=0.05)
+draw(gamdroplinbin4, select = 1, dist=0.01)
+draw(gamdroplinbin4, select = 2)
+
+appraise(droplinbin4$gam)
+
+anova(droplinbin4[[2]])
+plot(droplinbin4[[2]])
+
+
+
+
 
 
 
@@ -332,7 +427,7 @@ modbin5 <- gamm(log_sum_WGTCPUE_LEN ~ bottemp_anom*period +
                 correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE),
                 data=bin5_analysis_dat, method="ML")
 gam.check(modbin5[[2]]) 
-summary(modbin5[[1]]) #  
+summary(modbin5[[1]]) #  40562.73 40660.39 -20268.37
 summary(modbin5[[2]]) #rsq 0.222
 
 gammodbin5 <- modbin5$gam
@@ -369,8 +464,10 @@ dropbin5 <- gamm(log_sum_WGTCPUE_LEN ~  te(mean_station_bottemp, BOT_DEPTH, k=29
                  correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE),
                  data=bin5_analysis_dat, method="ML")
 gam.check(dropbin5[[2]]) 
-summary(dropbin5[[1]]) #   
-summary(dropbin5[[2]]) #rsq 0.
+summary(dropbin5[[1]]) #   40565.94 40656.09 -20270.97
+summary(dropbin5[[2]]) #rsq 0.218
+
+plot(dropbin5[[2]])
 
 gamdropbin5 <- dropbin5$gam
 
@@ -381,5 +478,30 @@ draw(gamdropbin5, select = 2)
 
 appraise(dropdropbin5$gam)
 
-anova(dropdropbin5[[2]])
-plot(dropdropbin5[[2]])
+anova(dropbin5[[2]])
+plot(dropbin5[[2]])
+
+
+
+#bin 5 linear no interaction
+droplinbin5 <- gamm(log_sum_WGTCPUE_LEN ~  bottemp_anom + te(mean_station_bottemp, BOT_DEPTH, k=29), random=list(YEAR_factor=~1), 
+                    correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE),
+                    data=bin5_analysis_dat, method="ML")
+gam.check(droplinbin5[[2]]) 
+summary(droplinbin5[[1]]) #   did not converge
+summary(droplinbin5[[2]]) #rsq 0.
+
+gamdroplinbin5 <- droplinbin5$gam
+
+draw(gamdroplinbin5, select = 1)
+draw(gamdroplinbin5, select = 1, dist=0.05)
+draw(gamdroplinbin5, select = 1, dist=0.01)
+draw(gamdroplinbin5, select = 2)
+
+appraise(droplinbin5$gam)
+
+anova(droplinbin5[[2]])
+plot(droplinbin5[[2]])
+
+
+
