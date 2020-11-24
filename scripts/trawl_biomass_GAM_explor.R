@@ -44,12 +44,20 @@ x <- mapproject(sel.trawl.dat$LONGITUDE, sel.trawl.dat$LATITUDE, "albers", param
 sel.trawl.dat$long_albers <- x$x
 sel.trawl.dat$lat_albers <- x$y
 
+#want to remove SID & common which repeat data from scientific (MOST of the time!) and cause issues later
+#doing this in a silly brute force way because I want to avoid indexing by col #s for better stability if data is read in repeatedly
+
+
+
+sel.trawl.dat <- sel.trawl.dat[,c("LATITUDE", "LONGITUDE","STATION","STRATUM","YEAR","DATETIME","WTCPUE","NUMCPUE",     
+                          "SCIENTIFIC","BOT_DEPTH","BOT_TEMP","SURF_TEMP","VESSEL","CRUISE","HAUL","YEAR_factor",
+                          "logCPUE","long_albers","lat_albers" )]
 
 #select early data======================================================
 
 #we only want data pre2014 in the early period
 early_dat <- sel.trawl.dat[which(sel.trawl.dat$YEAR<2014),]
-early_dat <- early_dat[,-c(9,11)] #drop columns that repeat info
+
 
 
 
@@ -125,6 +133,7 @@ full_dat <- full_dat[!duplicated(full_dat),] #there are 4 duplicate rows form 20
 full_wide <- full_dat %>% pivot_wider(names_from=SCIENTIFIC, 
                                         values_from=c(WTCPUE, NUMCPUE, logCPUE),
                                       values_fill=list(WTCPUE=0, NUMCPUE=0, logCPUE=0))
+
 
 # full_wide <- full_dat %>% pivot_wider(names_from=SCIENTIFIC, 
 #                                      # id_cols=c(CRUISE,HAUL,SID),
