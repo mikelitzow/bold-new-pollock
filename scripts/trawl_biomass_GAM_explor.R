@@ -383,10 +383,10 @@ fite
 # full_wide <- as.data.frame(full_wide)
 # summary(full_wide) 
 
-full_comm_mat <- as.matrix(full_wide[,c(40:50)])
+full_comm_mat <- as.matrix(full_wide[,c(38:48)])
 
 wd <- getwd()
-#write.csv(full_comm_mat, file=paste(wd,"/data/community_data_matrix.csv", sep=""))
+write.csv(full_comm_mat, file=paste(wd,"/data/community_data_matrix.csv", sep=""))
 
 
 #write to csv to run in R itself
