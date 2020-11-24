@@ -6,12 +6,20 @@
 #===========================================================================================================
 #Notes:
 #===========================================================================================================
+library(vegan)
+
 
 #read in data set up in other script
 wd <- getwd()
 comm_csv <- read.csv(file=paste(wd,"/data/community_data_matrix.csv", sep=""), row.names = 1)
 
 comm_mat <- as.matrix(comm_csv)
+
+dfull <- dist(comm_mat) # euclidean distances between the rows
+fitfull <- cmdscale(dfull,eig=TRUE, k=2) # k is the number of dim 
+
+fitfull # view results
+saveRDS(fitfull, file="scripts/MDS_full_output.RDS")
 
 
 
