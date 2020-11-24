@@ -376,6 +376,10 @@ fite
 
 full_comm_mat <- as.matrix(full_wide[,c(40:50)])
 
+wd <- getwd()
+write.csv(full_comm_mat, file=paste(wd,"/data/community_data_matrix.csv", sep=""))
+
+
 #write to csv to run in R itself
 #write.csv(full_comm_mat, file="/Users/krista/Dropbox/Work folder/Pollock Analyses/bold-new-pollock/data/full_comm_mat.csv")
 
