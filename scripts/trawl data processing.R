@@ -51,7 +51,7 @@ trawl.data <- trawl.data[!drop,]
 # now add NBS
 temp1 <- read.csv("data/cpue_nbs_FULL_allspecies_2010_2017.csv")
 temp2 <- read.csv("data/cpue_nbs_trunc_allspecies_2018.csv")
-temp3 <- read.csv(("data/nbs_2019_preliminary.csv"))
+temp3 <- read.csv(("data/2019_nbs.csv"))
 trawl.data <- rbind(trawl.data, temp1, temp2, temp3)
 
 #the steps above lead to some rows being duplicated
