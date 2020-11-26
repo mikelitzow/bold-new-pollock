@@ -444,7 +444,7 @@ p5 + geom_smooth() + geom_point()
 #both periods inclusion criteria
 
 both_dat <- sel.trawl.dat
-both_dat <- both_dat[,-c(9,11)] #drop columns that repeat info
+#both_dat <- both_dat[,-c(9,11)] #drop columns that repeat info
 both_dat <- both_dat[!duplicated(both_dat),] #few duplicated rows, remove them
 
 #widen dataframe to have columns for each sps
@@ -1066,13 +1066,14 @@ periods_analysis_dat <- filled
 
 #exclusion criteria again===============
 
-
-station_summary3 <- periods_analysis_dat %>% group_by(STATION) %>%
-  summarize(n_yrs=n())
-
-join2 <- left_join(periods_analysis_dat, station_summary3)
-
-periods_analysis_dat <- join2[which(join2$n_yrs>5),]
+#no longer doign this because it would drop NBS stations
+# 
+# station_summary3 <- periods_analysis_dat %>% group_by(STATION) %>%
+#   summarize(n_yrs=n())
+# 
+# join2 <- left_join(periods_analysis_dat, station_summary3)
+# 
+# periods_analysis_dat <- join2[which(join2$n_yrs>5),]
 
 #let's save the processed data
 wd <- getwd()
