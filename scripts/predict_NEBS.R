@@ -11,20 +11,59 @@
 pmod <- read_rds("~/Dropbox/Work folder/Pollock Analyses/bold-new-pollock/scripts/lin-int_allages_model.RDS")
 summary(pmod)
 
+#import the data
+#use data previously cleaned 
+#periods_analysis_dat is also loaded in trawl_biomass_GAM_explor.R
+wd <- getwd()
+periods_analysis_dat <- read.csv(paste(wd,"/data/processed_periods_analysis_data.csv",sep=""), row.names = 1)
+
+pdat <- periods_analysis_dat
+
+#----
+#sort into NEBS and SEBS
+
+pdat$region <- "SEBS"
+pdat$region[which(pdat$STRATUM==81 | 
+                    pdat$STRATUM==70 |
+                    pdat$STRATUM==71)] <- "NEBS"
+
+
+#add shelves 
+#based on table 1 in Laurth et al 2019 NOAA Technical Memorandum NMFS-AFSC-396
+
+pdat$shelf <- NA
+pdat$shelf[which(pdat$STRATUM==81 | 
+                               pdat$STRATUM==70 |
+                               pdat$STRATUM==71)] <- "NEBS"
+pdat$shelf[which(pdat$STRATUM==10 | 
+                               pdat$STRATUM==20)] <- "EBS_inner"
+pdat$shelf[which(pdat$STRATUM==31 | 
+                               pdat$STRATUM==32 | 
+                               pdat$STRATUM==41 | 
+                               pdat$STRATUM==42 | 
+                               pdat$STRATUM==43 | 
+                               pdat$STRATUM==82)] <- "EBS_middle"
+pdat$shelf[which(pdat$STRATUM==50 | 
+                               pdat$STRATUM==61 | 
+                               pdat$STRATUM==62 | 
+                               pdat$STRATUM==90)] <- "EBS_outer"
+#----
+
 #set up data to 1) drop high mean stations temps and 2) set high mean station temps to highest observed in SEBS
 # all_analysis_dat from NEBS_depth_temp_plot.R
 #needs lat/long albers and period
 
 #what is highest mean station bottemp in early?
-maxmean_bottemp_early <- max(all_analysis_dat$mean_station_bottemp[which(all_analysis_dat$YEAR<2014)])
-#11.7
+maxmean_bottemp_early <- max(pdat$mean_station_bottemp[which(pdat$YEAR<2014)])
+#12.13
 
-pdat_limited <- all_analysis_dat[which(all_analysis_dat$mean_station_bottemp<maxmean_bottemp_early),]
+pdat_limited <- pdat[which(pdat$mean_station_bottemp<maxmean_bottemp_early),]
 
 pdat_NEBS <- pdat_limited[which(pdat_limited$region=="NEBS"),]
 
 #just cols used for prediction
-nebs_sel <- pdat_NEBS[,c(12, 21:23, 26:28)]
+#nebs_sel <- pdat_NEBS[,c(12, 21:23, 26:28)] old based on all_analysis_dat cols
+nebs_sel <- pdat_NEBS[,c(7, 13, 14:15, 45, 50:54)]
 
 
 NEBSpred1 <- predict(pmod, newdata = nebs_sel)    #not working

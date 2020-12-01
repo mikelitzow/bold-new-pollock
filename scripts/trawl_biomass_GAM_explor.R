@@ -192,7 +192,7 @@ joinfull <- left_join(full_wide, station_summaryF2)
 
 #analysis_dat <- joinearly[which(joinearly$n_yrs>5),]
 
-
+analysis_dat <- joinfull
 
 #plot CPUE maps======
 
@@ -392,28 +392,32 @@ write.csv(full_comm_mat, file=paste(wd,"/data/community_data_matrix.csv", sep=""
 #write to csv to run in R itself
 #write.csv(full_comm_mat, file="/Users/krista/Dropbox/Work folder/Pollock Analyses/bold-new-pollock/data/full_comm_mat.csv")
 
-dfull <- dist(full_comm_mat) # euclidean distances between the rows
-fitfull <- cmdscale(dfull,eig=TRUE, k=2) # k is the number of dim 
-#start1:13
-fitfull # view results
-saveRDS(fitfull, file="scripts/MDS_full_output.RDS")
+# dfull <- dist(full_comm_mat) # euclidean distances between the rows
+# fitfull <- cmdscale(dfull,eig=TRUE, k=2) # k is the number of dim 
+# #start1:13
+# fitfull # view results
+# saveRDS(fitfull, file="scripts/MDS_full_output.RDS")
 
+#Mike ran these! Read in the RDS instead. See 'MDS_on_cluster.R' for running
+fitfull <- readRDS(file="scripts/MDS_full_output.RDS")
 
 rownames(early_comm_mat) <- paste(early_wide$CRUISE, early_wide$HAUL, sep="-")
 
-x1 <- fit1$points[,1]
-y1 <- fit1$points[,2]
+x1 <- fitfull$points[,1]
+y1 <- fitfull$points[,2]
 plot(x1, y1,  xlab="Coordinate 1", ylab="Coordinate 2", 
      main="Metric MDS", type="n")
-text(x1, y1, labels = row.names(early_comm_mat), cex=.7)
+text(x1, y1, labels = row.names(full_comm_mat), cex=.7)
 #perhaps paste rownames split into year and haul and colour by year
-mat2plot <- as.data.frame(early_comm_mat)
+mat2plot <- as.data.frame(full_comm_mat)
 mat2plot$rowname <- paste(rownames(mat2plot))
 mat2plot$year <- str_sub(mat2plot$rowname, 2, 5)
 
 text(x1, y1, labels = row.names(mat2plot), cex=.7, col=mat2plot$year)
 
+text(x1, y1, labels = row.names(full_comm_mat), cex=.7, col=full_wide$YEAR)
 
+text(x1, y1, labels = full_wide$YEAR, cex=.7)
 
 #plot climate variables========
 # load environmental data
@@ -494,7 +498,9 @@ station_summary2_both <- both_wide %>% group_by(STATION) %>%
 
 joinboth <- left_join(both_wide, station_summary2_both)
 
-periods_dat <- joinboth[which(joinboth$n_yrs>5),]
+#periods_dat <- joinboth[which(joinboth$n_yrs>5),]
+
+periods_dat <- joinboth
 
 periods_dat$period <- NA
 
@@ -518,7 +524,6 @@ plot(tempmod82)
 
 pre82 <- predict.gam(tempmod82, type="response")
 df82 <- periods_dat[which(periods_dat$YEAR==1982),] 
-df82$predicted <- pre82 #difference in length!
 
 missing82 <- df82[which(is.na(df82$BOT_TEMP)==TRUE),]
 pred82 <- predict.gam(tempmod82, newdata=missing82, type="response")
@@ -665,7 +670,7 @@ summary(tempmod93)
 gam.check(tempmod93) #seems awfully high
 plot(tempmod93) 
 
-pre93 <- predict.gam(tempmod, type="response")
+pre93 <- predict.gam(tempmod93, type="response")
 df93 <- periods_dat[which(periods_dat$YEAR==1993),] 
 
 missing93 <- df93[which(is.na(df93$BOT_TEMP)==TRUE),]
