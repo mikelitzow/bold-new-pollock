@@ -264,7 +264,7 @@ ggplot(data = world) +
   #                        pad_x = unit(0.75, "in"), pad_y = unit(0.5, "in"),
   #                        style = north_arrow_fancy_orienteering) +  
   stat_summary_2d(aes(LONGITUDE,LATITUDE,  z=value), bins = 30, fun = mean, data=plot_pred_dat) + 
-  facet_wrap(~interaction(response_type, YEAR), nrow=3)  +
+  facet_wrap(~interaction(response_type, YEAR), nrow=4)  +
   scale_fill_distiller(palette = "Spectral")
 
 ggplot(data = world) +
