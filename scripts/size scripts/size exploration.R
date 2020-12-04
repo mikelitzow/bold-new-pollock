@@ -34,6 +34,8 @@ head(tt)
 tail(tt)
 
 hist(data$LENGTH)
+hist(data$AGE)
+hist(data$WEIGHT) #is NA entered as zero?
 nrow(data)
 
 # limit to 10-20 cm
