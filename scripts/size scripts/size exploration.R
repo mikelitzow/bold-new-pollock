@@ -41,6 +41,16 @@ table(data$AGE)
 table(data$WEIGHT)
 nrow(data)
 
+ggplot(data, aes(LENGTH, WEIGHT, col=as.factor(AGE))) + geom_point()
+
+#hmm outlier that does not look possible (medium length, highest weight recorded)
+
+ggplot(d1, aes(LENGTH, WEIGHT, col=as.factor(AGE))) + geom_point()
+#oh even bigger outlier
+
+ggplot(d2, aes(LENGTH, WEIGHT, col=as.factor(AGE))) + geom_point()
+
+
 # limit to 10-20 cm
 
 data <- data %>%
