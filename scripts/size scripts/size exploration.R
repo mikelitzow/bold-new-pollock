@@ -18,9 +18,13 @@ d1 <- d1 %>%
   filter(REGION=="BS") %>%
   select(HAULJOIN, SPECIMENID, LENGTH, WEIGHT, AGE)
 
+d1$df <- "d1"
+
 d2 <- d2 %>%
   filter(SURVEY=="EBS") %>%
   select(HAULJOIN, SPECIMENID, LENGTH, WEIGHT, AGE)
+
+d2$df <- "d2"
 
 # confirm that there are no hauls in both data sets
 
@@ -90,9 +94,9 @@ strata
 
 # add station, stratum, year
 xtra <- tt %>%
-  select(YEAR, STRATUM, STATIONID, HAULJOIN)
+  select(YEAR, STRATUM, STATIONID, HAULJOIN)   
 
-data <- left_join(data, xtra) 
+data <- left_join(data, xtra)  #this is causing massive duplication!
 
 unique(data$YEAR)
 
