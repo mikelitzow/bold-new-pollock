@@ -47,6 +47,11 @@ ggplot(data, aes(LENGTH, WEIGHT, col=as.factor(AGE))) + geom_point()
 
 ggplot(d1, aes(LENGTH, WEIGHT, col=as.factor(AGE))) + geom_point()
 #oh even bigger outlier
+ggplot(d1, aes(LENGTH, WEIGHT, col=as.factor(REGION))) + geom_point()
+ggplot(d1, aes(LENGTH, WEIGHT, col=as.factor(CRUISE))) + geom_point()
+
+table(d1$CRUISE)
+table(d1$CRUISE, d1$AGE)
 
 ggplot(d2, aes(LENGTH, WEIGHT, col=as.factor(AGE))) + geom_point()
 
@@ -64,7 +69,7 @@ sum.cpue <- tt %>%
 data <- left_join(data, sum.cpue)
 
 
-ggplot(data, aes(LENGTH, WEIGHT)) + 
+ggplot(data, aes(LENGTH, WEIGHT)) +     
   geom_point() +
   geom_smooth(method="gam")
 
@@ -92,7 +97,7 @@ data <- left_join(data, xtra)
 unique(data$YEAR)
 
 # exclude data without years...
-keep <- !is.na(data$YEAR)
+keep <- !is.na(data$YEAR)    #this would drop hundreds of rows!
 data <- data[keep,]
 
 # and fit a gam
