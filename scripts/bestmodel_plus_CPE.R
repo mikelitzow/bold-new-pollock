@@ -36,10 +36,20 @@ periods_analysis_dat <- read.csv(paste(wd,"/data/processed_periods_analysis_data
 #model
 mod <- readRDS(file="~/Dropbox/Work folder/Pollock Analyses/bold-new-pollock/scripts/lin-int_allages_model.RDS")
 
+summary(mod)
 
+gam.check(mod[[2]]) 
+summary(mod[[1]]) #   44063.32 44161.09 -22018.66
+summary(mod[[2]]) #rsq   0.366 
 
+mod_CPE <- gamm(logCPUE_Gadus_chalcogrammus ~ bottemp_anom*period +
+                       te(mean_station_bottemp, BOT_DEPTH, k=29), random=list(YEAR_factor=~1), 
+                     correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE),
+                     data=periods_analysis_dat, method="ML")
 
-
+gam.check(mod_CPE[[2]]) 
+summary(mod_CPE[[1]]) #  
+summary(mod_CPE[[2]]) #rsq 
 
 
 
