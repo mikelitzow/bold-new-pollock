@@ -42,16 +42,36 @@ gam.check(mod[[2]])
 summary(mod[[1]]) #   44063.32 44161.09 -22018.66
 summary(mod[[2]]) #rsq   0.366 
 
-mod_CPE <- gamm(logCPUE_Gadus_chalcogrammus ~ bottemp_anom*period +
+#join clim data to data============
+
+do.cdat$YEAR <- as.integer(rownames(do.cdat))
+
+sub_CPE <- do.cdat[,c("YEAR", "summer.cold.pool.extent")]
+
+cpedat <- left_join(periods_analysis_dat, sub_CPE)
+
+#new model w CPE===================
+
+mod_CPE <- gamm(logCPUE_Gadus_chalcogrammus ~ bottemp_anom*period + summer.cold.pool.extent +
                        te(mean_station_bottemp, BOT_DEPTH, k=29), random=list(YEAR_factor=~1), 
                      correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE),
-                     data=periods_analysis_dat, method="ML")
+                     data=cpedat, method="ML")
 
 gam.check(mod_CPE[[2]]) 
 summary(mod_CPE[[1]]) #  
 summary(mod_CPE[[2]]) #rsq 
 
 
+
+
+mod_CPE_noyr <- gamm(logCPUE_Gadus_chalcogrammus ~ bottemp_anom*period + summer.cold.pool.extent +
+                  te(mean_station_bottemp, BOT_DEPTH, k=29), #random=list(YEAR_factor=~1), 
+                correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE),
+                data=cpedat, method="ML")
+
+gam.check(mod_CPE[[2]]) 
+summary(mod_CPE[[1]]) #  
+summary(mod_CPE[[2]]) #rsq 
 
 
 
