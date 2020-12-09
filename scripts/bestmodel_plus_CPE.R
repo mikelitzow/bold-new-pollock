@@ -55,11 +55,13 @@ cpedat <- left_join(periods_analysis_dat, sub_CPE)
 mod_CPE <- gamm(logCPUE_Gadus_chalcogrammus ~ bottemp_anom*period + summer.cold.pool.extent +
                        te(mean_station_bottemp, BOT_DEPTH, k=29), random=list(YEAR_factor=~1), 
                      correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE),
-                     data=cpedat, method="ML")
+                     data=cpedat[which(cpedat$STRATUM!=70 &
+                                         cpedat$STRATUM!=71 &
+                                         cpedat$STRATUM!=81),], method="ML")
 
 gam.check(mod_CPE[[2]]) 
-summary(mod_CPE[[1]]) #  
-summary(mod_CPE[[2]]) #rsq 
+summary(mod_CPE[[1]]) #  38250.09 38353.64 -19111.05
+summary(mod_CPE[[2]]) #rsq 0.384 
 
 
 
@@ -67,18 +69,33 @@ summary(mod_CPE[[2]]) #rsq
 mod_CPE_noyr <- gamm(logCPUE_Gadus_chalcogrammus ~ bottemp_anom*period + summer.cold.pool.extent +
                   te(mean_station_bottemp, BOT_DEPTH, k=29), #random=list(YEAR_factor=~1), 
                 correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE),
-                data=cpedat, method="ML")
+                data=cpedat[which(cpedat$STRATUM!=70 &
+                                    cpedat$STRATUM!=71 &
+                                    cpedat$STRATUM!=81),], method="ML")
 
-gam.check(mod_CPE[[2]]) 
-summary(mod_CPE[[1]]) #  
-summary(mod_CPE[[2]]) #rsq 
-
-
-
-
+gam.check(mod_CPE_noyr[[2]]) 
+summary(mod_CPE_noyr[[1]]) #  38248.18 38344.32 -19111.09
+summary(mod_CPE_noyr[[2]]) #rsq 0.384
 
 
+mod_CPE_only <- gamm(logCPUE_Gadus_chalcogrammus ~ summer.cold.pool.extent +
+                       te(mean_station_bottemp, BOT_DEPTH, k=29), #random=list(YEAR_factor=~1), 
+                     correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE),
+                     data=cpedat[which(cpedat$STRATUM!=70 &
+                                         cpedat$STRATUM!=71 &
+                                         cpedat$STRATUM!=81),], method="ML")
 
+gam.check(mod_CPE_only[[2]]) 
+summary(mod_CPE_only[[1]]) #  38343.83 38417.79 -19161.92
+summary(mod_CPE_only[[2]]) #rsq 0.358 
+
+draw(mod_CPE_only$gam, select = 1)
+draw(mod_CPE_only$gam, select = 1, dist=0.05)
+draw(mod_CPE_only$gam, select = 1, dist=0.01)
+
+
+#uh oh this included NEBS stations
+#will likely need to update elsewhere too
 
 
 
