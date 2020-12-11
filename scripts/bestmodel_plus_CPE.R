@@ -60,8 +60,8 @@ mod_CPE <- gamm(logCPUE_Gadus_chalcogrammus ~ bottemp_anom*period + summer.cold.
                                          cpedat$STRATUM!=81),], method="ML")
 
 gam.check(mod_CPE[[2]]) 
-summary(mod_CPE[[1]]) #  38250.09 38353.64 -19111.05
-summary(mod_CPE[[2]]) #rsq 0.384 
+summary(mod_CPE[[1]]) # 
+summary(mod_CPE[[2]]) #rsq 0.382
 
 
 
@@ -74,8 +74,16 @@ mod_CPE_noyr <- gamm(logCPUE_Gadus_chalcogrammus ~ bottemp_anom*period + summer.
                                     cpedat$STRATUM!=81),], method="ML")
 
 gam.check(mod_CPE_noyr[[2]]) 
-summary(mod_CPE_noyr[[1]]) #  38248.18 38344.32 -19111.09
-summary(mod_CPE_noyr[[2]]) #rsq 0.384
+summary(mod_CPE_noyr[[1]]) #  
+summary(mod_CPE_noyr[[2]]) #rsq 0.382
+
+plot_model(lin_tek3corE[[2]], type="int") #conditioned on fixed effects
+plot_model(lin_tek3corE[[2]], type="int", pred.type = "re") #conditioned on random effects
+plot_model(lin_tek3corE[[2]], type="int", pred.type = "re",
+           show.data = TRUE) #conditioned on random effects
+plot_model(mod_CPE_noyr[[2]], type="int", pred.type = "re",
+           show.values = TRUE) 
+plot_model(mod_CPE_noyr[[2]], type="resid")
 
 
 mod_CPE_only <- gamm(logCPUE_Gadus_chalcogrammus ~ summer.cold.pool.extent +
@@ -86,8 +94,8 @@ mod_CPE_only <- gamm(logCPUE_Gadus_chalcogrammus ~ summer.cold.pool.extent +
                                          cpedat$STRATUM!=81),], method="ML")
 
 gam.check(mod_CPE_only[[2]]) 
-summary(mod_CPE_only[[1]]) #  38343.83 38417.79 -19161.92
-summary(mod_CPE_only[[2]]) #rsq 0.358 
+summary(mod_CPE_only[[1]]) #  
+summary(mod_CPE_only[[2]]) #rsq 0.36
 
 draw(mod_CPE_only$gam, select = 1)
 draw(mod_CPE_only$gam, select = 1, dist=0.05)
@@ -98,4 +106,21 @@ draw(mod_CPE_only$gam, select = 1, dist=0.01)
 #will likely need to update elsewhere too
 
 
+#try a full on spatio-temporal version?
+stmod <- gam(logCPUE_Gadus_chalcogrammus ~ s(long_albers, lat_albers, bottemp_anom, by=period) + 
+                s(long_albers, lat_albers, summer.cold.pool.extent) +
+                       s(BOT_DEPTH), #random=list(YEAR_factor=~1), 
+                    # correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE),
+                     data=cpedat[which(cpedat$STRATUM!=70 &
+                                         cpedat$STRATUM!=71 &
+                                         cpedat$STRATUM!=81),], method="ML")
+summary(stmod)
 
+stmod2 <- gam(logCPUE_Gadus_chalcogrammus ~ s(long_albers, lat_albers, bottemp_anom, YEAR) + 
+               s(long_albers, lat_albers, summer.cold.pool.extent) +
+               s(BOT_DEPTH), #random=list(YEAR_factor=~1), 
+             # correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE),
+             data=cpedat[which(cpedat$STRATUM!=70 &
+                                 cpedat$STRATUM!=71 &
+                                 cpedat$STRATUM!=81),], method="ML")
+summary(stmod2)
