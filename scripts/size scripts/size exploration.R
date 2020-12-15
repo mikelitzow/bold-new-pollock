@@ -44,23 +44,40 @@ d2 <- d2[,-4] #drop column stratum
 
 sizedata <- rbind(d1, d2) 
 
-#mismatching
-#d1 - vessel
-#d2 - stratum, stationid
 
 tt <- read.csv("data/survey data/poll_cpue_by_sex_cm.csv")
 head(tt)
 tail(tt)
 
-hist(data$LENGTH)
-hist(data$AGE)
-hist(data$WEIGHT) #a lot of ones!
-table(data$LENGTH)
-table(data$AGE)
-table(data$WEIGHT)
-nrow(data)
+hist(sizedata$LENGTH)
+hist(sizedata$AGE)
+hist(sizedata$WEIGHT) #a lot of ones!
+table(sizedata$LENGTH)
+table(sizedata$AGE)
+table(sizedata$WEIGHT)
+nrow(sizedata)
 
-ggplot(data, aes(LENGTH, WEIGHT, col=as.factor(AGE))) + geom_point()
+ggplot(sizedata, aes(LENGTH)) + geom_histogram(binwidth = 10)
+
+ggplot(sizedata, aes(LENGTH)) + geom_histogram(binwidth = 10) + facet_wrap(~CRUISE)
+
+
+ggplot(sizedata, aes(WEIGHT)) + geom_histogram(binwidth = 10)
+
+ggplot(sizedata, aes(WEIGHT)) + geom_histogram(binwidth = 10) + facet_wrap(~CRUISE)
+
+
+ggplot(sizedata, aes(AGE)) + geom_histogram(binwidth = 1)
+
+ggplot(sizedata, aes(AGE)) + geom_histogram(binwidth = 1) + facet_wrap(~CRUISE)
+
+ggplot(sizedata, aes(LENGTH, WEIGHT, col=as.factor(AGE))) + geom_point() + facet_wrap(~CRUISE)
+
+ggplot(sizedata[which(sizedata$CRUISE>198200),], aes(LENGTH, WEIGHT, col=as.factor(AGE))) + geom_point() 
+
+ggplot(sizedata[which(sizedata$CRUISE>198200),], aes(LENGTH, WEIGHT, col=as.factor(AGE))) + 
+  geom_point() + facet_wrap(~CRUISE)
+
 
 #hmm outlier that does not look possible (medium length, highest weight recorded)
 
@@ -74,6 +91,7 @@ table(d1$CRUISE, d1$AGE)
 
 ggplot(d2, aes(LENGTH, WEIGHT, col=as.factor(AGE))) + geom_point()
 
+ggplot(d2, aes(LENGTH, WEIGHT, col=as.factor(AGE))) + geom_point() + facet_wrap(~CRUISE)
 
 # limit to 10-20 cm
 
