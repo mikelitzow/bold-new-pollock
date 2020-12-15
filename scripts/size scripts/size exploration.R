@@ -15,23 +15,30 @@ unique(d2$SPECIES_CODE)
 unique(d2$SURVEY)
 
 d1 <- d1 %>%
-  filter(REGION=="BS") %>%
-  select(HAULJOIN, SPECIMENID, LENGTH, WEIGHT, AGE)
+  filter(REGION=="BS") #%>%
+  #select(HAULJOIN, SPECIMENID, LENGTH, WEIGHT, AGE) #drop this for now, want to retain all cols
 
 d1$df <- "d1"
 
 d2 <- d2 %>%
-  filter(SURVEY=="EBS") %>%
-  select(HAULJOIN, SPECIMENID, LENGTH, WEIGHT, AGE)
+  filter(SURVEY=="EBS") #%>%
+  #select(HAULJOIN, SPECIMENID, LENGTH, WEIGHT, AGE) #drop this for now, want to retain all cols
 
 d2$df <- "d2"
+
+d2 <- d2[,-1] #drop col 'survey'
+names(d2)
+
+d2 <- d2 %>% rename(BOTTOM_TEMP = BOTTOM_TEMPERATURE)
 
 # confirm that there are no hauls in both data sets
 
 intersect(d1$HAULJOIN, d2$HAULJOIN)
 # looks good!
 
-data <- rbind(d1, d2)
+
+
+sizedata <- rbind(d1, d2) #still needs a little rearranging
 
 tt <- read.csv("data/survey data/poll_cpue_by_sex_cm.csv")
 head(tt)
@@ -68,7 +75,7 @@ data <- data %>%
 sum.cpue <- tt %>%
   filter(LENGTH >= 100 & LENGTH <= 200) %>%
   group_by(HAULJOIN) %>%
-  summarise(sum.cpue=sum(NUMCPUE_LENGTH))
+  summarise(sum.cpue=sum(NUMCPUE_LENGTH)) #need NA RM here?
 
 data <- left_join(data, sum.cpue)
 
