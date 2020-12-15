@@ -19,6 +19,7 @@ d1 <- d1 %>%
   #select(HAULJOIN, SPECIMENID, LENGTH, WEIGHT, AGE) #drop this for now, want to retain all cols
 
 d1$df <- "d1"
+d1$SEX <- NA
 
 d2 <- d2 %>%
   filter(SURVEY=="EBS") #%>%
@@ -36,9 +37,16 @@ d2 <- d2 %>% rename(BOTTOM_TEMP = BOTTOM_TEMPERATURE)
 intersect(d1$HAULJOIN, d2$HAULJOIN)
 # looks good!
 
+d1 <- d1[,-4] #drop column vessel
+d2 <- d2[,-6] #drop column stationID
+d2 <- d2[,-4] #drop column stratum
 
 
-sizedata <- rbind(d1, d2) #still needs a little rearranging
+sizedata <- rbind(d1, d2) 
+
+#mismatching
+#d1 - vessel
+#d2 - stratum, stationid
 
 tt <- read.csv("data/survey data/poll_cpue_by_sex_cm.csv")
 head(tt)
