@@ -78,6 +78,10 @@ ggplot(sizedata[which(sizedata$CRUISE>198200),], aes(LENGTH, WEIGHT, col=as.fact
 ggplot(sizedata[which(sizedata$CRUISE>198200),], aes(LENGTH, WEIGHT, col=as.factor(AGE))) + 
   geom_point() + facet_wrap(~CRUISE)
 
+sizedata$CRUISE2 <- sizedata$CRUISE
+sizedata <- sizedata %>% separate(CRUISE, c("YEAR", "Cruisenum"), sep=4)
+
+table(sizedata$YEAR)
 
 #hmm outlier that does not look possible (medium length, highest weight recorded)
 
