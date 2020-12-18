@@ -80,8 +80,10 @@ ggplot(sizedata[which(sizedata$CRUISE>198200),], aes(LENGTH, WEIGHT, col=as.fact
 
 sizedata$CRUISE2 <- sizedata$CRUISE
 sizedata <- sizedata %>% separate(CRUISE, c("YEAR", "Cruisenum"), sep=4)
+sizedata$YEAR <- as.numeric(sizedata$YEAR)
 
 table(sizedata$YEAR)
+
 
 #hmm outlier that does not look possible (medium length, highest weight recorded)
 
