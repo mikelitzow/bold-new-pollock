@@ -44,6 +44,12 @@ d2 <- d2[,-4] #drop column stratum
 
 sizedata <- rbind(d1, d2) 
 
+ggplot(sizedata, aes(YEAR, LENGTH)) + 
+        geom_point()+  geom_smooth() + facet_wrap(~as.factor(AGE), scales = "free")
+
+ggplot(sizedata[which(sizedata$AGE==1),], aes(YEAR, LENGTH)) + 
+  geom_point()+  geom_smooth() + facet_wrap(~as.factor(AGE), scales = "free")
+#the age 1 data looks very oddly regular for some reason? Others don't
 
 tt <- read.csv("data/survey data/poll_cpue_by_sex_cm.csv")
 head(tt)
