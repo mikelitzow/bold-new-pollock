@@ -44,12 +44,36 @@ d2 <- d2[,-4] #drop column stratum
 
 sizedata <- rbind(d1, d2) 
 
+sizedata$CRUISE2 <- sizedata$CRUISE
+sizedata <- sizedata %>% separate(CRUISE, c("YEAR", "Cruisenum"), sep=4)
+sizedata$YEAR <- as.numeric(sizedata$YEAR)
+
+
 ggplot(sizedata, aes(YEAR, LENGTH)) + 
         geom_point()+  geom_smooth() + facet_wrap(~as.factor(AGE), scales = "free")
 
 ggplot(sizedata[which(sizedata$AGE==1),], aes(YEAR, LENGTH)) + 
   geom_point()+  geom_smooth() + facet_wrap(~as.factor(AGE), scales = "free")
 #the age 1 data looks very oddly regular for some reason? Others don't
+
+ggplot(sizedata[which(sizedata$AGE==3|
+                        sizedata$AGE==6|
+                        sizedata$AGE==9|
+                        sizedata$AGE==12|
+                        sizedata$AGE==15|
+                        sizedata$AGE==18),], aes(YEAR, LENGTH)) + 
+  geom_point()+  geom_smooth() + facet_wrap(~as.factor(AGE), scales = "free")
+
+
+ggplot(sizedata[which(sizedata$AGE==2|
+                        sizedata$AGE==4|
+                        sizedata$AGE==6|
+                        sizedata$AGE==8|
+                        sizedata$AGE==10|
+                        sizedata$AGE==12|
+                        sizedata$AGE==14|
+                        sizedata$AGE==16),], aes(YEAR, LENGTH)) + 
+  geom_point()+  geom_smooth() + facet_wrap(~as.factor(AGE), scales = "free", nrow=2) + xlab("Year") + ylab("Body length (mm)")
 
 tt <- read.csv("data/survey data/poll_cpue_by_sex_cm.csv")
 head(tt)
@@ -84,9 +108,6 @@ ggplot(sizedata[which(sizedata$CRUISE>198200),], aes(LENGTH, WEIGHT, col=as.fact
 ggplot(sizedata[which(sizedata$CRUISE>198200),], aes(LENGTH, WEIGHT, col=as.factor(AGE))) + 
   geom_point() + facet_wrap(~CRUISE)
 
-sizedata$CRUISE2 <- sizedata$CRUISE
-sizedata <- sizedata %>% separate(CRUISE, c("YEAR", "Cruisenum"), sep=4)
-sizedata$YEAR <- as.numeric(sizedata$YEAR)
 
 table(sizedata$YEAR)
 

@@ -569,6 +569,7 @@ draw(gamdropk_tek3corE, select = 1, dist=0.05)
 draw(gamdropk_tek3corE, select = 1, dist=0.01)
 draw(gamdropk_tek3corE, select = 2)
 draw(gamdropk_tek3corE, select = 2, show.data=TRUE)
+draw(gamdropk_tek3corE, select = 2, axis.title = c("Bottom temperature anomoly","Effect"))
 
 appraise(dropk_tek3corE$gam)
 
@@ -608,7 +609,8 @@ plot(sm(linviz1 , 1))
 library(sjPlot)
 library(sjmisc)
 
-plot_model(lin_tek3corE[[2]], type="int") #conditioned on fixed effects
+plot_model(lin_tek3corE[[2]], type="int")
+plot_model(lin_tek3corE[[2]], type="int", axis.title = c("Bottom temperature anomoly","log CPUE")) #conditioned on fixed effects
 plot_model(lin_tek3corE[[2]], type="int", pred.type = "re") #conditioned on random effects
 plot_model(lin_tek3corE[[2]], type="int", pred.type = "re",
            show.data = TRUE) #conditioned on random effects
