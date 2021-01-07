@@ -21,7 +21,11 @@ fitfull <- cmdscale(dfull,eig=TRUE, k=2) # k is the number of dim
 fitfull # view results
 saveRDS(fitfull, file="scripts/MDS_full_output.RDS")
 
-
+x <- fitfull$points[,1]
+y <- fitfull$points[,2]
+plot(x, y, xlab="Coordinate 1", ylab="Coordinate 2", 
+     main="Metric MDS", type="n")
+text(x, y, labels = row.names(comm_mat), cex=.7)
 
 
 
