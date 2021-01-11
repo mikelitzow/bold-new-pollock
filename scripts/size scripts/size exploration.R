@@ -218,3 +218,28 @@ summary(mod)
 plot(mod, se=T, shade=T, resid=T, pch=1)
 
 # try fitting a model to lat/long as well
+
+
+#size means==================================
+
+yrly_means <- sizedata %>% group_by(YEAR, AGE) %>% summarise(mean_annual_size_global=mean(LENGTH, na.rm=TRUE), n=n())
+
+
+p1 <- ggplot(yrly_means[which(yrly_means$n>10),], aes( YEAR, mean_annual_size_global))
+p1 + geom_point() + facet_wrap(~AGE, scales = "free") + geom_smooth() 
+
+
+p1 <- ggplot(yrly_means[which(yrly_means$n>50),], aes( YEAR, mean_annual_size_global))
+p1 + geom_point() + facet_wrap(~AGE, scales = "free") + geom_smooth() 
+
+p1 <- ggplot(yrly_means[which(yrly_means$n>10 & yrly_means$AGE<11),], aes( YEAR, mean_annual_size_global))
+p1 + geom_point() + facet_wrap(~AGE, scales = "free", nrow=2) + geom_smooth() + ylab("Mean body length (mm)") + xlab("Year")
+
+
+
+
+
+
+
+
+
