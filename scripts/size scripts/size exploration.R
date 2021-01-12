@@ -247,7 +247,15 @@ dat2 <- dat2 %>% separate(CRUISE2, c("YEAR", "Cruisenum"), sep=4)
 dat2$YEAR <- as.numeric(dat2$YEAR)
 
 
+ggplot(dat2, aes(YEAR, LENGTH)) + 
+  geom_point()+  geom_smooth() + facet_wrap(~as.factor(AGE), scales = "free")
 
 
+
+yrly_means2 <- dat2 %>% group_by(YEAR, AGE) %>% summarise(mean_annual_size_global=mean(LENGTH, na.rm=TRUE), n=n())
+
+
+p1 <- ggplot(yrly_means2[which(yrly_means2$n>10),], aes( YEAR, mean_annual_size_global))
+p1 + geom_point() + facet_wrap(~AGE, scales = "free") + geom_smooth() 
 
 
