@@ -258,4 +258,17 @@ yrly_means2 <- dat2 %>% group_by(YEAR, AGE) %>% summarise(mean_annual_size_globa
 p1 <- ggplot(yrly_means2[which(yrly_means2$n>10),], aes( YEAR, mean_annual_size_global))
 p1 + geom_point() + facet_wrap(~AGE, scales = "free") + geom_smooth() 
 
+ggplot(dat2, aes(LENGTH, WEIGHT, col=as.factor(AGE))) + geom_point() + facet_wrap(~YEAR)
 
+ggplot(dat2, aes(LENGTH, WEIGHT, col=as.factor(AGE))) + geom_point()
+
+ggplot(dat2, aes(LENGTH, WEIGHT, col=as.factor(YEAR))) + geom_point()
+
+ggplot(dat2, aes(LENGTH, col=as.factor(AGE))) + geom_histogram() + facet_wrap(~YEAR)
+
+
+ggplot(dat2, aes(WEIGHT, col=as.factor(AGE))) + geom_histogram() + facet_wrap(~YEAR)
+
+View(dat2[which(dat2$YEAR==1992),])
+
+ggplot(dat2, aes(AGE, LENGTH, col=as.factor(AGE))) + geom_point() + facet_wrap(~YEAR)
