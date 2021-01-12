@@ -237,6 +237,14 @@ p1 + geom_point() + facet_wrap(~AGE, scales = "free", nrow=2) + geom_smooth() + 
 
 
 
+#new query====================================
+
+dat2 <- read.csv(("./data/survey data/pollock_survey_specimen_data_confirmation.csv"))
+
+
+dat2$CRUISE2 <- dat2$CRUISE
+dat2 <- dat2 %>% separate(CRUISE2, c("YEAR", "Cruisenum"), sep=4)
+dat2$YEAR <- as.numeric(dat2$YEAR)
 
 
 
