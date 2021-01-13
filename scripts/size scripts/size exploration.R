@@ -268,7 +268,14 @@ ggplot(dat2, aes(LENGTH, col=as.factor(AGE))) + geom_histogram() + facet_wrap(~Y
 
 
 ggplot(dat2, aes(WEIGHT, col=as.factor(AGE))) + geom_histogram() + facet_wrap(~YEAR)
+#explains difference in plots comparing new v old, new data includes a bunch of lengths w/o weights
+#which were removed using an na.rm in some plots
 
 View(dat2[which(dat2$YEAR==1992),])
 
 ggplot(dat2, aes(AGE, LENGTH, col=as.factor(AGE))) + geom_point() + facet_wrap(~YEAR)
+
+ggplot(dat2, aes(AGE, LENGTH, col=as.factor(AGE))) + geom_point() 
+
+ggplot(dat2, aes(YEAR, LENGTH, col=as.factor(YEAR))) + geom_point() + facet_wrap(~AGE)
+
