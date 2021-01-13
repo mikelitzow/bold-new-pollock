@@ -8,6 +8,7 @@
 
 
 
+full_wide <- read.csv("data/full_wide_comm_dat.csv", stringsAsFactors = FALSE, row.names = 1)
 
 #Mike ran these! Read in the RDS instead. See 'MDS_on_cluster.R' for running
 fitfull <- readRDS(file="scripts/MDS_full_output.RDS")
@@ -49,13 +50,27 @@ text(x1, y1, labels = full_wide$STRATUM, cex=.7, col=full_wide$STRATUM)
 
 
 
+ggplot(full_wide, aes(logCPUE_Gadus_chalcogrammus, logCPUE_Chionoecetes_bairdi, col=as.factor(period))) + geom_point() + geom_smooth()
 
+ggplot(full_wide, aes(logCPUE_Gadus_chalcogrammus, logCPUE_Atheresthes_stomias, col=as.factor(period))) + geom_point() + geom_smooth()
 
+ggplot(full_wide, aes(logCPUE_Gadus_chalcogrammus, logCPUE_Hippoglossus_stenolepis, col=as.factor(period))) + geom_point() + geom_smooth()
 
+ggplot(full_wide, aes(logCPUE_Gadus_chalcogrammus, logCPUE_Limanda_aspera, col=as.factor(period))) + geom_point() + geom_smooth()
 
+ggplot(full_wide, aes(logCPUE_Gadus_chalcogrammus, logCPUE_Lepidopsetta_sp, col=as.factor(period))) + geom_point() + geom_smooth()
 
+ggplot(full_wide, aes(logCPUE_Gadus_chalcogrammus, logCPUE_Chionoecetes_opilio, col=as.factor(period))) + geom_point() + geom_smooth()
 
+ggplot(full_wide, aes(logCPUE_Gadus_chalcogrammus, logCPUE_Gadus_macrocephalus, col=as.factor(period))) + geom_point() + geom_smooth()
 
+ggplot(full_wide, aes(logCPUE_Gadus_chalcogrammus, logCPUE_Hippoglossoides_elassodon, col=as.factor(period))) + geom_point() + geom_smooth()
+
+ggplot(full_wide, aes(logCPUE_Gadus_chalcogrammus, logCPUE_Pleuronectes_quadrituberculatus, col=as.factor(period))) + geom_point() + geom_smooth()
+
+ggplot(full_wide, aes(logCPUE_Gadus_chalcogrammus, logCPUE_Lepidopsetta_polyxystra, col=as.factor(period))) + geom_point() + geom_smooth()
+
+ggplot(full_wide, aes(logCPUE_Gadus_chalcogrammus, logCPUE_Gadus_macrocephalus, col=as.factor(period))) + geom_point() + geom_smooth()
 
 
 
