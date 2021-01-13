@@ -15,11 +15,23 @@ comm_csv <- read.csv(file=paste(wd,"/data/community_data_matrix.csv", sep=""), r
 
 comm_mat <- as.matrix(comm_csv)
 
-dfull <- dist(comm_mat) # euclidean distances between the rows
-fitfull <- cmdscale(dfull,eig=TRUE, k=2) # k is the number of dim 
+#scale here
 
-fitfull # view results
-saveRDS(fitfull, file="scripts/MDS_full_output.RDS")
+### Scale varespec data by maximum
+comm_mat_std <- comm_mat
+for (i in 1:ncol(comm_mat)){
+  comm_mat_std[i] <- comm_mat[i]/max(comm_mat[i])}
+
+#MDS
+dfull <- dist(comm_mat) # euclidean distances between the rows
+fitfull2 <- cmdscale(dfull,eig=TRUE, k=2) # k is the number of dim 
+fitfull1 <- cmdscale(dfull,eig=TRUE, k=1)
+fitfull3 <- cmdscale(dfull,eig=TRUE, k=3)
+
+#fitfull # view results
+saveRDS(fitfull1, file="scripts/MDS_full1_output.RDS")
+saveRDS(fitfull2, file="scripts/MDS_full2_output.RDS")
+saveRDS(fitfull3, file="scripts/MDS_full3_output.RDS")
 
 x <- fitfull$points[,1]
 y <- fitfull$points[,2]
@@ -27,8 +39,23 @@ plot(x, y, xlab="Coordinate 1", ylab="Coordinate 2",
      main="Metric MDS", type="n")
 text(x, y, labels = row.names(comm_mat), cex=.7)
 
+#NMDS
 
+meta1 <- metaMDS(lessshort.rel, # Our community-by-species matrix
+           distance = "bray",
+           k=1, # The number of reduced dimensions
+           na.rm=TRUE) 
 
+meta2 <- metaMDS(lessshort.rel, # Our community-by-species matrix
+                 distance = "bray",
+                 k=2, # The number of reduced dimensions
+                 na.rm=TRUE) 
 
+meta3 <- metaMDS(lessshort.rel, # Our community-by-species matrix
+                 distance = "bray",
+                 k=3, # The number of reduced dimensions
+                 na.rm=TRUE) 
 
-
+saveRDS(meta1, file="scripts/NMDS_full1_output.RDS")
+saveRDS(meta2, file="scripts/NMDS_full2_output.RDS")
+saveRDS(meta3, file="scripts/NMDS_full3_output.RDS")
