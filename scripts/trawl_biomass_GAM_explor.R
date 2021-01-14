@@ -178,6 +178,7 @@ full_wide <- full_wide %>% rename(WTCPUE_Chionoecetes_bairdi = "WTCPUE_Chionoece
                                     logCPUE_Lepidopsetta_polyxystra = "logCPUE_Lepidopsetta polyxystra") 
 
 
+write.csv(full_wide, file=paste(wd,"/data/full_wide_comm_dat.csv", sep=""))
 
 
 #exclusion criteria===============
@@ -417,7 +418,28 @@ text(x1, y1, labels = row.names(mat2plot), cex=.7, col=mat2plot$year)
 
 text(x1, y1, labels = row.names(full_comm_mat), cex=.7, col=full_wide$YEAR)
 
-text(x1, y1, labels = full_wide$YEAR, cex=.7)
+text(x1, y1, labels = full_wide$YEAR, cex=.7, col=full_wide$YEAR)
+
+full_wide$period_num <- NA
+full_wide$period_num[which(full_wide$YEAR<2014)]<-1
+full_wide$period_num[which(full_wide$YEAR>2013)]<-2
+full_wide$period <- as.factor(full_wide$period)
+
+text(x1, y1, labels = full_wide$YEAR, cex=.7, col=full_wide$period_num)
+text(x1, y1, labels = full_wide$YEAR, cex=.7, col=full_wide$STRATUM)
+text(x1, y1, labels = full_wide$STRATUM, cex=.7, col=full_wide$YEAR)
+text(x1, y1, labels = full_wide$STRATUM, cex=.7, col=full_wide$STRATUM)
+
+
+
+
+
+cov(short_early_mat)
+cov(full_comm_mat)
+
+pcatest <- prcomp(short_early_mat)
+
+
 
 #plot climate variables========
 # load environmental data
