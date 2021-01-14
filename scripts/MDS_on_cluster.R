@@ -8,6 +8,7 @@
 #===========================================================================================================
 library(vegan)
 
+#control section=====
 
 #read in data set up in other script
 wd <- getwd()
@@ -15,15 +16,12 @@ comm_csv <- read.csv(file=paste(wd,"/data/community_data_matrix.csv", sep=""), r
 
 comm_mat <- as.matrix(comm_csv)
 
-#scale here
+#scale data
+comm_std <- sweep(comm_mat, 2, apply(comm_mat, 2, max), "/")
 
-### Scale varespec data by maximum
-comm_mat_std <- comm_mat
-for (i in 1:ncol(comm_mat)){
-  comm_mat_std[i] <- comm_mat[i]/max(comm_mat[i])}
 
-#MDS
-dfull <- dist(comm_mat) # euclidean distances between the rows
+#MDS====
+dfull <- dist(comm_std) # euclidean distances between the rows
 fitfull2 <- cmdscale(dfull,eig=TRUE, k=2) # k is the number of dim 
 fitfull1 <- cmdscale(dfull,eig=TRUE, k=1)
 fitfull3 <- cmdscale(dfull,eig=TRUE, k=3)
@@ -33,25 +31,26 @@ saveRDS(fitfull1, file="scripts/MDS_full1_output.RDS")
 saveRDS(fitfull2, file="scripts/MDS_full2_output.RDS")
 saveRDS(fitfull3, file="scripts/MDS_full3_output.RDS")
 
-x <- fitfull$points[,1]
-y <- fitfull$points[,2]
+#check - run only if you want
+x <- fitfull1$points[,1]
+y <- fitfull1$points[,2]
 plot(x, y, xlab="Coordinate 1", ylab="Coordinate 2", 
      main="Metric MDS", type="n")
-text(x, y, labels = row.names(comm_mat), cex=.7)
+text(x, y, labels = row.names(comm_std), cex=.7)
 
-#NMDS
+#NMDS====
 
-meta1 <- metaMDS(lessshort.rel, # Our community-by-species matrix
+meta1 <- metaMDS(comm_std, # Our community-by-species matrix
            distance = "bray",
            k=1, # The number of reduced dimensions
            na.rm=TRUE) 
 
-meta2 <- metaMDS(lessshort.rel, # Our community-by-species matrix
+meta2 <- metaMDS(comm_std, # Our community-by-species matrix
                  distance = "bray",
                  k=2, # The number of reduced dimensions
                  na.rm=TRUE) 
 
-meta3 <- metaMDS(lessshort.rel, # Our community-by-species matrix
+meta3 <- metaMDS(comm_std, # Our community-by-species matrix
                  distance = "bray",
                  k=3, # The number of reduced dimensions
                  na.rm=TRUE) 
