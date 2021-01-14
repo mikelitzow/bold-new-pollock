@@ -6,6 +6,11 @@
 #Notes:
 #====================================================================================================================================
 #
+library("rnaturalearth")
+library("rnaturalearthdata")
+library( "ggspatial" )
+library("sf")
+
 
 #import the model fit for the model with a linear interaction
 pmod <- read_rds("~/Dropbox/Work folder/Pollock Analyses/bold-new-pollock/scripts/lin-int_allages_model.RDS")
@@ -92,6 +97,15 @@ pp1 + geom_point()
 
 ppdiff <- ggplot(pdat_NEBS[which(pdat_NEBS$YEAR!="2019"),], aes(lat_albers, long_albers, col=(predicted-logCPUE)/logCPUE))
 ppdiff + geom_point()
+
+world <- ne_countries(scale = "medium", returnclass = "sf")
+ggplot(data = world) +
+  geom_sf() +
+  coord_sf(xlim = c(-180, -155), ylim = c(53, 65), expand = TRUE) +
+  annotation_scale(location = "bl", width_hint = 0.5) +
+  geom_point(aes(LONGITUDE, LATITUDE, colour=logCPUE), data=pol.trawl.dat) +   
+  scale_colour_gradient2(low="blue", high="red", guide="colorbar")  
+
 
 ggplot(data = world) +
   geom_sf() +
