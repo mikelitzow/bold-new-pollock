@@ -99,13 +99,6 @@ ppdiff <- ggplot(pdat_NEBS[which(pdat_NEBS$YEAR!="2019"),], aes(lat_albers, long
 ppdiff + geom_point()
 
 world <- ne_countries(scale = "medium", returnclass = "sf")
-ggplot(data = world) +
-  geom_sf() +
-  coord_sf(xlim = c(-180, -155), ylim = c(53, 65), expand = TRUE) +
-  annotation_scale(location = "bl", width_hint = 0.5) +
-  geom_point(aes(LONGITUDE, LATITUDE, colour=logCPUE), data=pol.trawl.dat) +   
-  scale_colour_gradient2(low="blue", high="red", guide="colorbar")  
-
 
 ggplot(data = world) +
   geom_sf() +
@@ -253,6 +246,10 @@ plot_grid(p5, p6, p7, p8, p9, p10, nrow=2)
 plot_pred_dat <- pdat_NEBS[,c(1:3, 5, 45, 50, 53:56)] %>% pivot_longer(!c(LATITUDE, LONGITUDE, STATION, YEAR,  region, period, shelf), 
                                                                            names_to="response_type", values_to="value")
 
+plot_pred_dat <- pdat_NEBS[,c(1:3, 5, 45, 50, 53:55)] %>% pivot_longer(!c(LATITUDE, LONGITUDE, STATION, YEAR,  region, period, shelf), 
+                                                                       names_to="response_type", values_to="value")
+
+
 
 View(plot_pred_dat)
 
@@ -300,11 +297,31 @@ ggplot(data = world) +
   #                        pad_x = unit(0.75, "in"), pad_y = unit(0.5, "in"),
   #                        style = north_arrow_fancy_orienteering) +  
   stat_summary_2d(aes(LONGITUDE,LATITUDE,  z=value), bins = 20, fun = mean, data=plot_pred_dat) + 
-  facet_wrap(~interaction( YEAR, response_type), nrow=3)  +
+  facet_wrap(~interaction( YEAR, response_type), nrow=2)  +
   scale_fill_distiller(palette = "Spectral")
 
 #hmm predicted always seems lower
 
+#for presentation
+
+
+plot_pred_dat2 <- plot_pred_dat
+
+plot_pred_dat2$response_type2 <- plot_pred_dat2$response_type
+
+plot_pred_dat2$response_type2[which(plot_pred_dat$response_type=="logCPUE_Gadus_chalcogrammus")] <- "Actual"
+plot_pred_dat2$response_type2[which(plot_pred_dat$response_type=="predicted")] <- "Predicted"
+
+ggplot(data = world) +
+  geom_sf() +
+  coord_sf(xlim = c(-180, -155), ylim = c(58, 66), expand = TRUE) +
+  # annotation_scale(location = "bl", width_hint = 0.5) +
+  # annotation_north_arrow(location = "bl", which_north = "true", 
+  #                        pad_x = unit(0.75, "in"), pad_y = unit(0.5, "in"),
+  #                        style = north_arrow_fancy_orienteering) +  
+  stat_summary_2d(aes(LONGITUDE,LATITUDE,  z=value), bins = 20, fun = mean, data=plot_pred_dat2) + 
+  facet_wrap(response_type2~YEAR, nrow=2)  +
+  scale_fill_distiller(palette = "Spectral")
 
 
 
