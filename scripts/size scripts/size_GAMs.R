@@ -43,7 +43,18 @@ ggplot(dat2[which(dat2$YEAR>1998),], aes(YEAR, cond_fact, col=as.factor(AGE))) +
 
 #hmm need to double check this calc
 
+#match size data to bottom temp anom and mean stat temp etc
 
+
+#GAMs===============================================================================
+
+lin_cond1 <- gamm(cond_fact ~ bottemp_anom*period +
+                       te(mean_station_bottemp, BOT_DEPTH), random=list(YEAR_factor=~1), 
+                     correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE),
+                     data=dat2, method="REML")
+gam.check(lin_cond1[[2]]) 
+summary(lin_cond1[[1]]) #  
+summary(lin_cond1[[2]]) #rsq 0.
 
 
 
