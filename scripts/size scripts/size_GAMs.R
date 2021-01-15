@@ -44,7 +44,20 @@ ggplot(dat2[which(dat2$YEAR>1998),], aes(YEAR, cond_fact, col=as.factor(AGE))) +
 #hmm need to double check this calc
 
 #match size data to bottom temp anom and mean stat temp etc
+table(dat2$YEAR, dat2$AGE)
 
+#use data previously cleaned 
+#periods_analysis_dat is also loaded in trawl_biomass_GAM_explor.R
+wd <- getwd()
+periods_analysis_dat <- read.csv(paste(wd,"/data/processed_periods_analysis_data.csv",sep=""), row.names = 1)
+
+length(dat2$SURVEY)
+
+joindat <- left_join(dat2, periods_analysis_dat[,c(1:15,49:52)])
+
+length(joindat$SURVEY)#same length, nice
+
+#should either limit to age 10 or do age 10+. Stock assessment suggests most catch is under age 10
 
 #GAMs===============================================================================
 
