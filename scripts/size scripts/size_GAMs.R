@@ -61,10 +61,31 @@ length(joindat$SURVEY)#same length, nice
 
 #GAMs===============================================================================
 
+#exclude NBS stations
+
+joindat$shelf <- NA
+joindat$shelf[which(joindat$STRATUM==81 | 
+                      joindat$STRATUM==70 |
+                      joindat$STRATUM==71)] <- "NEBS"
+joindat$shelf[which(joindat$STRATUM==10 | 
+                      joindat$STRATUM==20)] <- "EBS_inner"
+joindat$shelf[which(joindat$STRATUM==31 | 
+                      joindat$STRATUM==32 | 
+                      joindat$STRATUM==41 | 
+                      joindat$STRATUM==42 | 
+                      joindat$STRATUM==43 | 
+                      joindat$STRATUM==82)] <- "EBS_middle"
+joindat$shelf[which(joindat$STRATUM==50 | 
+                      joindat$STRATUM==61 | 
+                      joindat$STRATUM==62 | 
+                      joindat$STRATUM==90)] <- "EBS_outer"
+
+cond_analysis_dat <- joindat[which(joindat$YEAR>1981),]
+
 lin_cond1 <- gamm(cond_fact ~ bottemp_anom*period +
                        te(mean_station_bottemp, BOT_DEPTH), random=list(YEAR_factor=~1), 
-                     correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE),
-                     data=dat2, method="REML")
+                   #  correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor + HAUL, nugget=TRUE),
+                     data=cond_analysis_dat, method="REML")
 gam.check(lin_cond1[[2]]) 
 summary(lin_cond1[[1]]) #  
 summary(lin_cond1[[2]]) #rsq 0.
