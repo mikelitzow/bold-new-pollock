@@ -72,9 +72,28 @@ ggplot(full_wide, aes(logCPUE_Gadus_chalcogrammus, logCPUE_Lepidopsetta_polyxyst
 
 ggplot(full_wide, aes(logCPUE_Gadus_chalcogrammus, logCPUE_Gadus_macrocephalus, col=as.factor(period))) + geom_point() + geom_smooth()
 
+wide_an <- full_wide
+wide_an$period <- NA
 
+wide_an$period[which(wide_an$YEAR<2014)]<-"early"
+wide_an$period[which(wide_an$YEAR>2013)]<-"late"
 
-
+big1 <- gamm(logCPUE_Gadus_chalcogrammus ~ s(logCPUE_Chionoecetes_bairdi, by=as.factor(period)) +
+               s(logCPUE_Atheresthes_stomias, by=as.factor(period)) +
+               s(logCPUE_Hippoglossus_stenolepis, by=as.factor(period)) + 
+               s(logCPUE_Limanda_aspera, by=as.factor(period)) + 
+               s(logCPUE_Chionoecetes_opilio, by=as.factor(period)) +
+               s(logCPUE_Gadus_macrocephalus, by=as.factor(period)) +
+               s(logCPUE_Hippoglossoides_elassodon, by=as.factor(period)) +
+               s(logCPUE_Pleuronectes_quadrituberculatus, by=as.factor(period)) +
+               s(logCPUE_Lepidopsetta_polyxystra, by=as.factor(period)) +
+               s(logCPUE_Gadus_macrocephalus, by=as.factor(period)) +
+                       te(long_albers, lat_albers), random=list(YEAR_factor=~1), 
+                     data=periods_analysis_dat, method="REML")
+gam.check(big1[[2]]) 
+summary(big1[[1]]) #  
+summary(big1[[2]])
+plot(big1[[2]])
 
 
 
