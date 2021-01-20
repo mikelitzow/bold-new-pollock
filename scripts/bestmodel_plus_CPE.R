@@ -140,6 +140,15 @@ p4 <- plot(sm(v, 1), fix = c("bottemp_anom"=0, "period"=2)) + l_fitRaster() + l_
 p5 <- plot(sm(v, 1), fix = c("bottemp_anom" = -4, "period"=2)) + l_fitRaster() + l_fitContour()
 p6 <- plot(sm(v, 1), fix = c("bottemp_anom" = 4, "period"=2)) + l_fitRaster() + l_fitContour()
 
+plot(stmod,1,n3=6)
+
+pl <- plotSlice(x = sm(v, 1), 
+                fix = list("bottemp_anom" = seq(-4, 4, length.out = 5), "period" = c(1,2)))
+pl + l_fitRaster() + l_fitContour() + l_points() + l_rug()
+
+pl2 <- plotSlice(x = sm(v, 3), 
+                fix = list("summer.cold.pool.extent" = seq(-2, 2, length.out = 5)))
+pl2 + l_fitRaster() + l_fitContour() + l_points() + l_rug()
 
 
 
