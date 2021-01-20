@@ -89,6 +89,7 @@ lin_cond1 <- gamm(cond_fact ~ bottemp_anom*period +
 gam.check(lin_cond1[[2]]) 
 summary(lin_cond1[[1]]) #  
 summary(lin_cond1[[2]]) #rsq 0.
+plot_model(lin_cond1[[2]], type="int")
 
 
 
