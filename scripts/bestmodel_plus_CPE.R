@@ -11,6 +11,7 @@ library(ggplot2)
 #remotes::install_github("gavinsimpson/gratia")
 library(gratia)
 library(mgcViz)
+library(cowplot)
 
 #Get data plot data =======
 
@@ -116,11 +117,9 @@ stmod <- gam(logCPUE_Gadus_chalcogrammus ~ s(long_albers, lat_albers, bottemp_an
                                          cpedat$STRATUM!=71 &
                                          cpedat$STRATUM!=81),], method="ML")
 summary(stmod)
-# n <- 1e3
-# x <- rnorm(n); y <- rnorm(n); z <- rnorm(n); z2 <- rnorm(n)
-# ob <- (x-z)^2 + (y-z)^2 + z2^3 + rnorm(n)
-# b <- gam(ob ~ s(x, y, z, z2))
 
+
+v <- getViz(stmod)
 
 # Plot slices
 pl2 <- plotSlice(x = sm(v, 2), 
@@ -132,6 +131,15 @@ pl2 + l_fitRaster() + l_fitContour() + l_points() + l_rug()
 pl <- plotSlice(x = sm(v, 1), 
                 fix = list("bottemp_anom" = seq(-4, 4, length.out = 9), "period"=seq(1,2)))
 pl + l_fitRaster() + l_fitContour() + l_points() + l_rug()
+#period 1=early
+
+p1 <- plot(sm(v, 1), fix = c("bottemp_anom"=0, "period"=1)) + l_fitRaster() + l_fitContour()
+p2 <- plot(sm(v, 1), fix = c("bottemp_anom" = -4, "period"=1)) + l_fitRaster() + l_fitContour()
+p3 <- plot(sm(v, 1), fix = c("bottemp_anom" = 4, "period"=1)) + l_fitRaster() + l_fitContour()
+p4 <- plot(sm(v, 1), fix = c("bottemp_anom"=0, "period"=2)) + l_fitRaster() + l_fitContour()
+p5 <- plot(sm(v, 1), fix = c("bottemp_anom" = -4, "period"=2)) + l_fitRaster() + l_fitContour()
+p6 <- plot(sm(v, 1), fix = c("bottemp_anom" = 4, "period"=2)) + l_fitRaster() + l_fitContour()
+
 
 
 
