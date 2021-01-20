@@ -10,6 +10,7 @@ library(mgcv)
 library(ggplot2)
 #remotes::install_github("gavinsimpson/gratia")
 library(gratia)
+library(mgcViz)
 
 #Get data plot data =======
 
@@ -115,6 +116,24 @@ stmod <- gam(logCPUE_Gadus_chalcogrammus ~ s(long_albers, lat_albers, bottemp_an
                                          cpedat$STRATUM!=71 &
                                          cpedat$STRATUM!=81),], method="ML")
 summary(stmod)
+# n <- 1e3
+# x <- rnorm(n); y <- rnorm(n); z <- rnorm(n); z2 <- rnorm(n)
+# ob <- (x-z)^2 + (y-z)^2 + z2^3 + rnorm(n)
+# b <- gam(ob ~ s(x, y, z, z2))
+
+
+# Plot slices
+pl2 <- plotSlice(x = sm(v, 2), 
+                fix = list("summer.cold.pool.extent" = seq(-2, 2, length.out = 5)))
+pl2 + l_fitRaster() + l_fitContour() + l_points() + l_rug()
+
+
+# Plot slices
+pl <- plotSlice(x = sm(v, 1), 
+                fix = list("bottemp_anom" = seq(-4, 4, length.out = 9), "period"=seq(1,2)))
+pl + l_fitRaster() + l_fitContour() + l_points() + l_rug()
+
+
 
 stmod2 <- gam(logCPUE_Gadus_chalcogrammus ~ s(long_albers, lat_albers, bottemp_anom, YEAR) + 
                s(long_albers, lat_albers, summer.cold.pool.extent) +

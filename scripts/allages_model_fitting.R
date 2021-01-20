@@ -614,7 +614,7 @@ plot_model(lin_tek3corE[[2]], type="int", axis.title = c("Bottom temperature ano
 plot_model(lin_tek3corE[[2]], type="int", pred.type = "re") #conditioned on random effects
 plot_model(lin_tek3corE[[2]], type="int", pred.type = "re",
            show.data = TRUE) #conditioned on random effects
-plot_model(lin_tek3corE[[2]], type="int", pred.type = "re",
+plot_model(lin_tek3corE[[2]], type="int", #pred.type = "re",
            show.values = TRUE) 
 plot_model(lin_tek3corE[[2]], type="resid")
 
