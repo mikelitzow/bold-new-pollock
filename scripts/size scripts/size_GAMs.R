@@ -43,7 +43,53 @@ ggplot(dat2[which(dat2$YEAR>1998),], aes(YEAR, cond_fact, col=as.factor(AGE))) +
 
 #hmm need to double check this calc
 
+#match size data to bottom temp anom and mean stat temp etc
+table(dat2$YEAR, dat2$AGE)
 
+#use data previously cleaned 
+#periods_analysis_dat is also loaded in trawl_biomass_GAM_explor.R
+wd <- getwd()
+periods_analysis_dat <- read.csv(paste(wd,"/data/processed_periods_analysis_data.csv",sep=""), row.names = 1)
+
+length(dat2$SURVEY)
+
+joindat <- left_join(dat2, periods_analysis_dat[,c(1:15,49:52)])
+
+length(joindat$SURVEY)#same length, nice
+
+#should either limit to age 10 or do age 10+. Stock assessment suggests most catch is under age 10
+
+#GAMs===============================================================================
+
+#exclude NBS stations
+
+joindat$shelf <- NA
+joindat$shelf[which(joindat$STRATUM==81 | 
+                      joindat$STRATUM==70 |
+                      joindat$STRATUM==71)] <- "NEBS"
+joindat$shelf[which(joindat$STRATUM==10 | 
+                      joindat$STRATUM==20)] <- "EBS_inner"
+joindat$shelf[which(joindat$STRATUM==31 | 
+                      joindat$STRATUM==32 | 
+                      joindat$STRATUM==41 | 
+                      joindat$STRATUM==42 | 
+                      joindat$STRATUM==43 | 
+                      joindat$STRATUM==82)] <- "EBS_middle"
+joindat$shelf[which(joindat$STRATUM==50 | 
+                      joindat$STRATUM==61 | 
+                      joindat$STRATUM==62 | 
+                      joindat$STRATUM==90)] <- "EBS_outer"
+
+cond_analysis_dat <- joindat[which(joindat$YEAR>1981),]
+
+lin_cond1 <- gamm(cond_fact ~ bottemp_anom*period +
+                       te(mean_station_bottemp, BOT_DEPTH), random=list(YEAR_factor=~1), 
+                   #  correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor + HAUL, nugget=TRUE),
+                     data=cond_analysis_dat, method="REML")
+gam.check(lin_cond1[[2]]) 
+summary(lin_cond1[[1]]) #  
+summary(lin_cond1[[2]]) #rsq 0.
+plot_model(lin_cond1[[2]], type="int")
 
 
 

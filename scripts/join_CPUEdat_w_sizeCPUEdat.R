@@ -41,8 +41,10 @@ indiv_pollock$Year <- as.factor(indiv_pollock$Year)
 head(sel.trawl.dat)
 head(sex.dat)
 
-trawljoin <- left_join(sel.trawl.dat[which(sel.trawl.dat$SCIENTIFIC=="Gadus chalcogrammus"),c(1:6,9:18,20:21)], 
-                      sex.dat)
+# trawljoin <- left_join(sel.trawl.dat[which(sel.trawl.dat$SCIENTIFIC=="Gadus chalcogrammus"),c(1:6,9:18,20:21)], 
+#                       sex.dat)
+trawljoin <- left_join(sel.trawl.dat[which(sel.trawl.dat$SCIENTIFIC=="Gadus chalcogrammus"),c(1:6,9:16,18:19)], 
+                       sex.dat)
 
 
 #seems to catch all sex.dat rows except ~20K rows w missing STRATUM values
@@ -173,6 +175,11 @@ length(output$year)
 
 binmeta_clean <- binjoin[!duplicated(binjoin),] 
 
+wd <- getwd()
+write.csv(binmeta_clean, file=paste(wd,"/data/clean_binned_meta_data.csv", sep=""))
+
+
+
 #let's move forwarrd with this and come back to troubleshoot the join
 
 length(output$year)
@@ -214,6 +221,8 @@ binmeta_clean$HAUL <- as.factor(binmeta_clean$HAUL)
 
 binmeta_clean_anom <- left_join(per_sub, binmeta_clean, by=c("YEAR", "HAUL", 
                                                         "VESSEL"))
+write.csv(binmeta_clean_anom, file=paste(wd,"/data/clean_binned_anom_data.csv", sep=""))
+
 
 length(binmeta_clean$YEAR)
 length(per_sub$YEAR)

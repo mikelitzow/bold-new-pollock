@@ -49,9 +49,13 @@ all.clim.dat <- t(as.matrix(dat))
 # now fit DFA models
 # first the early era
 # e.cli.dat = as.matrix(dat[rownames(dat) %in% 1950:1988,])
+
+#new early data
+ e.cli.dat = as.matrix(dat[rownames(dat) %in% 1988:2014,])
+
 # 
 # # and transpose
-# e.cli.dat <- t(e.cli.dat)
+ e.cli.dat <- t(e.cli.dat)
 
 
 #fit model========
@@ -72,7 +76,7 @@ model.data = data.frame()
 for(R in levels.R) {
   for(m in 1:4) {  # allowing up to 3 trends
     dfa.model = list(A="zero", R=R, m=m)
-    kemz = MARSS(all.clim.dat, model=dfa.model, control=cntl.list,
+    kemz = MARSS(e.clim.dat, model=dfa.model, control=cntl.list,
                  form="dfa", z.score=TRUE)
     model.data = rbind(model.data,
                        data.frame(R=R,
