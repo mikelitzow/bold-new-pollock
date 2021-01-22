@@ -160,3 +160,96 @@ stmod2 <- gam(logCPUE_Gadus_chalcogrammus ~ s(long_albers, lat_albers, bottemp_a
                                  cpedat$STRATUM!=71 &
                                  cpedat$STRATUM!=81),], method="ML")
 summary(stmod2)
+
+
+
+#w/o interaction
+stmod_drop <- gam(logCPUE_Gadus_chalcogrammus ~ s(long_albers, lat_albers, bottemp_anom) + 
+               s(long_albers, lat_albers, summer.cold.pool.extent) +
+               s(BOT_DEPTH), #random=list(YEAR_factor=~1), 
+             # correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE),
+             data=cpedat[which(cpedat$STRATUM!=70 &
+                                 cpedat$STRATUM!=71 &
+                                 cpedat$STRATUM!=81),], method="ML")
+summary(stmod_drop)
+AIC(stmod_drop)
+AIC(stmod)
+
+v2 <- getViz(stmod_drop)
+
+pl2 <- plotSlice(x = sm(v2, 1), 
+                fix = list("bottemp_anom" = seq(-4, 4, length.out = 9)))
+pl2 + l_fitRaster() + l_fitContour() + l_points() + l_rug()
+
+pl3 <- plotSlice(x = sm(v2, 2), 
+                 fix = list("summer.cold.pool.extent" = seq(-4, 4, length.out = 9)))
+pl3 + l_fitRaster() + l_fitContour() + l_points() + l_rug() #+
+
+#trying to plot on map, this gets map but overlayed blocking data (and wrong coordinates)
+  geom_polygon(data = map_data ("world"), 
+             aes(x=long, y = lat,group=group),fill=NA,color="red",inherit.aes = F)
+  
+  ggplot(data = world) +
+    geom_sf() +
+    coord_sf(xlim = c(-180, -155), ylim = c(53, 65), expand = TRUE) +
+    annotation_scale(location = "bl", width_hint = 0.5) +
+    geom_point(aes(LONGITUDE, LATITUDE, colour=logCPUE), data=pol.trawl.dat) +   
+    scale_colour_gradient2(low="blue", high="red", guide="colorbar")    
+
+
+#drop cpe and temp, which changes AIC more
+
+stmod_dropT <- gam(logCPUE_Gadus_chalcogrammus ~ #s(long_albers, lat_albers, bottemp_anom) + 
+                    s(long_albers, lat_albers, summer.cold.pool.extent) +
+                    s(BOT_DEPTH), #random=list(YEAR_factor=~1), 
+                  # correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE),
+                  data=cpedat[which(cpedat$STRATUM!=70 &
+                                      cpedat$STRATUM!=71 &
+                                      cpedat$STRATUM!=81),], method="ML")
+summary(stmod_dropT)
+AIC(stmod_dropT)
+
+stmod_dropC <- gam(logCPUE_Gadus_chalcogrammus ~ s(long_albers, lat_albers, bottemp_anom) + 
+                     #s(long_albers, lat_albers, summer.cold.pool.extent) +
+                     s(BOT_DEPTH), #random=list(YEAR_factor=~1), 
+                   # correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE),
+                   data=cpedat[which(cpedat$STRATUM!=70 &
+                                       cpedat$STRATUM!=71 &
+                                       cpedat$STRATUM!=81),], method="ML")
+summary(stmod_dropC)
+AIC(stmod_dropC)
+
+
+#mixed versions
+
+stmod_mixed <- gamm(logCPUE_Gadus_chalcogrammus ~ s(long_albers, lat_albers, bottemp_anom, by=period) + 
+               s(long_albers, lat_albers, summer.cold.pool.extent) +
+               s(BOT_DEPTH), random=list(YEAR_factor=~1), 
+             # correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE),
+             data=cpedat[which(cpedat$STRATUM!=70 &
+                                 cpedat$STRATUM!=71 &
+                                 cpedat$STRATUM!=81),], method="ML")
+summary(stmod_mixed)
+
+
+
+
+stmod_mixeddrop <- gamm(logCPUE_Gadus_chalcogrammus ~ s(long_albers, lat_albers, bottemp_anom) + 
+                      s(long_albers, lat_albers, summer.cold.pool.extent) +
+                      s(BOT_DEPTH), random=list(YEAR_factor=~1), 
+                    # correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE),
+                    data=cpedat[which(cpedat$STRATUM!=70 &
+                                        cpedat$STRATUM!=71 &
+                                        cpedat$STRATUM!=81),], method="ML")
+summary(stmod_mixeddrop)
+
+
+
+
+
+
+
+
+
+
+
