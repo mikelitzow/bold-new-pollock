@@ -135,27 +135,27 @@ He1 <- gamm(logCPUE_Gadus_chalcogrammus ~
               te(long_albers, lat_albers, logCPUE_Hippoglossoides_elassodon, 
                  by=as.factor(period)), random=list(YEAR_factor=~1), 
             data=wide_an, method="REML")
-gam.check(As1[[2]]) 
-summary(As1[[1]]) #  
-summary(As1[[2]])
-plot(As1[[2]])
+gam.check(He1[[2]]) 
+summary(He1[[1]]) #  
+summary(He1[[2]])
+plot(He1[[2]])
 
 
 La1 <- gamm(logCPUE_Gadus_chalcogrammus ~ 
               te(long_albers, lat_albers, logCPUE_Limanda_aspera, 
                  by=as.factor(period)), random=list(YEAR_factor=~1), 
             data=wide_an, method="REML")
-gam.check(As1[[2]]) 
-summary(As1[[1]]) #  
-summary(As1[[2]])
-plot(As1[[2]])
+gam.check(La1[[2]]) 
+summary(La1[[1]]) #  
+summary(La1[[2]])
+plot(La1[[2]])
 
 
 Gm1 <- gamm(logCPUE_Gadus_chalcogrammus ~ 
               te(long_albers, lat_albers, logCPUE_Gadus_macrocephalus, 
                  by=as.factor(period)), random=list(YEAR_factor=~1), 
             data=wide_an, method="REML")
-gam.check(As1[[2]]) 
-summary(As1[[1]]) #  
-summary(As1[[2]])
-plot(As1[[2]])
+gam.check(Gm1[[2]]) 
+summary(Gm1[[1]]) #  
+summary(Gm1[[2]])
+plot(Gm1[[2]])
