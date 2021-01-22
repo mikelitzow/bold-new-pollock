@@ -55,7 +55,7 @@ all.clim.dat <- t(as.matrix(dat))
 
 # 
 # # and transpose
- e.cli.dat <- t(e.cli.dat)
+ e.clim.dat <- t(e.cli.dat)
 
 
 #fit model========
@@ -63,7 +63,7 @@ all.clim.dat <- t(as.matrix(dat))
 # now fit DFA models with 1-3 trends and different error structures and compare
 
 # changing convergence criterion to ensure convergence
-cntl.list = list(minit=200, maxit=20000, allow.degen=FALSE, conv.test.slope.tol=0.1, abstol=0.0001)
+cntl.list = list(minit=200, maxit=20000, allow.degen=FALSE, conv.test.slope.tol=0.1, abstol=0.0001, safe=TRUE, trace=1)
 
 # set up forms of R matrices
 levels.R = c("diagonal and equal",
@@ -99,8 +99,9 @@ model.data
 
 # now fit best model
 
-model.list = list(A="zero", m=3, R="diagonal and unequal") # best model
-mod.best = MARSS(all.clim.dat, model=model.list, z.score=TRUE, form="dfa", control=cntl.list)
+model.list = list(A="zero", m=2, R="diagonal and unequal") # best model
+#mod.best = MARSS(all.clim.dat, model=model.list, z.score=TRUE, form="dfa", control=cntl.list)
+mod.best = MARSS(e.clim.dat, model=model.list, z.score=TRUE, form="dfa", control=cntl.list)
 
 
 # and rotate the loadings
@@ -108,7 +109,7 @@ Z.est = coef(mod.best, type="matrix")$Z
 H.inv = varimax(coef(mod.best, type="matrix")$Z)$rotmat
 Z.rot = as.data.frame(Z.est %*% H.inv)
 
-proc_rot = solve(H_inv) %*% mod.best$states
+proc_rot = solve(H.inv) %*% mod.best$states
 
 # reverse trend 2 to plot
 Z.rot[,2] <- -Z.rot[,2]
@@ -143,12 +144,12 @@ clim.plot <- ggplot(Z.rot, aes(names, value, fill=key)) + geom_bar(stat="identit
 
 #based on nwfsc-timeseries.github.io
 
-yr_frst <- 1951
+yr_frst <- 1988
 
 ## get number of time series
-N_ts <- dim(all.clim.dat)[1]
+N_ts <- dim(e.clim.dat)[1]
 ## get length of time series
-TT <- dim(all.clim.dat)[2]
+TT <- dim(e.clim.dat)[2]
 
 ## get the estimated ZZ
 Z_est <- coef(mod.best, type = "matrix")$Z
@@ -160,11 +161,11 @@ Z_rot = Z_est %*% H_inv
 ## rotate processes
 proc_rot = solve(H_inv) %*% mod.best$states
 
-mm <- 3 #3 processes
+mm <- 2 #2 processes
 
-clim_names <- rownames(all.clim.dat)
+clim_names <- rownames(e.clim.dat)
  ylbl <- clim_names
- w_ts <- seq(dim(all.clim.dat)[2])
+ w_ts <- seq(dim(e.clim.dat)[2])
  layout(matrix(c(1, 2, 3, 4, 5, 6), mm, 2), widths = c(2, 1))
 ## par(mfcol=c(mm,2), mai=c(0.5,0.5,0.5,0.1), omi=c(0,0,0,0))
 # jpeg("figs/ugly_DFA_trends_loadings.jpg")
@@ -267,23 +268,23 @@ get_DFA_fits <- function(MLEobj, dd = NULL, alpha = 0.05) {
 # dat <- all.clim.dat - y_bar
 # rownames(dat) <- rownames(all.clim.dat)
 
-dat <- scale(all.clim.dat)
+dat <- scale(e.clim.dat)
 
-head(all.clim.dat)
+head(e.clim.dat)
 
-all.clim.dat.std <- all.clim.dat
+e.clim.dat.std <- e.clim.dat
 
 i <- 1
-for(i in 1:nrow(all.clim.dat)) {
-  all.clim.dat.std[i,] <- (all.clim.dat[i,]-mean(all.clim.dat[i,], na.rm=TRUE))/sd(all.clim.dat[i,], na.rm=TRUE)  
+for(i in 1:nrow(e.clim.dat)) {
+  e.clim.dat.std[i,] <- (e.clim.dat[i,]-mean(e.clim.dat[i,], na.rm=TRUE))/sd(e.clim.dat[i,], na.rm=TRUE)  
 }
 #Double checking
-apply(all.clim.dat.std, 1, mean, na.rm=TRUE)
-apply(all.clim.dat.std, 1, sd, na.rm=TRUE)
-dat <- all.clim.dat.std
+apply(e.clim.dat.std, 1, mean, na.rm=TRUE)
+apply(e.clim.dat.std, 1, sd, na.rm=TRUE)
+dat <- e.clim.dat.std
 #plot demeaned data
 
-driv <- rownames(all.clim.dat)
+driv <- rownames(e.clim.dat)
 #clr <- c("brown", "blue", "darkgreen", "darkred", "purple")
 cnt <- 1
 par(mfrow = c(N_ts/4, 4), mar = c(1, 1,1.5,1), omi = c(0.1, 
@@ -291,7 +292,7 @@ par(mfrow = c(N_ts/4, 4), mar = c(1, 1,1.5,1), omi = c(0.1,
 for (i in driv) {
   plot(dat[i, ], xlab = "", ylab = "", bty = "L", 
        xaxt = "n", pch = 16, col = clr[cnt], type = "b")
-  axis(1,  (0:dim(all.clim.dat)[2]) + 1, yr_frst + 0:dim(all.clim.dat)[2])
+  axis(1,  (0:dim(e.clim.dat)[2]) + 1, yr_frst + 0:dim(e.clim.dat)[2])
   title(i)
   cnt <- cnt + 1
 }
@@ -389,3 +390,64 @@ acf(resids$model.residuals[1, ])
 acf(resids$state.residuals[1, ], na.action=na.pass)
 acf(resids$model.residuals, na.action=na.pass)
 
+
+
+
+
+#try w late=================================================
+
+#having trouble w early period, try late
+
+#manupulate data for DFA========
+
+# save the full data set for later use...
+#all.clim.dat <- t(as.matrix(dat))
+
+# now fit DFA models
+# first the early era
+# e.cli.dat = as.matrix(dat[rownames(dat) %in% 1950:1988,])
+
+#new early data
+l.cli.dat = as.matrix(dat[rownames(dat) %in% 2014:2019,])
+
+# 
+# # and transpose
+l.clim.dat <- t(l.cli.dat)
+
+
+#fit model========
+
+# now fit DFA models with 1-3 trends and different error structures and compare
+
+# changing convergence criterion to ensure convergence
+cntl.list = list(minit=200, maxit=20000, allow.degen=FALSE, conv.test.slope.tol=0.1, abstol=0.0001, safe=TRUE)
+
+# set up forms of R matrices
+levels.R = c("diagonal and equal",
+             "diagonal and unequal",
+             "equalvarcov",
+             "unconstrained")
+model.data = data.frame()
+
+# fit models & store results
+for(R in levels.R) {
+  for(m in 1:4) {  # allowing up to 3 trends
+    dfa.model = list(A="zero", R=R, m=m)
+    kemz = MARSS(l.clim.dat, model=dfa.model, control=cntl.list,
+                 form="dfa", z.score=TRUE)
+    model.data = rbind(model.data,
+                       data.frame(R=R,
+                                  m=m,
+                                  logLik=kemz$logLik,
+                                  K=kemz$num.params,
+                                  AICc=kemz$AICc,
+                                  stringsAsFactors=FALSE))
+    assign(paste("kemz", m, R, sep="."), kemz)
+  } # end m loop
+} # end R loop
+
+# calculate delta-AICc scores, sort in descending order, and compare
+model.data$dAICc <- model.data$AICc-min(model.data$AICc)
+model.data <- model.data %>%
+  arrange(dAICc)
+model.data
