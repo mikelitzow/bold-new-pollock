@@ -43,12 +43,20 @@ text(x1, y1, labels = full_wide$STRATUM, cex=.7, col=full_wide$STRATUM)
 
 
 
+mat1 <- full_wide[,c(38:48)]
+
+cor1 <- cor(mat1, method = "pearson", use = "complete.obs")
+corrplot(cor1)
+
+write.csv(cor1, file=paste(wd,"/data/community-correlations.csv", sep=""))
 
 
+#those above 0.1
+#Atheresthes_stomias, Hippoglossoides_elassodon, Limanda_aspera, Gadus_macrocephalus, 
+#Chionoecetes_bairdi, Chionoecetes_opilio
 
-
-
-
+#those above 0.2
+#Atheresthes_stomias, Hippoglossoides_elassodon, Limanda_aspera, Gadus_macrocephalus
 
 ggplot(full_wide, aes(logCPUE_Gadus_chalcogrammus, logCPUE_Chionoecetes_bairdi, col=as.factor(period))) + geom_point() + geom_smooth()
 
@@ -94,6 +102,21 @@ gam.check(big1[[2]])
 summary(big1[[1]]) #  
 summary(big1[[2]])
 plot(big1[[2]])
+
+
+#try w those above 0.2
+#Atheresthes_stomias, Hippoglossoides_elassodon, Limanda_aspera, Gadus_macrocephalus
+
+spat1 <- gamm(logCPUE_Gadus_chalcogrammus ~ 
+                te(long_albers, lat_albers, logCPUE_Atheresthes_stomias, by=as.factor(period)) +
+                te(long_albers, lat_albers, logCPUE_Hippoglossoides_elassodon, by=as.factor(period)) +
+                te(long_albers, lat_albers, logCPUE_Limanda_aspera, by=as.factor(period)) +
+                te(long_albers, lat_albers, logCPUE_Gadus_macrocephalus, by=as.factor(period)), random=list(YEAR_factor=~1), 
+             data=wide_an, method="REML")
+gam.check(spat1[[2]]) 
+summary(spat1[[1]]) #  
+summary(spat1[[2]])
+plot(spat1[[2]])
 
 
 
