@@ -245,11 +245,99 @@ summary(stmod_mixeddrop)
 
 
 
+#these s() should all be te()
 
 
+plotmod <- gam(logCPUE_Gadus_chalcogrammus ~ s(LONGITUDE, LATITUDE, bottemp_anom, by=period) + 
+               s(LONGITUDE, LATITUDE, summer.cold.pool.extent) +
+               s(BOT_DEPTH), #random=list(YEAR_factor=~1), 
+             # correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE),
+             data=cpedat[which(cpedat$STRATUM!=70 &
+                                 cpedat$STRATUM!=71 &
+                                 cpedat$STRATUM!=81),], method="ML")
+summary(plotmod)
 
 
+c2 <- getViz(plotmod)
 
+cl2 <- plotSlice(x = sm(c2, 1), 
+                 fix = list("bottemp_anom" = seq(-4, 4, length.out = 9), "period"=seq(1,2)))
+cl2 + geom_polygon(data = map_data ("world"), 
+               aes(x=long, y = lat,group=group),fill=NA,color="black",
+               inherit.aes = F)+coord_sf(xlim = c(-180, -155), ylim = c(53, 65), expand = TRUE)+
+l_fitRaster(pTrans = function(.p) 0.5) + 
+  l_fitContour() + l_points() + l_rug()
 
+cl3 <- plotSlice(x = sm(c2,3), 
+                 fix = list("summer.cold.pool.extent" = seq(-4, 4, length.out = 9)))
+cl3 + l_fitRaster() + l_fitContour() + l_points() + l_rug() #+
 
+cl3 + geom_polygon(data = map_data ("world"), 
+                   aes(x=long, y = lat,group=group),fill=NA,color="black",
+                   inherit.aes = F)+coord_sf(xlim = c(-180, -155), ylim = c(53, 65), expand = TRUE)+
+  l_fitRaster(pTrans = function(.p) 0.5) + 
+  l_fitContour() + l_points() + l_rug()
+
+#trying to plot on map, this gets map but overlayed blocking data (and wrong coordinates)
+geom_polygon(data = map_data ("world"), 
+             aes(x=long, y = lat,group=group),fill=NA,color="red",inherit.aes = F)
+
+ggplot(data = world) +
+  geom_sf() +
+  coord_sf(xlim = c(-180, -155), ylim = c(53, 65), expand = TRUE) +
+  annotation_scale(location = "bl", width_hint = 0.5) +
+  geom_point(aes(LONGITUDE, LATITUDE, colour=logCPUE), data=pol.trawl.dat) +   
+  scale_colour_gradient2(low="blue", high="red", guide="colorbar")    
+
+vis.gam(plotmod, c("LONGITUDE", "LATITUDE"), plot.type="contour", type="response")
+
+#should lat long be included if interactions w it are?
+llmod <- gam(logCPUE_Gadus_chalcogrammus ~ te(LONGITUDE, LATITUDE) +
+                 te(LONGITUDE, LATITUDE, bottemp_anom, by=period) + 
+                 te(LONGITUDE, LATITUDE, summer.cold.pool.extent) +
+                 s(BOT_DEPTH), #random=list(YEAR_factor=~1), 
+               # correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE),
+               data=cpedat[which(cpedat$STRATUM!=70 &
+                                   cpedat$STRATUM!=71 &
+                                   cpedat$STRATUM!=81),], method="ML")
+summary(llmod)
+
+d2 <- getViz(llmod)
+
+plot(x=sm(d2,1)) + geom_polygon(data = map_data ("world"), 
+                                  aes(x=long, y = lat,group=group),fill=NA,color="black",
+                                  inherit.aes = F)+coord_sf(xlim = c(-180, -155), ylim = c(53, 65), expand = TRUE)+
+  l_fitRaster(pTrans = function(.p) 0.5) + 
+  l_fitContour() + l_points() + l_rug()
+
+dp2 <- plotSlice(x = sm(d2,2), 
+                 fix = list("bottemp_anom" = seq(-4, 4, length.out = 5), "period"=seq(1,2)))
+dp2 + geom_polygon(data = map_data ("world"), 
+                   aes(x=long, y = lat,group=group),fill=NA,color="black",
+                   inherit.aes = F)+coord_sf(xlim = c(-180, -155), ylim = c(53, 65), expand = TRUE)+
+  l_fitRaster(pTrans = function(.p) 0.5) + 
+  l_fitContour() + l_points() + l_rug()
+
+d3 <- plotSlice(x = sm(d2,4), 
+                fix = list("summer.cold.pool.extent" = seq(-4, 4, length.out = 9)))
+d3 + geom_polygon(data = map_data ("world"), 
+                  aes(x=long, y = lat,group=group),fill=NA,color="black",
+                  inherit.aes = F)+coord_sf(xlim = c(-180, -155), ylim = c(53, 65), expand = TRUE)+
+  l_fitRaster(pTrans = function(.p) 0.5) + 
+  l_fitContour() + l_points() + l_rug()
+
+llmoddrop <- gam(logCPUE_Gadus_chalcogrammus ~ te(LONGITUDE, LATITUDE) +
+               te(LONGITUDE, LATITUDE, bottemp_anom) + 
+               te(LONGITUDE, LATITUDE, summer.cold.pool.extent) +
+               s(BOT_DEPTH), #random=list(YEAR_factor=~1), 
+             # correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE),
+             data=cpedat[which(cpedat$STRATUM!=70 &
+                                 cpedat$STRATUM!=71 &
+                                 cpedat$STRATUM!=81),], method="ML")
+summary(llmoddrop)
+
+cpedat2 <- cpedat
+cpedat2$period_num <- NA
+cpedat2$period_num[which(cpedat$period=="early")]<-1
+cpedat2$period_num[which(cpedat$period=="late")]<-2
 
