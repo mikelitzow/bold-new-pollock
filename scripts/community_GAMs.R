@@ -86,6 +86,8 @@ wide_an$period <- NA
 wide_an$period[which(wide_an$YEAR<2014)]<-"early"
 wide_an$period[which(wide_an$YEAR>2013)]<-"late"
 
+wide_an$period <- as.factor(wide_an$period)
+
 big1 <- gamm(logCPUE_Gadus_chalcogrammus ~ s(logCPUE_Chionoecetes_bairdi, by=as.factor(period)) +
                s(logCPUE_Atheresthes_stomias, by=as.factor(period)) +
                s(logCPUE_Hippoglossus_stenolepis, by=as.factor(period)) + 
@@ -119,43 +121,91 @@ summary(spat1[[2]])
 plot(spat1[[2]])
 
 
+
 #sps separately========
 
 As1 <- gamm(logCPUE_Gadus_chalcogrammus ~ 
                 te(long_albers, lat_albers, logCPUE_Atheresthes_stomias, 
-                   by=as.factor(period)), random=list(YEAR_factor=~1), 
+                   by=period), random=list(YEAR_factor=~1), 
               data=wide_an, method="REML")
 gam.check(As1[[2]]) 
 summary(As1[[1]]) #  
 summary(As1[[2]])
 plot(As1[[2]])
 
+A1 <- getViz(As1[[2]])
+
+
+Ap2 <- plotSlice(x = sm(A1,2), 
+                 fix = list("logCPUE_Atheresthes_stomias" = seq(-4, 4, length.out = 5), "period"=seq(1,2)))
+Ap2 + geom_polygon(data = map_data ("world"), 
+                   aes(x=long, y = lat,group=group),fill=NA,color="black",
+                   inherit.aes = F)+coord_sf(xlim = c(-180, -155), ylim = c(53, 65), expand = TRUE)+
+  l_fitRaster(pTrans = function(.p) 0.5) + 
+  l_fitContour() + l_points() + l_rug()
+
+As2 <- gamm(logCPUE_Gadus_chalcogrammus ~ te(long_albers, lat_albers) +
+              te(long_albers, lat_albers, logCPUE_Atheresthes_stomias, 
+                 by=as.factor(period)), random=list(YEAR_factor=~1), 
+            data=wide_an, method="REML")
+gam.check(As2[[2]]) 
+summary(As2[[1]]) #  
+summary(As2[[2]])
+plot(As2[[2]])
+
 
 He1 <- gamm(logCPUE_Gadus_chalcogrammus ~ 
               te(long_albers, lat_albers, logCPUE_Hippoglossoides_elassodon, 
-                 by=as.factor(period)), random=list(YEAR_factor=~1), 
+                 by=period), random=list(YEAR_factor=~1), 
             data=wide_an, method="REML")
 gam.check(He1[[2]]) 
 summary(He1[[1]]) #  
 summary(He1[[2]])
 plot(He1[[2]])
 
+He2 <- gamm(logCPUE_Gadus_chalcogrammus ~ te(long_albers, lat_albers, k=30) +
+              te(long_albers, lat_albers, logCPUE_Hippoglossoides_elassodon, 
+                 by=period), random=list(YEAR_factor=~1), 
+            data=wide_an, method="REML")
+gam.check(He2[[2]]) 
+summary(He2[[1]]) #  
+summary(He2[[2]])
+plot(He2[[2]])
+
 
 La1 <- gamm(logCPUE_Gadus_chalcogrammus ~ 
               te(long_albers, lat_albers, logCPUE_Limanda_aspera, 
-                 by=as.factor(period)), random=list(YEAR_factor=~1), 
+                 by=period), random=list(YEAR_factor=~1), 
             data=wide_an, method="REML")
 gam.check(La1[[2]]) 
 summary(La1[[1]]) #  
 summary(La1[[2]])
 plot(La1[[2]])
 
+La2 <- gamm(logCPUE_Gadus_chalcogrammus ~ te(long_albers, lat_albers) +
+              te(long_albers, lat_albers, logCPUE_Limanda_aspera, 
+                 by=period), random=list(YEAR_factor=~1), 
+            data=wide_an, method="REML")
+gam.check(La2[[2]]) 
+summary(La2[[1]]) #  
+summary(La2[[2]])
+plot(La2[[2]])
+
 
 Gm1 <- gamm(logCPUE_Gadus_chalcogrammus ~ 
               te(long_albers, lat_albers, logCPUE_Gadus_macrocephalus, 
-                 by=as.factor(period)), random=list(YEAR_factor=~1), 
+                 by=period), random=list(YEAR_factor=~1), 
             data=wide_an, method="REML")
 gam.check(Gm1[[2]]) 
 summary(Gm1[[1]]) #  
 summary(Gm1[[2]])
 plot(Gm1[[2]])
+
+Gm2 <- gamm(logCPUE_Gadus_chalcogrammus ~ te(long_albers, lat_albers) +
+              te(long_albers, lat_albers, logCPUE_Gadus_macrocephalus, 
+                 by=period), random=list(YEAR_factor=~1), 
+            data=wide_an, method="REML")
+gam.check(Gm2[[2]]) 
+summary(Gm2[[1]]) #  
+summary(Gm2[[2]])
+plot(Gm2[[2]])
