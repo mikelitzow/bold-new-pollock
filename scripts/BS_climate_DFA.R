@@ -103,6 +103,8 @@ model.list = list(A="zero", m=2, R="diagonal and unequal") # best model
 #mod.best = MARSS(all.clim.dat, model=model.list, z.score=TRUE, form="dfa", control=cntl.list)
 mod.best = MARSS(e.clim.dat, model=model.list, z.score=TRUE, form="dfa", control=cntl.list)
 
+saveRDS(mod.best, file="scripts/DFA_best_mod88-2014.RDS")
+
 
 # and rotate the loadings
 Z.est = coef(mod.best, type="matrix")$Z
@@ -410,6 +412,9 @@ acf(resids$model.residuals, na.action=na.pass)
 #new early data
 l.cli.dat = as.matrix(dat[rownames(dat) %in% 2014:2019,])
 
+#remove two columns w all zeros
+l.cli.dat <- l.cli.dat[,-c(14:15)]
+
 # 
 # # and transpose
 l.clim.dat <- t(l.cli.dat)
@@ -420,7 +425,7 @@ l.clim.dat <- t(l.cli.dat)
 # now fit DFA models with 1-3 trends and different error structures and compare
 
 # changing convergence criterion to ensure convergence
-cntl.list = list(minit=200, maxit=20000, allow.degen=FALSE, conv.test.slope.tol=0.1, abstol=0.0001, safe=TRUE)
+cntl.list = list(minit=200, maxit=20000, allow.degen=FALSE, conv.test.slope.tol=0.1, abstol=0.0001, safe=TRUE, trace=1)
 
 # set up forms of R matrices
 levels.R = c("diagonal and equal",
