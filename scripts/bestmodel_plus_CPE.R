@@ -292,14 +292,14 @@ ggplot(data = world) +
 vis.gam(plotmod, c("LONGITUDE", "LATITUDE"), plot.type="contour", type="response")
 
 #should lat long be included if interactions w it are?
-llmod <- gam(logCPUE_Gadus_chalcogrammus ~ te(LONGITUDE, LATITUDE) +
+llmod <- gamm(logCPUE_Gadus_chalcogrammus ~ te(LONGITUDE, LATITUDE) +
                  te(LONGITUDE, LATITUDE, bottemp_anom, by=period) + 
-                 te(LONGITUDE, LATITUDE, summer.cold.pool.extent) +
-                 s(BOT_DEPTH), #random=list(YEAR_factor=~1), 
+                 s(summer.cold.pool.extent) +
+                 s(BOT_DEPTH), random=list(YEAR_factor=~1), 
                # correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE),
                data=cpedat[which(cpedat$STRATUM!=70 &
                                    cpedat$STRATUM!=71 &
-                                   cpedat$STRATUM!=81),], method="ML")
+                                   cpedat$STRATUM!=81),], method="REML")
 summary(llmod)
 
 d2 <- getViz(llmod)
@@ -326,10 +326,10 @@ d3 + geom_polygon(data = map_data ("world"),
   l_fitRaster(pTrans = function(.p) 0.5) + 
   l_fitContour() + l_points() + l_rug()
 
-llmoddrop <- gam(logCPUE_Gadus_chalcogrammus ~ te(LONGITUDE, LATITUDE) +
+llmoddrop <- gamm(logCPUE_Gadus_chalcogrammus ~ te(LONGITUDE, LATITUDE) +
                te(LONGITUDE, LATITUDE, bottemp_anom) + 
-               te(LONGITUDE, LATITUDE, summer.cold.pool.extent) +
-               s(BOT_DEPTH), #random=list(YEAR_factor=~1), 
+               s(summer.cold.pool.extent) +
+               s(BOT_DEPTH), random=list(YEAR_factor=~1), 
              # correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE),
              data=cpedat[which(cpedat$STRATUM!=70 &
                                  cpedat$STRATUM!=71 &
@@ -341,3 +341,48 @@ cpedat2$period_num <- NA
 cpedat2$period_num[which(cpedat$period=="early")]<-1
 cpedat2$period_num[which(cpedat$period=="late")]<-2
 
+
+
+#following Ciannelli model:
+
+vbigmod <- gam(logCPUE_Gadus_chalcogrammus ~ te(LONGITUDE, LATITUDE) +
+                 # te(LONGITUDE, LATITUDE, bottemp_anom) +
+                #  te(LONGITUDE, LATITUDE,  by=period) + 
+                te(LONGITUDE, LATITUDE, bottemp_anom, by=period) + 
+                s(summer.cold.pool.extent) +
+                s(BOT_DEPTH) + 
+                  s(YEAR_factor), 
+              # correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE),
+              data=cpedat[which(cpedat$STRATUM!=70 &
+                                  cpedat$STRATUM!=71 &
+                                  cpedat$STRATUM!=81),], method="ML")
+summary(vbigmod)
+
+v3 <- getViz(vbigmod)
+
+plot(x=sm(v3,1)) + geom_polygon(data = map_data ("world"), 
+                                aes(x=long, y = lat,group=group),fill=NA,color="black",
+                                inherit.aes = F)+coord_sf(xlim = c(-180, -155), ylim = c(53, 65), expand = TRUE)+
+  l_fitRaster(pTrans = function(.p) 0.5) + 
+  l_fitContour() + l_points() + l_rug()
+
+vp2 <- plotSlice(x = sm(v3,2), 
+                 fix = list("bottemp_anom" = seq(-4, 4, length.out = 5), "period"=seq(1,2)))
+vp2 + geom_polygon(data = map_data ("world"), 
+                   aes(x=long, y = lat,group=group),fill=NA,color="black",
+                   inherit.aes = F)+coord_sf(xlim = c(-180, -155), ylim = c(53, 65), expand = TRUE)+
+  l_fitRaster(pTrans = function(.p) 0.5) + 
+  l_fitContour() + l_points() + l_rug()
+
+vbigmoddrop <- gam(logCPUE_Gadus_chalcogrammus ~ te(LONGITUDE, LATITUDE) +
+                 # te(LONGITUDE, LATITUDE, bottemp_anom) +
+                 #  te(LONGITUDE, LATITUDE,  by=period) + 
+                 te(LONGITUDE, LATITUDE, bottemp_anom) + 
+                 s(summer.cold.pool.extent) +
+                 s(BOT_DEPTH) + 
+                 s(YEAR_factor), 
+               # correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE),
+               data=cpedat[which(cpedat$STRATUM!=70 &
+                                   cpedat$STRATUM!=71 &
+                                   cpedat$STRATUM!=81),], method="ML")
+summary(vbigmoddrop)
