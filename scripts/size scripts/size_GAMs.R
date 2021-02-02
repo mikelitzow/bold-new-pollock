@@ -40,11 +40,16 @@ ggplot(dat2[which(dat2$YEAR>1998),], aes(YEAR, cond_fact, col=as.factor(AGE))) +
 ggplot(dat2[which(dat2$YEAR>1998),], aes(YEAR, cond_fact, col=as.factor(AGE))) + geom_point() + 
   facet_wrap(~AGE, scales="free") + geom_smooth()
 
+ggplot(dat2[which(dat2$YEAR>1998),], aes(YEAR, cond_fact)) + geom_point() + 
+  geom_smooth()
+
 
 #hmm need to double check this calc
 
 #match size data to bottom temp anom and mean stat temp etc
 table(dat2$YEAR, dat2$AGE)
+
+table(dat2$AGE)
 
 #use data previously cleaned 
 #periods_analysis_dat is also loaded in trawl_biomass_GAM_explor.R
@@ -80,7 +85,9 @@ joindat$shelf[which(joindat$STRATUM==50 |
                       joindat$STRATUM==62 | 
                       joindat$STRATUM==90)] <- "EBS_outer"
 
-cond_analysis_dat <- joindat[which(joindat$YEAR>1981),]
+cond_analysis_dat <- joindat[which(joindat$YEAR>1981 & is.na(joindat$AGE)==FALSE),]
+#about 10K with AGE NA removed
+#seems like a whole lot of NA age are recent
 
 lin_cond1 <- gamm(cond_fact ~ bottemp_anom*period +
                        te(mean_station_bottemp, BOT_DEPTH), random=list(YEAR_factor=~1), 
