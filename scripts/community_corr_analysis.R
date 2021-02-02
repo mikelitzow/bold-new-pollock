@@ -84,33 +84,143 @@ cormod <- lm(cor_vec ~ period, data = analysis_cor)
 anova(cormod)
 
 #need to do this by sps
-cormod_As <- lm(cor_vec ~ period, data = analysis_cor[which(analysis_cor$sps_vec=="logCPUE_Atheresthes_stomias"),])
-anova(cormod_As) #not sig
+# t.test() function makes the assumption that the variances of the two groups of samples, 
+# being compared, are different. Therefore, Welch t-test is performed by default.
 
-cormod_Hs <- lm(cor_vec ~ period, data = analysis_cor[which(analysis_cor$sps_vec=="logCPUE_Hippoglossus_stenolepis"),])
-anova(cormod_Hs) #p=0.02
+t_As <- t.test(cor_vec ~ period, data = analysis_cor[which(analysis_cor$sps_vec=="logCPUE_Atheresthes_stomias"),])
+t_As #not sig p-value = 0.2016
 
-cormod_He <- lm(cor_vec ~ period, data = analysis_cor[which(analysis_cor$sps_vec=="logCPUE_Hippoglossoides_elassodon"),])
-anova(cormod_He) #p=0.004
+t_Hs <- t.test(cor_vec ~ period, data = analysis_cor[which(analysis_cor$sps_vec=="logCPUE_Hippoglossus_stenolepis"),])
+t_Hs #p=0.02326
 
-cormod_La <- lm(cor_vec ~ period, data = analysis_cor[which(analysis_cor$sps_vec=="logCPUE_Limanda_aspera"),])
-anova(cormod_La) #not sig
+t_He <- t.test(cor_vec ~ period, data = analysis_cor[which(analysis_cor$sps_vec=="logCPUE_Hippoglossoides_elassodon"),])
+t_He #p=0.0.04584
 
-cormod_Lp <- lm(cor_vec ~ period, data = analysis_cor[which(analysis_cor$sps_vec=="logCPUE_Lepidopsetta_polyxystra"),])
-anova(cormod_Lp) #not sig
+t_La <- t.test(cor_vec ~ period, data = analysis_cor[which(analysis_cor$sps_vec=="logCPUE_Limanda_aspera"),])
+t_La #not sig p-value = 0.1204
 
-cormod_Pq <- lm(cor_vec ~ period, data = analysis_cor[which(analysis_cor$sps_vec=="logCPUE_Pleuronectes_quadrituberculatus"),])
-anova(cormod_Pq) #p=0.005
+t_Lp <- t.test(cor_vec ~ period, data = analysis_cor[which(analysis_cor$sps_vec=="logCPUE_Lepidopsetta_polyxystra"),])
+t_Lp #not sig p-value = 0.6489
 
-cormod_Gm <- lm(cor_vec ~ period, data = analysis_cor[which(analysis_cor$sps_vec=="logCPUE_Gadus_macrocephalus"),])
-anova(cormod_Gm) #p=0.04
+t_Pq <- t.test(cor_vec ~ period, data = analysis_cor[which(analysis_cor$sps_vec=="logCPUE_Pleuronectes_quadrituberculatus"),])
+t_Pq #p=0.3.15e-05
 
-cormod_Cb <- lm(cor_vec ~ period, data = analysis_cor[which(analysis_cor$sps_vec=="logCPUE_Chionoecetes_bairdi"),])
-anova(cormod_Cb) #p=0.002
+t_Gm <- t.test(cor_vec ~ period, data = analysis_cor[which(analysis_cor$sps_vec=="logCPUE_Gadus_macrocephalus"),])
+t_Gm #NOT SIG p=0.1737
 
-cormod_Co <- lm(cor_vec ~ period, data = analysis_cor[which(analysis_cor$sps_vec=="logCPUE_Chionoecetes_opilio"),])
-anova(cormod_Co) #not sig
+t_Cb <- t.test(cor_vec ~ period, data = analysis_cor[which(analysis_cor$sps_vec=="logCPUE_Chionoecetes_bairdi"),])
+t_Cb #Not sig p=0.05511
+
+t_Co <- t.test(cor_vec ~ period, data = analysis_cor[which(analysis_cor$sps_vec=="logCPUE_Chionoecetes_opilio"),])
+t_Co #not sig p-value = 0.8567
 
 ggplot(cor_output, aes(yr_vec, cor_vec, colour=sps_vec)) + geom_point() + geom_smooth() + facet_wrap(~sps_vec) + 
   geom_hline(yintercept = 0, col="red")
+
+
+#maps=====
+
+library("rnaturalearth")
+library("rnaturalearthdata")
+library( "ggspatial" )
+library("sf")
+
+
+
+world <- ne_countries(scale = "medium", returnclass = "sf")
+ggplot(data = world) +
+  geom_sf() +
+  coord_sf(xlim = c(-180, -155), ylim = c(53, 65), expand = TRUE) +
+  annotation_scale(location = "bl", width_hint = 0.5) +
+  geom_point(aes(LONGITUDE, LATITUDE, colour=logCPUE_Atheresthes_stomias), data=full_wide) +   
+  scale_colour_gradient2(low="blue", high="red", guide="colorbar") + facet_wrap(~period)  
+
+
+ggplot(data = world) +
+  geom_sf() +
+  coord_sf(xlim = c(-180, -155), ylim = c(53, 65), expand = TRUE) +
+  annotation_scale(location = "bl", width_hint = 0.5) +
+  geom_point(aes(LONGITUDE, LATITUDE, colour=logCPUE_Hippoglossus_stenolepis), data=full_wide) +   
+  scale_colour_gradient2(low="blue", high="red", guide="colorbar") + facet_wrap(~period)  
+
+ggplot(data = world) +
+  geom_sf() +
+  coord_sf(xlim = c(-180, -155), ylim = c(53, 65), expand = TRUE) +
+  annotation_scale(location = "bl", width_hint = 0.5) +
+  geom_point(aes(LONGITUDE, LATITUDE, colour=logCPUE_Hippoglossoides_elassodon), data=full_wide) +   
+  scale_colour_gradient2(low="blue", high="red", guide="colorbar") + facet_wrap(~period)  
+
+ggplot(data = world) +
+  geom_sf() +
+  coord_sf(xlim = c(-180, -155), ylim = c(53, 65), expand = TRUE) +
+  annotation_scale(location = "bl", width_hint = 0.5) +
+  geom_point(aes(LONGITUDE, LATITUDE, colour=logCPUE_Limanda_aspera), data=full_wide) +   
+  scale_colour_gradient2(low="blue", high="red", guide="colorbar") + facet_wrap(~period)  
+
+ggplot(data = world) +
+  geom_sf() +
+  coord_sf(xlim = c(-180, -155), ylim = c(53, 65), expand = TRUE) +
+  annotation_scale(location = "bl", width_hint = 0.5) +
+  geom_point(aes(LONGITUDE, LATITUDE, colour=logCPUE_Lepidopsetta_polyxystra), data=full_wide) +   
+  scale_colour_gradient2(low="blue", high="red", guide="colorbar") + facet_wrap(~period)  
+
+
+ggplot(data = world) +
+  geom_sf() +
+  coord_sf(xlim = c(-180, -155), ylim = c(53, 65), expand = TRUE) +
+  annotation_scale(location = "bl", width_hint = 0.5) +
+  geom_point(aes(LONGITUDE, LATITUDE, colour=logCPUE_Pleuronectes_quadrituberculatus), data=full_wide) +   
+  scale_colour_gradient2(low="blue", high="red", guide="colorbar") + facet_wrap(~period)  
+
+
+ggplot(data = world) +
+  geom_sf() +
+  coord_sf(xlim = c(-180, -155), ylim = c(53, 65), expand = TRUE) +
+  annotation_scale(location = "bl", width_hint = 0.5) +
+  geom_point(aes(LONGITUDE, LATITUDE, colour=logCPUE_Gadus_macrocephalus), data=full_wide) +   
+  scale_colour_gradient2(low="blue", high="red", guide="colorbar") + facet_wrap(~period)  
+
+
+ggplot(data = world) +
+  geom_sf() +
+  coord_sf(xlim = c(-180, -155), ylim = c(53, 65), expand = TRUE) +
+  annotation_scale(location = "bl", width_hint = 0.5) +
+  geom_point(aes(LONGITUDE, LATITUDE, colour=logCPUE_Gadus_chalcogrammus), data=full_wide) +   
+  scale_colour_gradient2(low="blue", high="red", guide="colorbar") + facet_wrap(~period)  
+
+
+ggplot(data = world) +
+  geom_sf() +
+  coord_sf(xlim = c(-180, -155), ylim = c(53, 65), expand = TRUE) +
+  annotation_scale(location = "bl", width_hint = 0.5) +
+  geom_point(aes(LONGITUDE, LATITUDE, colour=logCPUE_Chionoecetes_bairdi), data=full_wide) +   
+  scale_colour_gradient2(low="blue", high="red", guide="colorbar") + facet_wrap(~period)  
+
+
+ggplot(data = world) +
+  geom_sf() +
+  coord_sf(xlim = c(-180, -155), ylim = c(53, 65), expand = TRUE) +
+  annotation_scale(location = "bl", width_hint = 0.5) +
+  geom_point(aes(LONGITUDE, LATITUDE, colour=logCPUE_Chionoecetes_opilio), data=full_wide) +   
+  scale_colour_gradient2(low="blue", high="red", guide="colorbar") + facet_wrap(~period)  
+
+
+
+ggplot(data = world) +
+  geom_sf() +
+  coord_sf(xlim = c(-180, -155), ylim = c(53, 65), expand = TRUE) +
+  annotation_scale(location = "bl", width_hint = 0.5) +
+  geom_point(aes(LONGITUDE, LATITUDE, colour=logCPUE_Lepidopsetta_sp), data=full_wide) +   
+  scale_colour_gradient2(low="blue", high="red", guide="colorbar") + facet_wrap(~period)  
+
+
+
+
+
+
+
+
+
+
+
 
