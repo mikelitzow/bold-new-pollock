@@ -1,10 +1,17 @@
-## reconcile the two data versions that we have...
 
 library(tidyverse)
 library(mgcv)
+library(sf)
+library(rnaturalearth)
+library(rnaturalearthdata)
+library(rgeos)
+library(tidyverse)
+library(rgdal)
 
+# set palette
+cb <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
 theme_set(theme_bw())
-cb <- c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+
 
 # load confirmation data query to check these are complete
 dat <- read.csv("./data/survey data/pollock_survey_specimen_data_confirmation.csv")
@@ -19,6 +26,31 @@ dat <- dat %>%
   filter(SURVEY == "EBS", YEAR >= 1999) 
 
 # exploratory plots
+space.plot <- dat %>%
+  group_by(LATITUDE, LONGITUDE, YEAR) %>%
+  summarise(size = log(n()+1))
+
+ak <- ne_countries(scale = "medium", returnclass = "sf", continent="north america")
+
+min <- min(space.plot$size)
+max <- max(space.plot$size)
+
+map.plot <- ggplot(ak) +
+  geom_point(data=space.plot, aes(LONGITUDE, LATITUDE)) +
+  scale_radius(range=c(min, max)) +
+  geom_sf(fill="darkgoldenrod3", color=NA) + 
+  coord_sf(xlim = c(-180, -156), ylim = c(52, 66), expand = FALSE) +
+  facet_wrap(~YEAR)
+
+map.plot # pretty light before 2006!
+
+count.dat <- dat %>%
+  dplyr::group_by(AGE, YEAR) +
+  plyr::summarise(count=n())
+
+
+ggplot(dat, aes())
+  
 ggplot(dat, aes(AGE, WEIGHT)) +
   geom_point() +
   facet_wrap(~YEAR)
