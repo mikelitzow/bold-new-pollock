@@ -5,7 +5,6 @@ library(sf)
 library(rnaturalearth)
 library(rnaturalearthdata)
 library(rgeos)
-library(tidyverse)
 library(rgdal)
 
 # set palette
@@ -44,12 +43,10 @@ map.plot <- ggplot(ak) +
 
 map.plot # pretty light before 2006!
 
-count.dat <- dat %>%
-  dplyr::group_by(AGE, YEAR) +
-  plyr::summarise(count=n())
-
-
-ggplot(dat, aes())
+ggplot(filter(dat, AGE <= 15), aes(AGE)) +
+  geom_histogram(fill="grey", color="black", bins=15) +
+  facet_wrap(~YEAR, scales="free_y")
+  
   
 ggplot(dat, aes(AGE, WEIGHT)) +
   geom_point() +
@@ -80,6 +77,46 @@ ggplot(filter(dat, AGE <= 12), aes(sst.amj, WEIGHT)) +
   facet_wrap(~AGE, scales="free_y") + 
   geom_smooth(method = "gam", formula = y ~ s(x, bs = "cs", k = 4))
 
+## scale length by age to allow comparison / analysis across ages
+
+scale_this <- function(x) as.vector(scale(x))
+
+scale.dat <- plyr::ddply(dat, "AGE", transform, sc.weight = scale(WEIGHT))
+
+# check
+ggplot(scale.dat, aes(WEIGHT, sc.weight)) +
+  geom_point() +
+  facet_wrap(~AGE, scales = "free")
+
+# looks good!
+
+# exploratory TS plots - one panel!
+
+# object to catch results and predict time evolution
+mod.summary.out <- age.out <- data.frame()
+new.dat <- data.frame(YEAR = 1999:2019)
+
+for(i in 1:12){
+  
+  mod <- gam(sc.weight ~ s(YEAR, k=6), data=filter(scale.dat, AGE==i))
+  
+  temp.out <- data.frame(age = i,
+                         edf = summary(mod)$edf,
+                         nominal_p = summary(mod)$s.table[1,4])
+  
+  mod.summary.out <- rbind(mod.summary.out, temp.out)
+  
+  temp.out <- data.frame(age = i,
+                         year = 1999:2019,
+                         weight_anomaly = predict.gam(mod, newdata = new.dat))
+  
+age.out <- rbind(age.out, temp.out)
+  
+}
+
+age.out$age <- as.factor(age.out$age)
+ggplot(age.out, aes(year, weight_anomaly, color=age)) +
+  geom_line() 
 
 mod1 <- gam(WEIGHT ~ s(sst.amj, k = 3) + te(LATITUDE, LONGITUDE), data=dat[dat$AGE == 1,])
 summary(mod1)
@@ -110,4 +147,4 @@ summary(mod7)
 plot(mod7, se=F, select=1)
 
 
-scale_this <- function(x) as.vector(scale(x))
+
