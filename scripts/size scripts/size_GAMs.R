@@ -89,6 +89,12 @@ cond_analysis_dat <- joindat[which(joindat$YEAR>1981 & is.na(joindat$AGE)==FALSE
 #about 10K with AGE NA removed
 #seems like a whole lot of NA age are recent
 
+ggplot(cond_analysis_dat[which(cond_analysis_dat$AGE<11),], aes(as.factor(AGE), cond_fact, col=period)) + geom_boxplot()
+
+ggplot(cond_analysis_dat[which(cond_analysis_dat$AGE<11),], aes(as.factor(AGE), cond_fact, col=period)) + geom_boxplot() +
+  facet_wrap(~STRATUM)
+
+
 lin_cond1 <- gamm(cond_fact ~ bottemp_anom*period +
                        te(mean_station_bottemp, BOT_DEPTH), random=list(YEAR_factor=~1), 
                    #  correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor + HAUL, nugget=TRUE),
@@ -99,6 +105,32 @@ summary(lin_cond1[[2]]) #rsq 0.
 plot_model(lin_cond1[[2]], type="int")
 
 
+
+
+lin_cond1 <- gamm(cond_fact ~ bottemp_anom*period +
+                    te(mean_station_bottemp, BOT_DEPTH), random=list(YEAR_factor=~1), 
+                  #  correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor + HAUL, nugget=TRUE),
+                  data=cond_analysis_dat[which(cond_analysis_dat$AGE==1),], method="REML")
+gam.check(lin_cond1[[2]]) 
+summary(lin_cond1[[1]]) #  
+summary(lin_cond1[[2]]) #rsq 0.08
+plot(lin_cond1[[2]])
+plot_model(lin_cond1[[2]], type="int")
+
+age1dat <- cond_analysis_dat[which(cond_analysis_dat$AGE==1),]
+
+table(age1dat$YEAR, age1dat$HAUL)
+
+
+#following Mike's models
+
+mmod1 <- gam(cond_fact ~ s(YEAR) + s(bottemp_anom) + te(LATITUDE, LONGITUDE), data=cond_analysis_dat[which(cond_analysis_dat$AGE==1),])
+summary(mmod1)
+plot(mmod1)
+
+mmod10 <- gam(cond_fact ~ s(YEAR) + s(bottemp_anom) + te(LATITUDE, LONGITUDE), data=cond_analysis_dat[which(cond_analysis_dat$AGE==10),])
+summary(mmod10)
+plot(mmod10)
 
 
 
