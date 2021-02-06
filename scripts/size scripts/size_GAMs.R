@@ -94,6 +94,11 @@ ggplot(cond_analysis_dat[which(cond_analysis_dat$AGE<11),], aes(as.factor(AGE), 
 ggplot(cond_analysis_dat[which(cond_analysis_dat$AGE<11),], aes(as.factor(AGE), cond_fact, col=period)) + geom_boxplot() +
   facet_wrap(~STRATUM)
 
+ggplot(cond_analysis_dat[which(cond_analysis_dat$AGE<11),], aes(YEAR, cond_fact, col=as.factor(AGE))) + geom_point() +
+  facet_wrap(~STRATUM, scales="free") + geom_smooth()
+
+
+
 
 lin_cond1 <- gamm(cond_fact ~ bottemp_anom*period +
                        te(mean_station_bottemp, BOT_DEPTH), random=list(YEAR_factor=~1), 
@@ -131,6 +136,30 @@ plot(mmod1)
 mmod10 <- gam(cond_fact ~ s(YEAR) + s(bottemp_anom) + te(LATITUDE, LONGITUDE), data=cond_analysis_dat[which(cond_analysis_dat$AGE==10),])
 summary(mmod10)
 plot(mmod10)
+
+#use annual climate data instead
+clim.dat <- read.csv("data/climate data.csv")
+
+temp_cond_dat <- left_join(cond_analysis_dat, clim.dat[,c(1:5,12)], by=c("YEAR"="year"))
+length(cond_analysis_dat$YEAR)
+length(temp_cond_dat$YEAR)
+
+bmod1 <- gam(cond_fact ~ s(YEAR) + s(summer.bottom.temp) + te(LATITUDE, LONGITUDE), data=temp_cond_dat[which(temp_cond_dat$AGE==1),])
+summary(bmod1)
+plot(bmod1)
+
+smod1 <- gam(cond_fact ~ s(YEAR) + s(south.sst.amj) + te(LATITUDE, LONGITUDE), data=temp_cond_dat[which(temp_cond_dat$AGE==1),])
+summary(smod1)
+plot(smod1)
+
+
+bmod10 <- gam(cond_fact ~ s(YEAR) + s(summer.bottom.temp) + te(LATITUDE, LONGITUDE), data=temp_cond_dat[which(temp_cond_dat$AGE==10),])
+summary(bmod10)
+plot(bmod10)
+
+smod10 <- gam(cond_fact ~ s(YEAR) + s(south.sst.amj) + te(LATITUDE, LONGITUDE), data=temp_cond_dat[which(temp_cond_dat$AGE==10),])
+summary(smod10)
+plot(smod10)
 
 
 
