@@ -89,33 +89,65 @@ anova(cormod)
 
 t_As <- t.test(cor_vec ~ period, data = analysis_cor[which(analysis_cor$sps_vec=="logCPUE_Atheresthes_stomias"),])
 t_As #not sig p-value = 0.2016
+p_As <- t_As$p.value
 
 t_Hs <- t.test(cor_vec ~ period, data = analysis_cor[which(analysis_cor$sps_vec=="logCPUE_Hippoglossus_stenolepis"),])
 t_Hs #p=0.02326
+p_Hs <- t_Hs$p.value
 
 t_He <- t.test(cor_vec ~ period, data = analysis_cor[which(analysis_cor$sps_vec=="logCPUE_Hippoglossoides_elassodon"),])
 t_He #p=0.0.04584
+p_He <- t_He$p.value
 
 t_La <- t.test(cor_vec ~ period, data = analysis_cor[which(analysis_cor$sps_vec=="logCPUE_Limanda_aspera"),])
 t_La #not sig p-value = 0.1204
+p_La <- t_La$p.value
 
 t_Lp <- t.test(cor_vec ~ period, data = analysis_cor[which(analysis_cor$sps_vec=="logCPUE_Lepidopsetta_polyxystra"),])
 t_Lp #not sig p-value = 0.6489
+p_Lp <- t_Lp$p.value
 
 t_Pq <- t.test(cor_vec ~ period, data = analysis_cor[which(analysis_cor$sps_vec=="logCPUE_Pleuronectes_quadrituberculatus"),])
 t_Pq #p=0.3.15e-05
+p_Pq <- t_Pq$p.value
 
 t_Gm <- t.test(cor_vec ~ period, data = analysis_cor[which(analysis_cor$sps_vec=="logCPUE_Gadus_macrocephalus"),])
 t_Gm #NOT SIG p=0.1737
+p_Gm <- t_Gm$p.value
 
 t_Cb <- t.test(cor_vec ~ period, data = analysis_cor[which(analysis_cor$sps_vec=="logCPUE_Chionoecetes_bairdi"),])
 t_Cb #Not sig p=0.05511
+p_Cb <- t_Cb$p.value
 
 t_Co <- t.test(cor_vec ~ period, data = analysis_cor[which(analysis_cor$sps_vec=="logCPUE_Chionoecetes_opilio"),])
 t_Co #not sig p-value = 0.8567
+p_Co <- t_Co$p.value
 
 ggplot(cor_output, aes(yr_vec, cor_vec, colour=sps_vec)) + geom_point() + geom_smooth() + facet_wrap(~sps_vec) + 
   geom_hline(yintercept = 0, col="red")
+
+
+#FDR control=================
+
+#following Verhoeven et al 2005 Oikos to control false discovery rate
+
+m<- length(unique(plot_cor$Species))
+alpha <- 0.05
+
+pvec <- as.vector(c(p_As, p_Hs, p_He, p_La, p_Lp, p_Pq, p_Gm, p_Cb, p_Co))
+
+pvec <- sort(pvec, decreasing=FALSE)
+
+i<-1
+for(i in 1:m){
+  temp_p <- pvec[i]
+  print(temp_p)
+  temp_value <- (alpha/m)*i
+  print(temp_value)
+  print(temp_p < temp_value)
+}
+#Only p_Pq is significant
+
 
 
 #maps=====
