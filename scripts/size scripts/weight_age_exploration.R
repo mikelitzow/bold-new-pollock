@@ -405,34 +405,3 @@ dev.off()
 
 mod.9_12 <- gam(sc.weight ~ s(sst.amj, k=6) + te(LATITUDE, LONGITUDE) + s(julian, k = 4), data=filter(scale.dat, AGE %in% 9:12))
 plot(mod.9_12, pages=1, se=F)
-############
-mod1 <- gam(WEIGHT ~ s(sst.amj, k = 3) + te(LATITUDE, LONGITUDE), data=dat[dat$AGE == 1,])
-summary(mod1)
-plot(mod1, se=F, select=1)
-
-mod2 <- gam(WEIGHT ~ s(sst.amj, k = 3) + te(LATITUDE, LONGITUDE), data=dat[dat$AGE == 2,])
-summary(mod2)
-plot(mod2, se=F, select=1)
-
-mod3 <- gam(WEIGHT ~ s(sst.amj, k = 3) + te(LATITUDE, LONGITUDE), data=dat[dat$AGE == 3,])
-summary(mod3)
-plot(mod3, se=F, select=1)
-
-mod4 <- gam(WEIGHT ~ s(sst.amj, k = 3) + te(LATITUDE, LONGITUDE), data=dat[dat$AGE == 4,])
-summary(mod4)
-plot(mod4, se=F, select=1)
-
-mod5 <- gam(WEIGHT ~ s(sst.amj, k = 3) + te(LATITUDE, LONGITUDE), data=dat[dat$AGE == 5,])
-summary(mod5)
-plot(mod5, se=F, select=1)
-
-mod6 <- gam(WEIGHT ~ s(sst.amj, k = 3) + te(LATITUDE, LONGITUDE), data=dat[dat$AGE == 6,])
-summary(mod6)
-plot(mod6, se=F, select=1)
-
-mod7 <- gam(WEIGHT ~ s(sst.amj, k = 3) + te(LATITUDE, LONGITUDE), data=dat[dat$AGE == 7,])
-summary(mod7)
-plot(mod7, se=F, select=1)
-
-
-
