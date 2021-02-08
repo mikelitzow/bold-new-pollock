@@ -14,7 +14,7 @@ theme_set(theme_bw())
 
 
 # load confirmation data query to check these are complete
-# dat <- read.csv("./data/survey data/pollock_survey_specimen_data_confirmation.csv")
+# old.dat <- read.csv("./data/survey data/pollock_survey_specimen_data_confirmation.csv")
 
 # version with date!
 dat <- read.csv(("./data/survey data/Litzow_pollock_02032021.csv"))
@@ -22,7 +22,7 @@ dat <- read.csv(("./data/survey data/Litzow_pollock_02032021.csv"))
 unique(dat$SURVEY) # EBS and NBS
 
 # begin with fitting to EBS data only
-# and only 1999-on to get good dates
+# and only 1999-on to get good weights
 
 dat$YEAR <- as.numeric(as.character((chron::years(dat$TOW_DATE))))
 
@@ -40,18 +40,21 @@ min <- min(space.plot$size)
 max <- max(space.plot$size)
 
 map.plot <- ggplot(ak) +
-  geom_point(data=space.plot, aes(LONGITUDE, LATITUDE)) +
-  scale_radius(range=c(min, max)) +
+  geom_point(data=space.plot, aes(LONGITUDE, LATITUDE), size = 0.5) +
   geom_sf(fill="darkgoldenrod3", color=NA) + 
   coord_sf(xlim = c(-180, -156), ylim = c(52, 66), expand = FALSE) +
   facet_wrap(~YEAR)
 
 map.plot # pretty light before 2006!
 
+ggsave("./figs/age_weight_sampling_maps.png", width=7, height=9, units='in')
+
 ggplot(filter(dat, AGE <= 15), aes(AGE)) +
   geom_histogram(fill="grey", color="black", bins=15) +
   facet_wrap(~YEAR, scales="free_y")
-  
+
+ggsave("./figs/age_sample_size_histograms.png", width=9, height=7, units='in')
+
 ggplot(dat, aes(AGE, WEIGHT)) +
   geom_point() +
   facet_wrap(~YEAR)
@@ -61,15 +64,26 @@ ggplot(filter(dat, AGE <= 12), aes(YEAR, WEIGHT)) +
   facet_wrap(~AGE, scales="free_y") + 
   geom_smooth()
 
+ggsave("./figs/age_weight_scatter.png", width=9, height=6, units='in')
+
 # load climate data
 clim.dat <- read.csv("data/climate data.csv")
 
-ggplot(clim.dat, aes(south.sst.ndjfm, south.sst.amj)) + 
+sst.scatter <- ggplot(clim.dat, aes(south.sst.ndjfm, south.sst.amj)) + 
   geom_point()
+sst.scatter
 
-ggplot(clim.dat, aes(year, south.sst.amj)) +
+amj.ts <- ggplot(clim.dat, aes(year, south.sst.amj)) +
   geom_line() +
   geom_point()
+
+amj.ts
+
+png("./figs/winter_spring_ebs_sst_plots.png", width=6, height = 3, units='in', res=300)
+
+ggpubr::ggarrange(sst.scatter, amj.ts, ncol=2, widths = c(0.45, 0.55))
+
+dev.off()
 
 dat$sst.ndjfm <- clim.dat$south.sst.ndjfm[match(dat$YEAR, clim.dat$year)] 
 dat$era <- as.factor(if_else(dat$YEAR < 2014, 1, 2))
@@ -110,6 +124,8 @@ ggplot(filter(scale.dat, AGE <= 12), aes(sc.weight)) +
   facet_wrap(~AGE, scales = "free")
 
 # a bit of skew!
+ggsave("./figs/age_sc.weight_hist.png", width=9, height=6, units='in')
+
 
 ## weight by year ----------------------------------------------------------
 
@@ -133,7 +149,7 @@ for(i in 1:12){
   
   temp.out <- data.frame(age = i,
                          year = 1999:2019,
-                         weight_anomaly = predict.gam(mod, newdata = new.dat))
+                         weight_anomaly = predict.gam(mod, newdata = new.dat, type = "response"))
   
 age.out <- rbind(age.out, temp.out)
   
@@ -154,6 +170,8 @@ ggplot(age.out, aes(year, weight_anomaly)) +
   geom_line() +
   geom_hline(yintercept = 0) +
   facet_wrap(~age)
+
+ggsave("./figs/weight_time_series_smooths_by_age.png", width=9, height=6, units='in')
 
 ## analyze by these group
 mod.summary.out <- age.out <- data.frame()
@@ -178,7 +196,7 @@ new.dat <- data.frame(YEAR = 1999:2019,
   
   temp.out <- data.frame(age = "1-2",
                          year = 1999:2019,
-                         weight_anomaly = predict.gam(mod, newdata = new.dat))
+                         weight_anomaly = predict.gam(mod, newdata = new.dat, type = "response"))
   
   age.out <- rbind(age.out, temp.out)
   
@@ -198,7 +216,7 @@ new.dat <- data.frame(YEAR = 1999:2019,
   
   temp.out <- data.frame(age = "5-8",
                          year = 1999:2019,
-                         weight_anomaly = predict.gam(mod, newdata = new.dat))
+                         weight_anomaly = predict.gam(mod, newdata = new.dat, type = "response"))
   
   age.out <- rbind(age.out, temp.out)
   
@@ -217,7 +235,7 @@ new.dat <- data.frame(YEAR = 1999:2019,
   
   temp.out <- data.frame(age = "9-12",
                          year = 1999:2019,
-                         weight_anomaly = predict.gam(mod, newdata = new.dat))
+                         weight_anomaly = predict.gam(mod, newdata = new.dat, type = "response"))
   
   age.out <- rbind(age.out, temp.out)
   
@@ -231,7 +249,7 @@ ggplot(age.out, aes(year, weight_anomaly, color=age)) +
 
 # object to catch results and predict time evolution
 mod.summary.out <- sst.out <- data.frame()
-new.dat <- data.frame(sst.amj = unique(scale.dat$sst.amj),
+new.dat <- data.frame(sst.amj = seq(from = min(scale.dat$sst.amj), to = max(scale.dat$sst.amj), length.out = 100),
                       LATITUDE = mean(scale.dat$LATITUDE),
                       LONGITUDE = mean(scale.dat$LONGITUDE),
                       julian = mean(scale.dat$julian))
@@ -247,8 +265,8 @@ for(i in 1:12){
   mod.summary.out <- rbind(mod.summary.out, temp.out)
   
   temp.out <- data.frame(age = i,
-                         sst.amj = unique(scale.dat$sst.amj),
-                         weight_anomaly = predict.gam(mod, newdata = new.dat))
+                         sst.amj = seq(from = min(scale.dat$sst.amj), to = max(scale.dat$sst.amj), length.out = 100),
+                         weight_anomaly = predict.gam(mod, newdata = new.dat, type = "response"))
   
   sst.out <- rbind(sst.out, temp.out)
   
@@ -266,6 +284,8 @@ ggplot(sst.out, aes(sst.amj, weight_anomaly)) +
   geom_hline(yintercept = 0) +
   facet_wrap(~age)
 
+ggsave("./figs/age_sc.weight_amj.sst_smooths.png", width=9, height=6, units='in')
+
 ## analyze by these group
 mod.summary.out <- sst.out <- data.frame()
 
@@ -282,8 +302,8 @@ temp.out <- data.frame(age = "1-2",
 mod.summary.out <- rbind(mod.summary.out, temp.out)
 
 temp.out <- data.frame(age = "1-2",
-                       sst.amj = unique(scale.dat$sst.amj),
-                       weight_anomaly = predict.gam(mod, newdata = new.dat))
+                       sst.amj = seq(from = min(scale.dat$sst.amj), to = max(scale.dat$sst.amj), length.out = 100),
+                       weight_anomaly = predict.gam(mod, newdata = new.dat, type = "response"))
 
 sst.out <- rbind(sst.out, temp.out)
 
@@ -300,8 +320,8 @@ temp.out <- data.frame(age = "5-8",
 mod.summary.out <- rbind(mod.summary.out, temp.out)
 
 temp.out <- data.frame(age = "5-8",
-                       sst.amj = unique(scale.dat$sst.amj),
-                       weight_anomaly = predict.gam(mod, newdata = new.dat))
+                       sst.amj = seq(from = min(scale.dat$sst.amj), to = max(scale.dat$sst.amj), length.out = 100),
+                       weight_anomaly = predict.gam(mod, newdata = new.dat, type = "response"))
 
 sst.out <- rbind(sst.out, temp.out)
 
@@ -317,8 +337,8 @@ temp.out <- data.frame(age = "9-12",
 mod.summary.out <- rbind(mod.summary.out, temp.out)
 
 temp.out <- data.frame(age = "9-12",
-                       sst.amj = unique(scale.dat$sst.amj),
-                       weight_anomaly = predict.gam(mod, newdata = new.dat))
+                       sst.amj = seq(from = min(scale.dat$sst.amj), to = max(scale.dat$sst.amj), length.out = 100),
+                       weight_anomaly = predict.gam(mod, newdata = new.dat, type = "response"))
 
 sst.out <- rbind(sst.out, temp.out)
 
@@ -327,6 +347,8 @@ ggplot(sst.out, aes(sst.amj, weight_anomaly, color=age)) +
   geom_line() +
   geom_hline(yintercept = 0) +
   scale_color_viridis_d()
+
+ggsave("./figs/age_class_vs_sst_smooths.png", width = 6, height = 5, units = 'in')
 
 ## compare with sst*era model --------------------------------
 
@@ -405,3 +427,206 @@ dev.off()
 
 mod.9_12 <- gam(sc.weight ~ s(sst.amj, k=6) + te(LATITUDE, LONGITUDE) + s(julian, k = 4), data=filter(scale.dat, AGE %in% 9:12))
 plot(mod.9_12, pages=1, se=F)
+
+
+## fit brms models to attempt to calculate valid credible intervals -----------------------------
+
+library(rstan)
+library(brms)
+library(bayesplot)
+source("./scripts/stan_utils.R")
+
+## setup - formula
+# note that we're using t2 tensor products instead of te
+brm_formula <- bf(sc.weight ~ s(sst.amj, k=6) + t2(LATITUDE, LONGITUDE) + s(julian, k = 4))
+
+
+## fit: brms --------------------------------------
+brm_1_2 <- brm(brm_formula,
+                   data = filter(scale.dat, AGE %in% 1:2),
+                   cores = 4, chains = 4, iter = 4000,
+                   save_pars = save_pars(all = TRUE),
+                   control = list(adapt_delta = 0.99, max_treedepth = 10))
+brm_1_2  <- add_criterion(brm_1_2, c("loo", "bayes_R2"), moment_match = TRUE)
+saveRDS(brm_1_2, file = "output/brm_1_2.rds")
+
+brm_1_2 <- readRDS("./output/brm_1_2.rds")
+check_hmc_diagnostics(brm_1_2$fit)
+neff_lowest(brm_1_2$fit)
+rhat_highest(brm_1_2$fit)
+summary(brm_1_2)
+bayes_R2(brm_1_2)
+y <- scale.dat$sc.weight
+yrep_brm_1_2  <- fitted(brm_1_2, scale = "response", summary = FALSE)
+ppc_dens_overlay(y = y, yrep = yrep_brm_1_2[sample(nrow(yrep_brm_1_2), 25), ]) +
+  xlim(0, 500) +
+  ggtitle("brm_1_2")
+
+
+# older age classes
+brm_9_12 <- brm(brm_formula,
+               data = filter(scale.dat, AGE %in% 9:12),
+               cores = 4, chains = 4, iter = 4000,
+               save_pars = save_pars(all = TRUE),
+               control = list(adapt_delta = 0.99, max_treedepth = 10))
+brm_9_12  <- add_criterion(brm_9_12, c("loo", "bayes_R2"), moment_match = TRUE)
+saveRDS(brm_9_12, file = "output/brm_9_12.rds")
+
+brm_9_12 <- readRDS("./output/brm_9_12.rds")
+check_hmc_diagnostics(brm_9_12$fit)
+neff_lowest(brm_9_12$fit)
+rhat_highest(brm_9_12$fit)
+summary(brm_9_12)
+bayes_R2(brm_9_12)
+y <- scale.dat$sc.weight
+yrep_brm_9_12  <- fitted(brm_9_12, scale = "response", summary = FALSE)
+ppc_dens_overlay(y = y, yrep = yrep_brm_9_12[sample(nrow(yrep_brm_9_12), 25), ]) +
+  xlim(0, 500) +
+  ggtitle("brm_9_12")
+
+## follow-up hypothesis: are there reverse size anomalies between the EBS and NBS for these size classes?? -------------------
+# re-load data to include NBS
+dat <- read.csv(("./data/survey data/Litzow_pollock_02032021.csv"))
+
+unique(dat$SURVEY) # EBS and NBS
+
+dat$YEAR <- as.numeric(as.character((chron::years(dat$TOW_DATE))))
+
+dat <- dat %>%
+  filter(YEAR >= 1999) 
+
+# get julian day
+dat$Date <- chron::dates(as.character(dat$TOW_DATE))
+
+dat$julian <- lubridate::yday(dat$Date)
+
+# exploratory plots
+space.plot <- dat %>%
+  group_by(LATITUDE, LONGITUDE, YEAR) %>%
+  summarise(size = log(n()+1))
+
+ak <- ne_countries(scale = "medium", returnclass = "sf", continent="north america")
+
+min <- min(space.plot$size)
+max <- max(space.plot$size)
+
+map.plot <- ggplot(ak) +
+  geom_point(data=space.plot, aes(LONGITUDE, LATITUDE)) +
+  scale_radius(range=c(min, max)) +
+  geom_sf(fill="darkgoldenrod3", color=NA) + 
+  coord_sf(xlim = c(-180, -156), ylim = c(52, 66), expand = FALSE) +
+  facet_wrap(~YEAR)
+
+map.plot # pretty light before 2006!
+
+ggplot(filter(dat,  SURVEY=="NBS"), aes(AGE)) +
+  geom_histogram(fill="grey", color="black", bins=15) +
+  facet_wrap(~YEAR, scales="free_y")
+
+# no ages for NBS??
+
+## look at length histograms for these ages in the EBS
+# first, age 1-2
+ggplot(filter(dat, AGE %in% 1:2), aes(LENGTH)) +
+  geom_histogram(color="black", fill="grey")
+
+# compare to age 3
+ggplot(filter(dat, AGE == 3), aes(LENGTH)) +
+  geom_histogram(color="black", fill="grey")
+
+# lots of overlap - limit 'young' group to <= 250 mm to avoid this
+
+# now the 9-12s
+ggplot(filter(dat, AGE %in% 9:12), aes(LENGTH)) +
+  geom_histogram(color="black", fill="grey")
+
+# compare with the 8s
+ggplot(filter(dat, AGE == 8), aes(LENGTH)) +
+  geom_histogram(color="black", fill="grey")
+
+# and the 13-15s
+ggplot(filter(dat, AGE %in% 13:15), aes(LENGTH)) +
+  geom_histogram(color="black", fill="grey")
+
+# again, plenty of overlap; limit "old" group to 550-800 mm
+
+# we don't have ages, so can't scale by age - fit length:weight regressions instead!
+dat <- dat %>%
+  mutate(class = if_else(LENGTH %in% 100:250, "young",
+                         if_else(LENGTH %in% 550:750, "old", NULL)))
+
+mod1 <- gam(WEIGHT ~ s(LENGTH, k=6) + s(julian, k = 4) + SURVEY, data=filter(dat, class == "young", YEAR %in% c(2017, 2019)))
+summary(mod1)
+
+mod2 <- gam(WEIGHT ~ s(LENGTH, k=6, by = SURVEY) + s(julian, k = 4) + SURVEY, data=filter(dat, class == "young", YEAR %in% c(2017, 2019)))
+summary(mod2)
+plot(mod2, se=F, resid=T, pages=1, rug=F)
+
+AICc(mod1, mod2) # slight support for mod2!
+AICc(mod1)-AICc(mod2)
+
+# now the larger age class
+mod3 <- gam(WEIGHT ~ s(LENGTH, k=6) + s(julian, k = 4) + SURVEY, data=filter(dat, class == "old", YEAR %in% c(2017, 2019)))
+summary(mod3)
+
+mod4 <- gam(WEIGHT ~ s(LENGTH, k=6, by = SURVEY) + s(julian, k = 4) + SURVEY, data=filter(dat, class == "old", YEAR %in% c(2017, 2019)))
+summary(mod4)
+plot(mod4, se=F, resid=T, pages=1, rug=F)
+
+AICc(mod3, mod4) # again, slight support for mod4!
+AICc(mod3)-AICc(mod4)
+
+# plot predicted values for each length comparison
+newdat1 <- data.frame(LENGTH = rep(seq(from = 100, to = 250, length.out = 100), 2),
+                      julian = mean(dat$julian),
+                      SURVEY = rep(c("EBS", "NBS"), each = 100),
+                      class = "young")
+
+newdat1$predict <- predict(mod2, newdata = newdat1, type = "response")
+
+newdat2 <- data.frame(LENGTH = rep(seq(from = 550, to = 750, length.out = 100), 2),
+                      julian = mean(dat$julian),
+                      SURVEY = rep(c("EBS", "NBS"), each = 100),
+                      class = "old")
+
+newdat2$predict <- predict(mod4, newdata = newdat2, type = "response")
+
+plot.dat <- rbind(newdat1, newdat2)
+
+
+ggplot(plot.dat, aes(LENGTH, predict, color = SURVEY)) +
+  geom_line() +
+  facet_wrap(~class, scales = "free", ncol=1)
+
+# might be instructive to compare the entire length-weight relationship
+
+range <- dat %>%
+  filter(YEAR %in% c(2017, 2019)) %>%
+  group_by(SURVEY) %>%
+  summarise(min=min(LENGTH), max=max(LENGTH))
+
+# so 100-750 is the range of overlap!
+
+mod5 <- gam(WEIGHT ~ s(LENGTH, k=6) + s(julian, k = 4) + SURVEY, 
+            data=filter(dat, LENGTH %in% 100:750, YEAR %in% c(2017, 2019)))
+
+
+mod6 <- gam(WEIGHT ~ s(LENGTH, k=6, by = SURVEY) + s(julian, k = 4) + SURVEY, 
+            data=filter(dat, LENGTH %in% 100:750, YEAR %in% c(2017, 2019)))
+summary(mod6)
+plot(mod6, se=T, resid=T, pages=1, rug=F)
+
+AICc(mod5) - AICc(mod6)
+
+
+newdat6 <- data.frame(LENGTH = rep(seq(from = 100, to = 750, length.out = 100), 2),
+                      julian = mean(dat$julian),
+                      SURVEY = rep(c("EBS", "NBS"), each = 100))
+
+newdat6$predict <- predict(mod6, newdata = newdat6, type = "response")
+
+
+ggplot(newdat6, aes(LENGTH, predict, color = SURVEY)) +
+  geom_line() +
+  coord_trans(y = "pseudo_log") 
+        
