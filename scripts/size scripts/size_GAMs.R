@@ -98,38 +98,38 @@ ggplot(cond_analysis_dat[which(cond_analysis_dat$AGE<11),], aes(YEAR, cond_fact,
   facet_wrap(~STRATUM, scales="free") + geom_smooth()
 
 
-ggplot(cond_analysis_dat[which(cond_analysis_dat$AGE<11),], aes(as.factor(STRATUM), cond_fact, col=as.factor(AGE))) + 
+ggplot(cond_analysis_dat[which(cond_analysis_dat$AGE<11& 
+                                 temp_cond_dat$AGE>0 ),], aes(as.factor(STRATUM), cond_fact, col=as.factor(AGE))) + 
   geom_boxplot() + facet_wrap(~as.factor(AGE))
 
-ggplot(cond_analysis_dat[which(cond_analysis_dat$AGE<11),], aes(LATITUDE, cond_fact, col=as.factor(AGE))) + 
+ggplot(cond_analysis_dat[which(cond_analysis_dat$AGE<11& 
+                                 temp_cond_dat$AGE>0 ),], aes(LATITUDE, cond_fact, col=as.factor(AGE))) + 
   geom_point() + geom_smooth() + facet_wrap(~as.factor(AGE), scales="free")
 
-ggplot(cond_analysis_dat[which(cond_analysis_dat$AGE<11),], aes(LONGITUDE, cond_fact, col=as.factor(AGE))) + 
+ggplot(cond_analysis_dat[which(cond_analysis_dat$AGE<11& 
+                                 temp_cond_dat$AGE>0 ),], aes(LONGITUDE, cond_fact, col=as.factor(AGE))) + 
   geom_point() + geom_smooth() + facet_wrap(~as.factor(AGE), scales="free")
 
+ggplot(temp_cond_dat[which(temp_cond_dat$AGE<11& 
+                             temp_cond_dat$AGE>0 ),], aes(south.sst.amj, cond_fact, col=as.factor(AGE))) + 
+  geom_point() + geom_smooth(method="lm") + facet_wrap(~as.factor(AGE), scales="free")
 
+ggplot(temp_cond_dat[which(temp_cond_dat$AGE<11& 
+                             temp_cond_dat$AGE>0 ),], aes(summer.bottom.temp, cond_fact, col=as.factor(AGE))) + 
+  geom_point() + geom_smooth(method="lm") + facet_wrap(~as.factor(AGE), scales="free")
 
-lin_cond1 <- gamm(cond_fact ~ bottemp_anom*period +
-                       te(mean_station_bottemp, BOT_DEPTH), random=list(YEAR_factor=~1), 
-                   #  correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor + HAUL, nugget=TRUE),
-                     data=cond_analysis_dat, method="REML")
-gam.check(lin_cond1[[2]]) 
-summary(lin_cond1[[1]]) #  
-summary(lin_cond1[[2]]) #rsq 0.
-plot_model(lin_cond1[[2]], type="int")
+ggplot(temp_cond_dat[which(temp_cond_dat$AGE<11& 
+                             temp_cond_dat$AGE>0 ),], aes(YEAR, cond_fact, col=as.factor(AGE))) + 
+  geom_point() + geom_smooth(method="lm") + facet_wrap(~as.factor(AGE), scales="free")
 
+ggplot(temp_cond_dat[which(temp_cond_dat$AGE<11& 
+                             temp_cond_dat$AGE>0 ),], aes(YEAR, cond_fact, col=as.factor(AGE))) + 
+  geom_point() + geom_smooth(method="gam") + facet_wrap(~as.factor(AGE), scales="free")
 
+ggplot(temp_cond_dat[which(temp_cond_dat$AGE<11 & 
+                             temp_cond_dat$AGE>0 ),], aes(juliandate, cond_fact, col=as.factor(AGE))) + 
+  geom_point() + geom_smooth(method="gam", col="black") + facet_wrap(~as.factor(AGE), scales="free")
 
-
-lin_cond1 <- gamm(cond_fact ~ bottemp_anom*period +
-                    te(mean_station_bottemp, BOT_DEPTH), random=list(YEAR_factor=~1), 
-                  #  correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor + HAUL, nugget=TRUE),
-                  data=cond_analysis_dat[which(cond_analysis_dat$AGE==1),], method="REML")
-gam.check(lin_cond1[[2]]) 
-summary(lin_cond1[[1]]) #  
-summary(lin_cond1[[2]]) #rsq 0.08
-plot(lin_cond1[[2]])
-plot_model(lin_cond1[[2]], type="int")
 
 age1dat <- cond_analysis_dat[which(cond_analysis_dat$AGE==1),]
 
@@ -153,6 +153,19 @@ temp_cond_dat <- left_join(cond_analysis_dat, clim.dat[,c(1:5,12)], by=c("YEAR"=
 length(cond_analysis_dat$YEAR)
 length(temp_cond_dat$YEAR)
 
+temp_cond_dat$DATETIME <- as.character(temp_cond_dat$DATETIME)
+temp_cond_dat$DATE <- strsplit(temp_cond_dat$DATETIME, " ")
+temp_cond_dat <- temp_cond_dat %>% separate(DATETIME, 
+                                            into = c("DATE", "TIME"), sep = " ")
+
+# get julian day
+
+temp_cond_dat$DATE <- parse_date_time2(temp_cond_dat$DATE, "mdy", cutoff_2000 = 50)
+temp_cond_dat$juliandate <- format(temp_cond_dat$DATE, "%j")
+temp_cond_dat$juliandate <- as.numeric(temp_cond_dat$juliandate) 
+
+#
+
 bmod1 <- gam(cond_fact ~ s(YEAR) + s(summer.bottom.temp) + te(LATITUDE, LONGITUDE), data=temp_cond_dat[which(temp_cond_dat$AGE==1),])
 summary(bmod1)
 plot(bmod1)
@@ -166,6 +179,16 @@ plot(smod1)
 draw(smod1, select = 3)
 
 
+jmod1 <- gam(cond_fact ~ s(YEAR) + s(south.sst.amj) + s(juliandate) + te(LATITUDE, LONGITUDE), data=temp_cond_dat[which(temp_cond_dat$AGE==1),])
+summary(jmod1)
+plot(jmod1)
+
+draw(jmod1, select = 1)
+draw(jmod1, select = 2)
+draw(jmod1, select = 3)
+draw(jmod1, select = 4)
+
+
 bmod10 <- gam(cond_fact ~ s(YEAR) + s(summer.bottom.temp) + te(LATITUDE, LONGITUDE), data=temp_cond_dat[which(temp_cond_dat$AGE==10),])
 summary(bmod10)
 plot(bmod10)
@@ -175,5 +198,29 @@ summary(smod10)
 plot(smod10)
 
 
+world <- ne_countries(scale = "medium", returnclass = "sf")
+ggplot(data = world) +
+  geom_sf() +
+  coord_sf(xlim = c(-180, -155), ylim = c(53, 65), expand = TRUE) +
+  annotation_scale(location = "bl", width_hint = 0.5) +
+  geom_point(aes(LONGITUDE, LATITUDE, colour=cond_fact), data=temp_cond_dat) +   
+  scale_colour_distiller(palette = "Spectral")
+
+ggplot(data = world) +
+  geom_sf() +
+  coord_sf(xlim = c(-180, -155), ylim = c(53, 65), expand = TRUE) +
+  annotation_scale(location = "bl", width_hint = 0.5) +
+ # geom_hex(aes(LONGITUDE, LATITUDE, fill=cond_fact), data=temp_cond_dat) +   
+  stat_summary_2d(aes(LONGITUDE,LATITUDE,  z=cond_fact), bins = 30, fun = mean, data=temp_cond_dat) +   
+  scale_fill_distiller(palette = "Spectral")
+ # scale_colour_distiller(palette = "Spectral")
+
+
+ggplot(data = world) +
+  geom_sf() +
+  coord_sf(xlim = c(-180, -155), ylim = c(53, 65), expand = TRUE) +
+  annotation_scale(location = "bl", width_hint = 0.5) +
+   stat_summary_2d(aes(LONGITUDE,LATITUDE,  z=cond_fact), bins = 20, fun = mean, data=temp_cond_dat[which(temp_cond_dat$YEAR>2003),]) +   
+  scale_fill_distiller(palette = "Spectral") + facet_wrap(~YEAR)
 
 
