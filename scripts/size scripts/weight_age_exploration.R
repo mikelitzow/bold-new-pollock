@@ -438,7 +438,7 @@ source("./scripts/stan_utils.R")
 
 ## setup - formula
 # note that we're using t2 tensor products instead of te
-brm_formula <- bf(sc.weight ~ s(sst.amj, k=6) + t2(LATITUDE, LONGITUDE) + s(julian, k = 4))
+brm_formula <- bf(sc.weight ~ s(sst.amj, k=4) + t2(LATITUDE, LONGITUDE) + s(julian, k = 4))
 
 
 ## fit: brms --------------------------------------
@@ -446,7 +446,7 @@ brm_1_2 <- brm(brm_formula,
                    data = filter(scale.dat, AGE %in% 1:2),
                    cores = 4, chains = 4, iter = 4000,
                    save_pars = save_pars(all = TRUE),
-                   control = list(adapt_delta = 0.99, max_treedepth = 10))
+                   control = list(adapt_delta = 0.99, max_treedepth = 15))
 brm_1_2  <- add_criterion(brm_1_2, c("loo", "bayes_R2"), moment_match = TRUE)
 saveRDS(brm_1_2, file = "output/brm_1_2.rds")
 
@@ -466,9 +466,9 @@ ppc_dens_overlay(y = y, yrep = yrep_brm_1_2[sample(nrow(yrep_brm_1_2), 25), ]) +
 # older age classes
 brm_9_12 <- brm(brm_formula,
                data = filter(scale.dat, AGE %in% 9:12),
-               cores = 4, chains = 4, iter = 4000,
+               cores = 4, chains = 4, iter = 3000,
                save_pars = save_pars(all = TRUE),
-               control = list(adapt_delta = 0.99, max_treedepth = 10))
+               control = list(adapt_delta = 0.99, max_treedepth = 12))
 brm_9_12  <- add_criterion(brm_9_12, c("loo", "bayes_R2"), moment_match = TRUE)
 saveRDS(brm_9_12, file = "output/brm_9_12.rds")
 
@@ -478,11 +478,72 @@ neff_lowest(brm_9_12$fit)
 rhat_highest(brm_9_12$fit)
 summary(brm_9_12)
 bayes_R2(brm_9_12)
+plot(conditional_smooths(brm_9_12), ask = FALSE)
 y <- scale.dat$sc.weight
 yrep_brm_9_12  <- fitted(brm_9_12, scale = "response", summary = FALSE)
 ppc_dens_overlay(y = y, yrep = yrep_brm_9_12[sample(nrow(yrep_brm_9_12), 25), ]) +
   xlim(0, 500) +
   ggtitle("brm_9_12")
+
+
+## plot
+
+## 95% CI
+ce1s_1 <- conditional_effects(brm_9_12, effect = "sst.amj", re_formula = NA,
+                              probs = c(0.025, 0.975))
+
+dat_ce <- ce1s_1$sst.amj
+dat_ce[["rug.anom"]] <- c(unique(scale.dat$sst.amj),
+                          rep(NA, 100-length(unique(scale.dat$sst.amj))))
+dat_ce$age.class <- "Age 9-12"
+
+sst_9_12 <- ggplot(dat_ce) +
+  aes(x = effect1__, y = estimate__) +
+  geom_ribbon(aes(ymin = lower__, ymax = upper__), fill = "grey90") +
+  geom_line(size = 1, color = "red3") +
+  labs(x = "April-June SST", y = "Scaled weight") +
+  theme_bw()+
+  geom_rug(aes(x=rug.anom, y=NULL))
+sst_9_12
+
+# now the young fish
+ce1s_1 <- conditional_effects(brm_1_2, effect = "sst.amj", re_formula = NA,
+                              probs = c(0.025, 0.975))
+
+young_dat_ce <- ce1s_1$sst.amj
+young_dat_ce[["rug.anom"]] <- c(unique(scale.dat$sst.amj),
+                          rep(NA, 100-length(unique(scale.dat$sst.amj))))
+young_dat_ce$age.class <- "Age 1-2"
+
+sst_1_2 <- ggplot(young_dat_ce) +
+  aes(x = effect1__, y = estimate__) +
+  geom_ribbon(aes(ymin = lower__, ymax = upper__), fill = "grey90") +
+  geom_line(size = 1, color = "red3") +
+  labs(x = "April-June SST", y = "Scaled weight") +
+  theme_bw()+
+  geom_rug(aes(x=rug.anom, y=NULL))
+
+sst_1_2
+
+both.plot <- rbind(dat_ce, young_dat_ce)
+
+# set palette
+cb <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+theme_set(theme_bw())
+
+sst_both <- ggplot(both.plot) +
+  aes(x = effect1__, y = estimate__, color = age.class, fill = age.class) +
+  geom_ribbon(aes(ymin = lower__, ymax = upper__), alpha = 0.3, lty=0) +
+  geom_line() +
+  labs(x = "April-June SST", y = "Weight anomaly") +
+  geom_rug(aes(x=rug.anom, y=NULL), color = "black") +
+  theme(legend.title = element_blank()) +
+  scale_color_manual(values = cb[c(2,4)]) +
+  scale_fill_manual(values = cb[c(2,4)])
+
+sst_both
+
+ggsave("./figs/ages_1-2_9-12_weight_vs_sst.png", width=6.5, height=4, units='in')
 
 ## follow-up hypothesis: are there reverse size anomalies between the EBS and NBS for these size classes?? -------------------
 # re-load data to include NBS
