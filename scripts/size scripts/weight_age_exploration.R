@@ -578,7 +578,7 @@ map.plot <- ggplot(ak) +
   coord_sf(xlim = c(-180, -156), ylim = c(52, 66), expand = FALSE) +
   facet_wrap(~YEAR)
 
-map.plot # pretty light before 2006!
+map.plot
 
 ggplot(filter(dat,  SURVEY=="NBS"), aes(AGE)) +
   geom_histogram(fill="grey", color="black", bins=15) +
@@ -588,6 +588,7 @@ ggplot(filter(dat,  SURVEY=="NBS"), aes(AGE)) +
 
 ## look at length histograms for these ages in the EBS
 # first, age 1-2
+
 ggplot(filter(dat, AGE %in% 1:2), aes(LENGTH)) +
   geom_histogram(color="black", fill="grey")
 
@@ -609,7 +610,7 @@ ggplot(filter(dat, AGE == 8), aes(LENGTH)) +
 ggplot(filter(dat, AGE %in% 13:15), aes(LENGTH)) +
   geom_histogram(color="black", fill="grey")
 
-# again, plenty of overlap; limit "old" group to 550-800 mm
+# again, plenty of overlap; limit "old" group to 550-750 mm
 
 # we don't have ages, so can't scale by age - fit length:weight regressions instead!
 dat <- dat %>%
@@ -665,7 +666,7 @@ range <- dat %>%
   filter(YEAR %in% c(2017, 2019)) %>%
   group_by(SURVEY) %>%
   summarise(min=min(LENGTH), max=max(LENGTH))
-
+range
 # so 100-750 is the range of overlap!
 
 mod5 <- gam(WEIGHT ~ s(LENGTH, k=6) + s(julian, k = 4) + SURVEY, 
@@ -688,6 +689,31 @@ newdat6$predict <- predict(mod6, newdata = newdat6, type = "response")
 
 
 ggplot(newdat6, aes(LENGTH, predict, color = SURVEY)) +
-  geom_line() +
-  coord_trans(y = "pseudo_log") 
-        
+  geom_line() 
+
+# differences look slight
+# try fitting a brm model to estimate CIs for a more rigorous comparison
+
+brm_formula <- bf(WEIGHT ~ s(LENGTH, k=6) + s(julian, k = 4) + SURVEY)
+
+
+## fit: brms --------------------------------------
+brm_area <- brm(brm_formula,
+               data = filter(dat, LENGTH %in% 100:750, YEAR %in% c(2017, 2019)),
+               cores = 4, chains = 4, iter = 4000,
+               save_pars = save_pars(all = TRUE),
+               control = list(adapt_delta = 0.99, max_treedepth = 12))
+brm_area  <- add_criterion(brm_area, c("loo", "bayes_R2"), moment_match = TRUE)
+saveRDS(brm_area, file = "output/brm_area.rds")
+
+brm_area <- readRDS("./output/brm_area.rds")
+check_hmc_diagnostics(brm_area$fit)
+neff_lowest(brm_area$fit)
+rhat_highest(brm_area$fit)
+summary(brm_area)
+bayes_R2(brm_area)
+y <- dat$WEIGHT
+yrep_brm_area  <- fitted(brm_area, scale = "response", summary = FALSE)
+ppc_dens_overlay(y = y, yrep = yrep_brm_area[sample(nrow(yrep_brm_area), 25), ]) +
+  xlim(0, 500) +
+  ggtitle("brm_area")
