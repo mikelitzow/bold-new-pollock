@@ -98,6 +98,15 @@ ggplot(cond_analysis_dat[which(cond_analysis_dat$AGE<11),], aes(YEAR, cond_fact,
   facet_wrap(~STRATUM, scales="free") + geom_smooth()
 
 
+ggplot(cond_analysis_dat[which(cond_analysis_dat$AGE<11),], aes(as.factor(STRATUM), cond_fact, col=as.factor(AGE))) + 
+  geom_boxplot() + facet_wrap(~as.factor(AGE))
+
+ggplot(cond_analysis_dat[which(cond_analysis_dat$AGE<11),], aes(LATITUDE, cond_fact, col=as.factor(AGE))) + 
+  geom_point() + geom_smooth() + facet_wrap(~as.factor(AGE), scales="free")
+
+ggplot(cond_analysis_dat[which(cond_analysis_dat$AGE<11),], aes(LONGITUDE, cond_fact, col=as.factor(AGE))) + 
+  geom_point() + geom_smooth() + facet_wrap(~as.factor(AGE), scales="free")
+
 
 
 lin_cond1 <- gamm(cond_fact ~ bottemp_anom*period +
@@ -148,9 +157,13 @@ bmod1 <- gam(cond_fact ~ s(YEAR) + s(summer.bottom.temp) + te(LATITUDE, LONGITUD
 summary(bmod1)
 plot(bmod1)
 
+draw(bmod1, select = 3)
+
 smod1 <- gam(cond_fact ~ s(YEAR) + s(south.sst.amj) + te(LATITUDE, LONGITUDE), data=temp_cond_dat[which(temp_cond_dat$AGE==1),])
 summary(smod1)
 plot(smod1)
+
+draw(smod1, select = 3)
 
 
 bmod10 <- gam(cond_fact ~ s(YEAR) + s(summer.bottom.temp) + te(LATITUDE, LONGITUDE), data=temp_cond_dat[which(temp_cond_dat$AGE==10),])
