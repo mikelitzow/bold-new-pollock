@@ -728,3 +728,5 @@ ce1s_1 <- conditional_effects(brm_area, effect = "LENGTH:SURVEY", re_formula = N
 ce1s_1
 
 ggsave("./figs/ebs_nbs_length_weight.png", width=6, height=4, units='in')
+
+
