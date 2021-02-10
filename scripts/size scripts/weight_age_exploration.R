@@ -729,4 +729,13 @@ ce1s_1
 
 ggsave("./figs/ebs_nbs_length_weight.png", width=6, height=4, units='in')
 
+diff <- ce1s_1$LENGTH %>%
+  select(effect1__, effect2__, estimate__) %>%
+  pivot_wider(values_from = estimate__, names_from = effect2__) %>%
+  mutate(percent_diff = 100*(NBS-EBS)/EBS)
 
+ggplot(diff, aes(effect1__, percent_diff)) +
+  geom_line() +
+  labs(x = "Length", y = "Percent difference (NBS vs. EBS)")
+
+ggsave("./figs/ebs_nbs_percent_diff_length_weight.png", width=6, height=4, units='in')
