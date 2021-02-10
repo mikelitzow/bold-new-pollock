@@ -694,13 +694,13 @@ ggplot(newdat6, aes(LENGTH, predict, color = SURVEY)) +
 # differences look slight
 # try fitting a brm model to estimate CIs for a more rigorous comparison
 
-brm_formula <- bf(WEIGHT ~ s(LENGTH, k=6) + s(julian, k = 4) + SURVEY)
+brm_formula <- bf(WEIGHT ~ s(LENGTH, k=6, by = SURVEY) + s(julian, k = 4))
 
 
 ## fit: brms --------------------------------------
 brm_area <- brm(brm_formula,
                data = filter(dat, LENGTH %in% 100:750, YEAR %in% c(2017, 2019)),
-               cores = 4, chains = 4, iter = 4000,
+               cores = 4, chains = 4, iter = 3000,
                save_pars = save_pars(all = TRUE),
                control = list(adapt_delta = 0.99, max_treedepth = 12))
 brm_area  <- add_criterion(brm_area, c("loo", "bayes_R2"), moment_match = TRUE)
@@ -712,8 +712,19 @@ neff_lowest(brm_area$fit)
 rhat_highest(brm_area$fit)
 summary(brm_area)
 bayes_R2(brm_area)
+plot(conditional_smooths(brm_area), ask = FALSE)
 y <- dat$WEIGHT
 yrep_brm_area  <- fitted(brm_area, scale = "response", summary = FALSE)
 ppc_dens_overlay(y = y, yrep = yrep_brm_area[sample(nrow(yrep_brm_area), 25), ]) +
   xlim(0, 500) +
   ggtitle("brm_area")
+
+# plot predicted weight-length regressions by area...
+
+## 95% CI
+ce1s_1 <- conditional_effects(brm_area, effect = "LENGTH:SURVEY", re_formula = NA,
+                              probs = c(0.025, 0.975))
+
+ce1s_1
+
+ggsave("./figs/ebs_nbs_length_weight.png", width=6, height=4, units='in')
