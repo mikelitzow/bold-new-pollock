@@ -112,7 +112,12 @@ ggplot(cond_analysis_dat[which(cond_analysis_dat$AGE<11&
 
 ggplot(temp_cond_dat[which(temp_cond_dat$AGE<11& 
                              temp_cond_dat$AGE>0 ),], aes(south.sst.amj, cond_fact, col=as.factor(AGE))) + 
-  geom_point() + geom_smooth(method="lm") + facet_wrap(~as.factor(AGE), scales="free")
+  geom_point() + geom_smooth(method="lm", col="black") + facet_wrap(~as.factor(AGE), scales="free", nrow=2)
+
+ggplot(temp_cond_dat[which(temp_cond_dat$AGE<11& 
+                             temp_cond_dat$AGE>0 ),], aes(south.sst.amj, cond_fact, col=as.factor(AGE))) + 
+  geom_point() + geom_smooth(method="gam", col="black") + facet_wrap(~as.factor(AGE), scales="free", nrow=2)
+
 
 ggplot(temp_cond_dat[which(temp_cond_dat$AGE<11& 
                              temp_cond_dat$AGE>0 ),], aes(summer.bottom.temp, cond_fact, col=as.factor(AGE))) + 
@@ -120,15 +125,15 @@ ggplot(temp_cond_dat[which(temp_cond_dat$AGE<11&
 
 ggplot(temp_cond_dat[which(temp_cond_dat$AGE<11& 
                              temp_cond_dat$AGE>0 ),], aes(YEAR, cond_fact, col=as.factor(AGE))) + 
-  geom_point() + geom_smooth(method="lm") + facet_wrap(~as.factor(AGE), scales="free")
+  geom_point() + geom_smooth(method="lm", col="black") + facet_wrap(~as.factor(AGE), scales="free", nrow=2)
 
 ggplot(temp_cond_dat[which(temp_cond_dat$AGE<11& 
                              temp_cond_dat$AGE>0 ),], aes(YEAR, cond_fact, col=as.factor(AGE))) + 
-  geom_point() + geom_smooth(method="gam") + facet_wrap(~as.factor(AGE), scales="free")
+  geom_point() + geom_smooth(method="gam", col="black") + facet_wrap(~as.factor(AGE), scales="free", nrow=2)
 
 ggplot(temp_cond_dat[which(temp_cond_dat$AGE<11 & 
                              temp_cond_dat$AGE>0 ),], aes(juliandate, cond_fact, col=as.factor(AGE))) + 
-  geom_point() + geom_smooth(method="gam", col="black") + facet_wrap(~as.factor(AGE), scales="free")
+  geom_point() + geom_smooth(method="gam", col="black") + facet_wrap(~as.factor(AGE), scales="free", nrow=2)
 
 
 age1dat <- cond_analysis_dat[which(cond_analysis_dat$AGE==1),]
@@ -166,34 +171,37 @@ temp_cond_dat$juliandate <- as.numeric(temp_cond_dat$juliandate)
 
 #
 
-bmod1 <- gam(cond_fact ~ s(YEAR) + s(summer.bottom.temp) + te(LATITUDE, LONGITUDE), data=temp_cond_dat[which(temp_cond_dat$AGE==1),])
+bmod1 <- gam(cond_fact ~ s(summer.bottom.temp) + te(LATITUDE, LONGITUDE), data=temp_cond_dat[which(temp_cond_dat$AGE==1),])
 summary(bmod1)
 plot(bmod1)
+gam.check(bmod1)
 
-draw(bmod1, select = 3)
+draw(bmod1, select = 2)
 
-smod1 <- gam(cond_fact ~ s(YEAR) + s(south.sst.amj) + te(LATITUDE, LONGITUDE), data=temp_cond_dat[which(temp_cond_dat$AGE==1),])
+smod1 <- gam(cond_fact ~ s(south.sst.amj) + te(LATITUDE, LONGITUDE), data=temp_cond_dat[which(temp_cond_dat$AGE==1),])
 summary(smod1)
 plot(smod1)
+gam.check(smod1)
 
-draw(smod1, select = 3)
+draw(smod1, select = 2)
 
 
-jmod1 <- gam(cond_fact ~ s(YEAR) + s(south.sst.amj) + s(juliandate) + te(LATITUDE, LONGITUDE), data=temp_cond_dat[which(temp_cond_dat$AGE==1),])
+jmod1 <- gam(cond_fact ~  s(south.sst.amj) + s(juliandate) + te(LATITUDE, LONGITUDE), data=temp_cond_dat[which(temp_cond_dat$AGE==1),])
 summary(jmod1)
 plot(jmod1)
+gam.check(jmod1)
 
 draw(jmod1, select = 1)
 draw(jmod1, select = 2)
 draw(jmod1, select = 3)
-draw(jmod1, select = 4)
 
 
-bmod10 <- gam(cond_fact ~ s(YEAR) + s(summer.bottom.temp) + te(LATITUDE, LONGITUDE), data=temp_cond_dat[which(temp_cond_dat$AGE==10),])
+
+bmod10 <- gam(cond_fact ~ s(summer.bottom.temp) + te(LATITUDE, LONGITUDE), data=temp_cond_dat[which(temp_cond_dat$AGE==10),])
 summary(bmod10)
 plot(bmod10)
 
-smod10 <- gam(cond_fact ~ s(YEAR) + s(south.sst.amj) + te(LATITUDE, LONGITUDE), data=temp_cond_dat[which(temp_cond_dat$AGE==10),])
+smod10 <- gam(cond_fact ~ s(south.sst.amj) + te(LATITUDE, LONGITUDE), data=temp_cond_dat[which(temp_cond_dat$AGE==10),])
 summary(smod10)
 plot(smod10)
 
