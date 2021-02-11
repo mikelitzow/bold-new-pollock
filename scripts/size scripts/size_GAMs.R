@@ -199,12 +199,26 @@ ones.nona <- ones[which( is.na(ones$south.sst.amj)==FALSE &
                            is.na(ones$LONGITUDE)==FALSE &
                            is.na(ones$juliandate)==FALSE ),]
 
-jmod1 <- gam(cond_fact ~  s(south.sst.amj) + s(juliandate) + te(LATITUDE, LONGITUDE), #data=temp_cond_dat[which(temp_cond_dat$AGE==1),])
+#limit to days with 20 or more samples
+ones.nona <- ones.nona[which(ones.nona$juliandate>154 & 
+                               ones.nona$juliandate<212 ),]
+
+ggplot(ones.nona, aes(south.sst.amj, cond_fact)) + geom_point() + geom_smooth()
+
+ggplot(ones.nona, aes(juliandate, cond_fact)) + geom_point() + geom_smooth()
+
+ggplot(ones.nona, aes(LATITUDE, cond_fact)) + geom_point() + geom_smooth()
+
+ggplot(ones.nona, aes(LONGITUDE, cond_fact)) + geom_point() + geom_smooth()
+
+#seems some unusually high condition factors are leaving to heavy tail maybe?
+
+jmod1 <- gam(cond_fact ~  s(south.sst.amj, k=4) + s(juliandate) + te(LATITUDE, LONGITUDE), #data=temp_cond_dat[which(temp_cond_dat$AGE==1),])
              data=ones.nona)
 summary(jmod1)
 plot(jmod1)
 gam.check(jmod1) #qqplot does not look good
-#BAD HESSIAN
+#limiting k for sst deals with bad hessian
 
 draw(jmod1, select = 1)
 draw(jmod1, select = 2)
@@ -222,6 +236,8 @@ plot(ones.nona$YEAR, Efull) #look pretty good
 jmod_lintemp <- gam(cond_fact ~  south.sst.amj + s(juliandate) + te(LATITUDE, LONGITUDE), #data=temp_cond_dat[which(temp_cond_dat$AGE==1),])
              data=ones.nona)
 summary(jmod_lintemp)
+gam.check(jmod_lintemp)
+plot_model(jmod_lintemp, type="pred")
 
 AIC(jmod1, jmod_lintemp)
 
