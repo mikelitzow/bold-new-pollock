@@ -169,6 +169,13 @@ temp_cond_dat$DATE <- parse_date_time2(temp_cond_dat$DATE, "mdy", cutoff_2000 = 
 temp_cond_dat$juliandate <- format(temp_cond_dat$DATE, "%j")
 temp_cond_dat$juliandate <- as.numeric(temp_cond_dat$juliandate) 
 
+#limit to post 99
+temp_cond_dat <- temp_cond_dat[which(temp_cond_dat$YEAR>1998),]
+
+hist(temp_cond_dat$juliandate)
+
+ggplot(temp_cond_dat, aes(juliandate)) + geom_histogram() + facet_wrap(~YEAR)
+
 #
 
 bmod1 <- gam(cond_fact ~ s(summer.bottom.temp) + te(LATITUDE, LONGITUDE), data=temp_cond_dat[which(temp_cond_dat$AGE==1),])
@@ -185,8 +192,15 @@ gam.check(smod1)
 
 draw(smod1, select = 2)
 
+ones <- temp_cond_dat[which(temp_cond_dat$AGE==1),]
+ones.nona <- ones[which( is.na(ones$south.sst.amj)==FALSE &
+                           is.na(ones$cond_fact)==FALSE  &
+                           is.na(ones$LATITUDE)==FALSE &
+                           is.na(ones$LONGITUDE)==FALSE &
+                           is.na(ones$juliandate)==FALSE ),]
 
-jmod1 <- gam(cond_fact ~  s(south.sst.amj) + s(juliandate) + te(LATITUDE, LONGITUDE), data=temp_cond_dat[which(temp_cond_dat$AGE==1),])
+jmod1 <- gam(cond_fact ~  s(south.sst.amj) + s(juliandate) + te(LATITUDE, LONGITUDE), #data=temp_cond_dat[which(temp_cond_dat$AGE==1),])
+             data=ones.nona)
 summary(jmod1)
 plot(jmod1)
 gam.check(jmod1)
@@ -194,6 +208,28 @@ gam.check(jmod1)
 draw(jmod1, select = 1)
 draw(jmod1, select = 2)
 draw(jmod1, select = 3)
+
+#autocor?
+E <- residuals(jmod1, type="deviance")
+I1 <- !is.na(ones.nona$cond_fact)
+Efull <- vector(length=length(ones.nona$cond_fact))
+Efull <- NA
+Efull[I1] <- E
+acf(Efull, na.action=na.pass) #not bad, some in year i - 1
+plot(ones.nona$YEAR, Efull) #look pretty good
+
+#so looks good on temp autocor for age one BUT what about older ages?
+
+
+jmmod1 <- gamm(cond_fact ~  s(south.sst.amj) + s(juliandate) + te(LATITUDE, LONGITUDE), 
+               correlation = corAR1(form = ~ HAUL|YEAR),
+               data=temp_cond_dat[which(temp_cond_dat$AGE==1),])
+
+
+
+jmmod1 <- gamm(cond_fact ~  s(south.sst.amj) + s(juliandate) + te(LATITUDE, LONGITUDE), 
+               correlation = corARMA(form = ~ juliandate|YEAR, p=1, q=1),
+               data=temp_cond_dat[which(temp_cond_dat$AGE==1),])
 
 
 
