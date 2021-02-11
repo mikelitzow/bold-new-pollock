@@ -203,7 +203,8 @@ jmod1 <- gam(cond_fact ~  s(south.sst.amj) + s(juliandate) + te(LATITUDE, LONGIT
              data=ones.nona)
 summary(jmod1)
 plot(jmod1)
-gam.check(jmod1)
+gam.check(jmod1) #qqplot does not look good
+#BAD HESSIAN
 
 draw(jmod1, select = 1)
 draw(jmod1, select = 2)
@@ -217,6 +218,12 @@ Efull <- NA
 Efull[I1] <- E
 acf(Efull, na.action=na.pass) #not bad, some in year i - 1
 plot(ones.nona$YEAR, Efull) #look pretty good
+
+jmod_lintemp <- gam(cond_fact ~  south.sst.amj + s(juliandate) + te(LATITUDE, LONGITUDE), #data=temp_cond_dat[which(temp_cond_dat$AGE==1),])
+             data=ones.nona)
+summary(jmod_lintemp)
+
+AIC(jmod1, jmod_lintemp)
 
 #so looks good on temp autocor for age one BUT what about older ages?
 
