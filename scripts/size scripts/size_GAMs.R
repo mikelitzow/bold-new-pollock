@@ -244,25 +244,278 @@ AIC(jmod1, jmod_lintemp)
 #so looks good on temp autocor for age one BUT what about older ages?
 
 
-jmmod1 <- gamm(cond_fact ~  s(south.sst.amj) + s(juliandate) + te(LATITUDE, LONGITUDE), 
-               correlation = corAR1(form = ~ HAUL|YEAR),
-               data=temp_cond_dat[which(temp_cond_dat$AGE==1),])
+#2======
+
+twos <- temp_cond_dat[which(temp_cond_dat$AGE==2),]
+twos.nona <- twos[which( is.na(twos$south.sst.amj)==FALSE &
+                           is.na(twos$cond_fact)==FALSE  &
+                           is.na(twos$LATITUDE)==FALSE &
+                           is.na(twos$LONGITUDE)==FALSE &
+                           is.na(twos$juliandate)==FALSE ),]
+
+table(twos$juliandate)
+
+jmod2 <- gam(cond_fact ~  s(south.sst.amj, k=4) + s(juliandate) + te(LATITUDE, LONGITUDE), #data=temp_cond_dat[which(temp_cond_dat$AGE==1),])
+             data=twos.nona)
+summary(jmod2)
+plot(jmod2)
+gam.check(jmod2) #
+
+draw(jmod2, select = 1)
+draw(jmod2, select = 2)
+draw(jmod2, select = 3)
+
+#autocor?
+E <- residuals(jmod2, type="deviance")
+I1 <- !is.na(twos.nona$cond_fact)
+Efull <- vector(length=length(twos.nona$cond_fact))
+Efull <- NA
+Efull[I1] <- E
+acf(Efull, na.action=na.pass) #YES
+plot(twos.nona$YEAR, Efull) #look pretty good
+
+
+#3=====
 
 
 
-jmmod1 <- gamm(cond_fact ~  s(south.sst.amj) + s(juliandate) + te(LATITUDE, LONGITUDE), 
-               correlation = corARMA(form = ~ juliandate|YEAR, p=1, q=1),
-               data=temp_cond_dat[which(temp_cond_dat$AGE==1),])
+threes <- temp_cond_dat[which(temp_cond_dat$AGE==3),]
+threes.nona <- threes[which( is.na(threes$south.sst.amj)==FALSE &
+                           is.na(threes$cond_fact)==FALSE  &
+                           is.na(threes$LATITUDE)==FALSE &
+                           is.na(threes$LONGITUDE)==FALSE &
+                           is.na(threes$juliandate)==FALSE ),]
+
+table(threes$juliandate)
+
+jmod3 <- gam(cond_fact ~  s(south.sst.amj, k=4) + s(juliandate) + te(LATITUDE, LONGITUDE), #data=temp_cond_dat[which(temp_cond_dat$AGE==1),])
+             data=threes.nona)
+summary(jmod3)
+plot(jmod3)
+gam.check(jmod3) #heavy tail
+
+draw(jmod3, select = 1)
+draw(jmod3, select = 2)
+draw(jmod3, select = 3)
+
+#autocor?
+E <- residuals(jmod3, type="deviance")
+I1 <- !is.na(threes.nona$cond_fact)
+Efull <- vector(length=length(threes.nona$cond_fact))
+Efull <- NA
+Efull[I1] <- E
+acf(Efull, na.action=na.pass) #maybe
+plot(threes.nona$YEAR, Efull) #look pretty good
 
 
 
-bmod10 <- gam(cond_fact ~ s(summer.bottom.temp) + te(LATITUDE, LONGITUDE), data=temp_cond_dat[which(temp_cond_dat$AGE==10),])
-summary(bmod10)
-plot(bmod10)
 
-smod10 <- gam(cond_fact ~ s(south.sst.amj) + te(LATITUDE, LONGITUDE), data=temp_cond_dat[which(temp_cond_dat$AGE==10),])
-summary(smod10)
-plot(smod10)
+#4=====
+
+
+
+fours <- temp_cond_dat[which(temp_cond_dat$AGE==4),]
+fours.nona <- fours[which( is.na(fours$south.sst.amj)==FALSE &
+                               is.na(fours$cond_fact)==FALSE  &
+                               is.na(fours$LATITUDE)==FALSE &
+                               is.na(fours$LONGITUDE)==FALSE &
+                               is.na(fours$juliandate)==FALSE ),]
+
+table(fours$juliandate)
+
+jmod4 <- gam(cond_fact ~  s(south.sst.amj, k=4) + s(juliandate) + te(LATITUDE, LONGITUDE), #data=temp_cond_dat[which(temp_cond_dat$AGE==1),])
+             data=fours.nona)
+summary(jmod4)
+plot(jmod4)
+gam.check(jmod4) #BAD HESSIAN
+
+draw(jmod4, select = 1)
+draw(jmod4, select = 2)
+draw(jmod4, select = 3)
+
+#autocor?
+E <- residuals(jmod4, type="deviance")
+I1 <- !is.na(fours.nona$cond_fact)
+Efull <- vector(length=length(fours.nona$cond_fact))
+Efull <- NA
+Efull[I1] <- E
+acf(Efull, na.action=na.pass) #yes
+plot(fours.nona$YEAR, Efull) #
+
+
+
+#5=====
+
+
+
+fives <- temp_cond_dat[which(temp_cond_dat$AGE==5),]
+fives.nona <- fives[which( is.na(fives$south.sst.amj)==FALSE &
+                             is.na(fives$cond_fact)==FALSE  &
+                             is.na(fives$LATITUDE)==FALSE &
+                             is.na(fives$LONGITUDE)==FALSE &
+                             is.na(fives$juliandate)==FALSE ),]
+
+table(fives$juliandate)
+
+jmod5 <- gam(cond_fact ~  s(south.sst.amj, k=4) + s(juliandate) + te(LATITUDE, LONGITUDE), #data=temp_cond_dat[which(temp_cond_dat$AGE==1),])
+             data=fives.nona)
+summary(jmod5)
+plot(jmod5)
+gam.check(jmod5) #res v fit looks a little odd, so does qq
+
+draw(jmod5, select = 1)
+draw(jmod5, select = 2)
+draw(jmod5, select = 3)
+
+#autocor?
+E <- residuals(jmod5, type="deviance")
+I1 <- !is.na(fives.nona$cond_fact)
+Efull <- vector(length=length(fives.nona$cond_fact))
+Efull <- NA
+Efull[I1] <- E
+acf(Efull, na.action=na.pass) #maybe
+plot(fives.nona$YEAR, Efull) # some very low residuals in 2013
+
+
+
+#6=====
+
+
+
+sixes <- temp_cond_dat[which(temp_cond_dat$AGE==6),]
+sixes.nona <- sixes[which( is.na(sixes$south.sst.amj)==FALSE &
+                             is.na(sixes$cond_fact)==FALSE  &
+                             is.na(sixes$LATITUDE)==FALSE &
+                             is.na(sixes$LONGITUDE)==FALSE &
+                             is.na(sixes$juliandate)==FALSE ),]
+
+table(sixes$juliandate)
+
+jmod6 <- gam(cond_fact ~  s(south.sst.amj, k=4) + s(juliandate) + te(LATITUDE, LONGITUDE), #data=temp_cond_dat[which(temp_cond_dat$AGE==1),])
+             data=sixes.nona)
+summary(jmod6)
+plot(jmod6)
+gam.check(jmod6) #
+
+draw(jmod6, select = 1)
+draw(jmod6, select = 2)
+draw(jmod6, select = 3)
+
+#autocor?
+E <- residuals(jmod6, type="deviance")
+I1 <- !is.na(sixes.nona$cond_fact)
+Efull <- vector(length=length(sixes.nona$cond_fact))
+Efull <- NA
+Efull[I1] <- E
+acf(Efull, na.action=na.pass) #seems ok
+plot(sixes.nona$YEAR, Efull) # 
+
+
+
+
+#7=====
+
+
+
+sevens <- temp_cond_dat[which(temp_cond_dat$AGE==7),]
+sevens.nona <- sevens[which( is.na(sevens$south.sst.amj)==FALSE &
+                             is.na(sevens$cond_fact)==FALSE  &
+                             is.na(sevens$LATITUDE)==FALSE &
+                             is.na(sevens$LONGITUDE)==FALSE &
+                             is.na(sevens$juliandate)==FALSE ),]
+
+table(sevens$juliandate)
+
+jmod7 <- gam(cond_fact ~  s(south.sst.amj, k=4) + s(juliandate) + te(LATITUDE, LONGITUDE), #data=temp_cond_dat[which(temp_cond_dat$AGE==1),])
+             data=sevens.nona)
+summary(jmod7)
+plot(jmod7)
+gam.check(jmod7) #not bad actually
+
+draw(jmod7, select = 1)
+draw(jmod7, select = 2)
+draw(jmod7, select = 3)
+
+#autocor?
+E <- residuals(jmod7, type="deviance")
+I1 <- !is.na(sevens.nona$cond_fact)
+Efull <- vector(length=length(sevens.nona$cond_fact))
+Efull <- NA
+Efull[I1] <- E
+acf(Efull, na.action=na.pass) #seems ok
+plot(sevens.nona$YEAR, Efull) # 
+
+
+
+
+#8=====
+
+
+
+eights <- temp_cond_dat[which(temp_cond_dat$AGE==8),]
+eights.nona <- eights[which( is.na(eights$south.sst.amj)==FALSE &
+                               is.na(eights$cond_fact)==FALSE  &
+                               is.na(eights$LATITUDE)==FALSE &
+                               is.na(eights$LONGITUDE)==FALSE &
+                               is.na(eights$juliandate)==FALSE ),]
+
+table(eights$juliandate)
+
+jmod8 <- gam(cond_fact ~  s(south.sst.amj, k=4) + s(juliandate) + te(LATITUDE, LONGITUDE), #data=temp_cond_dat[which(temp_cond_dat$AGE==1),])
+             data=eights.nona)
+summary(jmod8)
+plot(jmod8)
+gam.check(jmod8) #qq not great, one v low residual
+
+draw(jmod8, select = 1)
+draw(jmod8, select = 2)
+draw(jmod8, select = 3)
+
+#autocor?
+E <- residuals(jmod8, type="deviance")
+I1 <- !is.na(eights.nona$cond_fact)
+Efull <- vector(length=length(eights.nona$cond_fact))
+Efull <- NA
+Efull[I1] <- E
+acf(Efull, na.action=na.pass) #seems ok
+plot(eights.nona$YEAR, Efull) # 
+
+
+
+#9=====
+
+
+
+nines <- temp_cond_dat[which(temp_cond_dat$AGE==9),]
+nines.nona <- nines[which( is.na(nines$south.sst.amj)==FALSE &
+                               is.na(nines$cond_fact)==FALSE  &
+                               is.na(nines$LATITUDE)==FALSE &
+                               is.na(nines$LONGITUDE)==FALSE &
+                               is.na(nines$juliandate)==FALSE ),]
+
+table(nines$juliandate)
+
+jmod9 <- gam(cond_fact ~  s(south.sst.amj, k=4) + s(juliandate) + te(LATITUDE, LONGITUDE), #data=temp_cond_dat[which(temp_cond_dat$AGE==1),])
+             data=nines.nona)
+summary(jmod9)
+plot(jmod9)
+gam.check(jmod9) #
+
+draw(jmod9, select = 1)
+draw(jmod9, select = 2)
+draw(jmod9, select = 3)
+
+#autocor?
+E <- residuals(jmod9, type="deviance")
+I1 <- !is.na(nines.nona$cond_fact)
+Efull <- vector(length=length(nines.nona$cond_fact))
+Efull <- NA
+Efull[I1] <- E
+acf(Efull, na.action=na.pass) #seems ok
+plot(nines.nona$YEAR, Efull) # 
+
+
+
 
 
 world <- ne_countries(scale = "medium", returnclass = "sf")
