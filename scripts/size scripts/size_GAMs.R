@@ -499,7 +499,7 @@ jmod9 <- gam(cond_fact ~  s(south.sst.amj, k=4) + s(juliandate) + te(LATITUDE, L
              data=nines.nona)
 summary(jmod9)
 plot(jmod9)
-gam.check(jmod9) #
+gam.check(jmod9) #heavy tail, qq has big outlier
 
 draw(jmod9, select = 1)
 draw(jmod9, select = 2)
@@ -513,6 +513,41 @@ Efull <- NA
 Efull[I1] <- E
 acf(Efull, na.action=na.pass) #seems ok
 plot(nines.nona$YEAR, Efull) # 
+
+
+
+
+#10=====
+
+
+
+tens <- temp_cond_dat[which(temp_cond_dat$AGE==10),]
+tens.nona <- tens[which( is.na(tens$south.sst.amj)==FALSE &
+                             is.na(tens$cond_fact)==FALSE  &
+                             is.na(tens$LATITUDE)==FALSE &
+                             is.na(tens$LONGITUDE)==FALSE &
+                             is.na(tens$juliandate)==FALSE ),]
+
+table(tens$juliandate)
+
+jmod10 <- gam(cond_fact ~  s(south.sst.amj, k=4) + s(juliandate) + te(LATITUDE, LONGITUDE), #data=temp_cond_dat[which(temp_cond_dat$AGE==1),])
+             data=tens.nona)
+summary(jmod10)
+plot(jmod10)
+gam.check(jmod10) #qq not super
+
+draw(jmod10, select = 1)
+draw(jmod10, select = 2)
+draw(jmod10, select = 3)
+
+#autocor?
+E <- residuals(jmod10, type="deviance")
+I1 <- !is.na(tens.nona$cond_fact)
+Efull <- vector(length=length(tens.nona$cond_fact))
+Efull <- NA
+Efull[I1] <- E
+acf(Efull, na.action=na.pass) #seems ok
+plot(tens.nona$YEAR, Efull) # 
 
 
 
