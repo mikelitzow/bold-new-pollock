@@ -383,8 +383,10 @@ fite
 
 late_only <- full_wide[which(full_wide$YEAR>2016),]
 names(late_only)
-late_mat <- as.matrix(late_only[,c(38:48)])
-
+#late_mat <- as.matrix(late_only[,c(38:48)])
+#late_mat <- as.matrix(late_only[,c(38:47)]) #Lepidopsetta_sp is all zeros in late period!
+#also try without crabs which have a very high number of zeros and few non zeros
+late_mat <- as.matrix(late_only[,c(38:45)]) 
 
 late_NMDS <- metaMDS(late_mat, # Our community-by-species matrix
                      distance = "bray",
@@ -392,8 +394,8 @@ late_NMDS <- metaMDS(late_mat, # Our community-by-species matrix
                              na.rm=TRUE,
                              noshare=TRUE,
                              trymax=200,
-                             maxit=200,
-                     previous.best = late_NMDS) 
+                             maxit=200)#,
+                    # previous.best = late_NMDS) 
 
 summary(late_NMDS)
 late_NMDS$stress
@@ -408,12 +410,11 @@ orditorp(late_NMDS,display="species",col="red",air=0.01)
 
 late_highk <- metaMDS(late_mat, # Our community-by-species matrix
                      distance = "bray",
-                     k=5, # The number of reduced dimensions
+                     k=6, # The number of reduced dimensions
                      na.rm=TRUE,
                      noshare=TRUE,
                      trymax=50,
-                     maxit=50,
-                     previous.best = late_highk) 
+                     maxit=50) 
 
 ordiplot(late_highk,type="n")
 orditorp(late_highk,display="sites",cex=1.25,air=0.01)
