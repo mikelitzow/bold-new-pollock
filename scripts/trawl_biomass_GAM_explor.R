@@ -379,6 +379,47 @@ fite <- cmdscale(de,eig=TRUE, k=2) # k is the number of dim, 3 minute run time
 fite
 
 
+#NMDS late only====
+
+late_only <- full_wide[which(full_wide$YEAR>2016),]
+names(late_only)
+late_mat <- as.matrix(late_only[,c(38:48)])
+
+
+late_NMDS <- metaMDS(late_mat, # Our community-by-species matrix
+                     distance = "bray",
+                             k=3, # The number of reduced dimensions
+                             na.rm=TRUE,
+                             noshare=TRUE,
+                             trymax=200,
+                             maxit=200,
+                     previous.best = late_NMDS) 
+
+summary(late_NMDS)
+late_NMDS$stress
+lateptsall<-scores(late_NMDS)
+scores(lateptsall, display="species")
+ordiplot(late_NMDS)
+
+ordiplot(late_NMDS,type="n")
+orditorp(late_NMDS,display="sites",cex=1.25,air=0.01)
+orditorp(late_NMDS,display="species",col="red",air=0.01)
+
+
+late_highk <- metaMDS(late_mat, # Our community-by-species matrix
+                     distance = "bray",
+                     k=5, # The number of reduced dimensions
+                     na.rm=TRUE,
+                     noshare=TRUE,
+                     trymax=50,
+                     maxit=50,
+                     previous.best = late_highk) 
+
+ordiplot(late_highk,type="n")
+orditorp(late_highk,display="sites",cex=1.25,air=0.01)
+orditorp(late_highk,display="species",col="red",air=0.01)
+
+
 #MDS with full data====
 
 # full_wide <- as.data.frame(full_wide)
