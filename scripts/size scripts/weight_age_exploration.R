@@ -441,10 +441,10 @@ plot(mod.9_12, pages=1, se=F)
 dat1_2 <- filter(scale.dat, AGE %in% 1:2)
 
 # age 1-2
-log.null1 <- gam(log(WEIGHT) ~ s(sst.amj, k=6) + te(LATITUDE, LONGITUDE) + s(julian, k = 4), data=dat1_2)
+log.null1 <- gam(log(WEIGHT) ~ as.factor(AGE) + s(sst.amj, k=6) + te(LATITUDE, LONGITUDE) + s(julian, k = 4), data=dat1_2)
 gam.check(log.null1)
 
-log.alt1 <- gam(log(WEIGHT) ~ sst.amj*era + te(LATITUDE, LONGITUDE) + s(julian, k = 4), data=dat1_2)
+log.alt1 <- gam(log(WEIGHT) ~ as.factor(AGE) + sst.amj*era + te(LATITUDE, LONGITUDE) + s(julian, k = 4), data=dat1_2)
 gam.check(log.alt1)
 
 summary(log.alt1)
@@ -457,10 +457,10 @@ AICc_1.2 # null model is better
 dat5_8 <- filter(scale.dat, AGE %in% 5:8)
 
 # age 5-8
-log.null5 <- gam(log(WEIGHT) ~ s(sst.amj, k=6) + te(LATITUDE, LONGITUDE) + s(julian, k = 4), data=dat5_8)
+log.null5 <- gam(log(WEIGHT) ~ as.factor(AGE) + s(sst.amj, k=6) + te(LATITUDE, LONGITUDE) + s(julian, k = 4), data=dat5_8)
 gam.check(log.null5)
 
-log.alt5 <- gam(log(WEIGHT) ~ sst.amj*era + te(LATITUDE, LONGITUDE) + s(julian, k = 4), data=dat5_8)
+log.alt5 <- gam(log(WEIGHT) ~ as.factor(AGE) + sst.amj*era + te(LATITUDE, LONGITUDE) + s(julian, k = 4), data=dat5_8)
 gam.check(log.alt5)
 
 summary(log.alt5)
@@ -472,10 +472,10 @@ AICc_5.8 # null model is better
 dat9_12 <- filter(scale.dat, AGE %in% 9:12)
 
 # age 9-12
-log.null9 <- gam(log(WEIGHT) ~ s(sst.amj, k=6) + te(LATITUDE, LONGITUDE) + s(julian, k = 4), data=dat9_12)
+log.null9 <- gam(log(WEIGHT) ~ as.factor(AGE) + s(sst.amj, k=6) + te(LATITUDE, LONGITUDE) + s(julian, k = 4), data=dat9_12)
 gam.check(log.null9)
 
-log.alt9 <- gam(log(WEIGHT) ~ sst.amj*era + te(LATITUDE, LONGITUDE) + s(julian, k = 4), data=dat9_12)
+log.alt9 <- gam(log(WEIGHT) ~ as.factor(AGE) + sst.amj*era + te(LATITUDE, LONGITUDE) + s(julian, k = 4), data=dat9_12)
 gam.check(log.alt9)
 
 summary(log.alt9)
@@ -484,6 +484,96 @@ AICc_9.12 <- AICc(log.null9, log.alt9)
 AICc_9.12 # alt model is better; but nominal p-values are pretty high consider the # of obs in the model!
 
 #conclusions don't appear to change vs previous (non-log) models
+
+#temp autocor?===================================================================================
+
+#1 & 2==
+#log.null1 fit above
+draw(log.null1, select = 1)
+draw(log.null1, select = 2)
+draw(log.null1, select = 3)
+
+#autocor?
+E <- residuals(log.null1, type="deviance")
+I1 <- !is.na(dat1_2$WEIGHT)
+Efull <- vector(length=length(dat1_2$WEIGHT))
+Efull <- NA
+Efull[I1] <- E
+plot(dat1_2$YEAR, Efull) #
+
+res1 <- dat1_2
+res1$Efull <- Efull
+
+ggplot(res1, aes(YEAR, Efull)) + geom_point() + geom_smooth()
+
+ggplot(res1, aes(as.factor(YEAR), Efull))  + geom_boxplot()
+
+ggplot(res1, aes(as.factor(julian), Efull))  + geom_boxplot()
+
+ggplot(res1, aes(sst.amj, Efull))  + geom_point()
+
+ggplot(res1, aes(AGE, Efull))  + geom_point()
+
+
+
+#5 - 8==
+#log.null5 fit above
+draw(log.null5, select = 1)
+draw(log.null5, select = 2)
+draw(log.null5, select = 3)
+
+#autocor?
+E <- residuals(log.null5, type="deviance")
+I1 <- !is.na(dat5_8$WEIGHT)
+Efull <- vector(length=length(dat5_8$WEIGHT))
+Efull <- NA
+Efull[I1] <- E
+plot(dat5_8$YEAR, Efull) #
+
+res5 <- dat5_8
+res5$Efull <- Efull
+
+ggplot(res5, aes(YEAR, Efull)) + geom_point() + geom_smooth()
+
+ggplot(res5, aes(as.factor(YEAR), Efull))  + geom_boxplot()
+
+ggplot(res5, aes(as.factor(julian), Efull))  + geom_boxplot()
+
+ggplot(res5, aes(sst.amj, Efull))  + geom_point()
+
+ggplot(res5, aes(AGE, Efull))  + geom_point()
+
+
+
+
+
+
+#9 - 12==
+#log.null5 fit above
+draw(log.null9, select = 1)
+draw(log.null9, select = 2)
+draw(log.null9, select = 3)
+
+#autocor?
+E <- residuals(log.null9, type="deviance")
+I1 <- !is.na(dat9_12$WEIGHT)
+Efull <- vector(length=length(dat9_12$WEIGHT))
+Efull <- NA
+Efull[I1] <- E
+plot(dat9_12$YEAR, Efull) #
+
+res9 <- dat9_12
+res9$Efull <- Efull
+
+ggplot(res9, aes(YEAR, Efull)) + geom_point() + geom_smooth()
+
+ggplot(res9, aes(as.factor(YEAR), Efull))  + geom_boxplot()
+
+ggplot(res9, aes(as.factor(julian), Efull))  + geom_boxplot()
+
+ggplot(res9, aes(sst.amj, Efull))  + geom_point()
+
+ggplot(res9, aes(AGE, Efull))  + geom_point()
 
 
 
