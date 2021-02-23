@@ -576,6 +576,75 @@ ggplot(res9, aes(sst.amj, Efull))  + geom_point()
 ggplot(res9, aes(AGE, Efull))  + geom_point()
 
 
+#last yrs weight anomaly===========================================================================
+
+wmeans <- scale.dat %>% group_by(YEAR, AGE) %>% summarize(mean_annual_weight_at_age=mean(WEIGHT, na.rm=TRUE))
+
+wtotalmeans <- scale.dat %>% group_by(AGE) %>% summarize(mean_overall_weight_at_age=mean(WEIGHT, na.rm=TRUE))
+
+bothmeans <- left_join(wmeans, wtotalmeans)
+
+bothmeans$weight_at_age_anom <- NA
+bothmeans$weight_at_age_anom <- bothmeans$mean_annual_weight_at_age - bothmeans$mean_overall_weight_at_age 
+
+bothmeans$lag_year <- NA
+bothmeans$lag_year <- bothmeans$YEAR + 1
+
+#wmeans$temp_1yr_lag <- wmeans$mean_annual_sstamj
+
+mergemeans <- bothmeans[,c(2,5:6)]
+
+lagdat <- left_join(scale.dat, mergemeans, by = c("YEAR" = "lag_year", "AGE"="AGE"))
+
+lag12 <- lagdat[which(lagdat$AGE<3),]
+lag58 <- lagdat[which(lagdat$AGE<9 & lagdat$AGE>4),]
+lag912 <- lagdat[which(lagdat$AGE<13 & lagdat$AGE>8),]
+
+
+#models==
+
+
+# age 1-2
+lag.null1 <- gam(log(WEIGHT) ~ as.factor(AGE) + s(sst.amj, k=6) + te(LATITUDE, LONGITUDE) + s(julian, k = 4) + s(weight_at_age_anom), data=lag12)
+gam.check(lag.null1)
+
+lag.alt1 <- gam(log(WEIGHT) ~ as.factor(AGE) + sst.amj*era + te(LATITUDE, LONGITUDE) + s(julian, k = 4) + s(weight_at_age_anom), data=lag12)
+gam.check(lag.alt1)
+
+summary(lag.alt1)
+AICc(lag.null1, lag.alt1, log.null1, log.alt1) #yes improves model
+
+AICc_1.2lag <- AICc(lag.null1, lag.alt1) #null still better
+AICc_1.2lag # 
+
+
+
+# age 5-8
+lag.null5 <- gam(log(WEIGHT) ~ as.factor(AGE) + s(sst.amj, k=6) + te(LATITUDE, LONGITUDE) + s(julian, k = 4) + s(weight_at_age_anom), data=lag58)
+gam.check(lag.null5)
+
+lag.alt5 <- gam(log(WEIGHT) ~ as.factor(AGE) + sst.amj*era + te(LATITUDE, LONGITUDE) + s(julian, k = 4) + s(weight_at_age_anom), data=lag58)
+gam.check(lag.alt5)
+
+summary(lag.alt5)
+AICc(lag.null5, lag.alt5, log.null5, log.alt5) #better with lagged weight anoms
+
+AICc_5.8lag <- AICc(lag.null5, lag.alt5) 
+AICc_5.8lag # null better
+
+
+# age 9-12
+lag.null9 <- gam(log(WEIGHT) ~ as.factor(AGE) + s(sst.amj, k=6) + te(LATITUDE, LONGITUDE) + s(julian, k = 4) + s(weight_at_age_anom), data=lag912)
+gam.check(lag.null9)
+
+lag.alt9 <- gam(log(WEIGHT) ~ as.factor(AGE) + sst.amj*era + te(LATITUDE, LONGITUDE) + s(julian, k = 4) + s(weight_at_age_anom), data=lag912)
+gam.check(lag.alt9)
+
+summary(lag.alt9)
+AICc(lag.null9, lag.alt9, log.null9, log.alt9) #better w lagged weight anom
+
+AICc_9.12lag <- AICc(lag.null9, lag.alt9) 
+AICc_9.12lag # null better
 
 
 ## fit brms models to attempt to calculate valid credible intervals -----------------------------
