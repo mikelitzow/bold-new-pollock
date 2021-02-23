@@ -447,11 +447,14 @@ gam.check(log.null1)
 log.alt1 <- gam(log(WEIGHT) ~ as.factor(AGE) + sst.amj*era + te(LATITUDE, LONGITUDE) + s(julian, k = 4), data=dat1_2)
 gam.check(log.alt1)
 
+log.by1 <- gam(log(WEIGHT) ~ as.factor(AGE) + s(sst.amj, by=era, k=6) + te(LATITUDE, LONGITUDE) + s(julian, k = 4), data=dat1_2)
+gam.check(log.by1) #bad hessian
+
 summary(log.alt1)
 
 AICc_1.2 <- AICc(log.null1, log.alt1) 
 AICc_1.2 # null model is better
-
+AICc(log.null1, log.alt1, log.by1) 
 
 #==
 dat5_8 <- filter(scale.dat, AGE %in% 5:8)
@@ -463,10 +466,14 @@ gam.check(log.null5)
 log.alt5 <- gam(log(WEIGHT) ~ as.factor(AGE) + sst.amj*era + te(LATITUDE, LONGITUDE) + s(julian, k = 4), data=dat5_8)
 gam.check(log.alt5)
 
+log.by5 <- gam(log(WEIGHT) ~ as.factor(AGE) + s(sst.amj, by=era, k=6) + te(LATITUDE, LONGITUDE) + s(julian, k = 4), data=dat5_8)
+gam.check(log.by5)
+
 summary(log.alt5)
 
 AICc_5.8 <- AICc(log.null5, log.alt5) 
 AICc_5.8 # null model is better
+AICc(log.null5, log.alt5, log.by5) #by better
 
 #==
 dat9_12 <- filter(scale.dat, AGE %in% 9:12)
@@ -478,10 +485,14 @@ gam.check(log.null9)
 log.alt9 <- gam(log(WEIGHT) ~ as.factor(AGE) + sst.amj*era + te(LATITUDE, LONGITUDE) + s(julian, k = 4), data=dat9_12)
 gam.check(log.alt9)
 
+log.by9 <- gam(log(WEIGHT) ~ as.factor(AGE) + s(sst.amj, by=era, k=6) + te(LATITUDE, LONGITUDE) + s(julian, k = 4), data=dat9_12)
+gam.check(log.by9) #bad hessian
+
 summary(log.alt9)
 
 AICc_9.12 <- AICc(log.null9, log.alt9) 
 AICc_9.12 # alt model is better; but nominal p-values are pretty high consider the # of obs in the model!
+AICc(log.null9, log.alt9, log.by9) #by much lower AIC
 
 #conclusions don't appear to change vs previous (non-log) models
 
