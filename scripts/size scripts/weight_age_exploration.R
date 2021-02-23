@@ -622,13 +622,16 @@ gam.check(lag.null1)
 lag.alt1 <- gam(log(WEIGHT) ~ as.factor(AGE) + sst.amj*era + te(LATITUDE, LONGITUDE) + s(julian, k = 4) + s(weight_at_age_anom), data=lag12)
 gam.check(lag.alt1)
 
+lag.by1 <- gam(log(WEIGHT) ~ as.factor(AGE) +  s(sst.amj, by=era, k=6) + te(LATITUDE, LONGITUDE) + s(julian, k = 4) + s(weight_at_age_anom), data=lag12)
+gam.check(lag.by1) #bad hessian
+
 summary(lag.alt1)
 AICc(lag.null1, lag.alt1, log.null1, log.alt1) #yes improves model
 
 AICc_1.2lag <- AICc(lag.null1, lag.alt1) #null still better
 AICc_1.2lag # 
 
-
+AICc(lag.null1, lag.alt1, log.null1, log.alt1, lag.by1) #by still better
 
 # age 5-8
 lag.null5 <- gam(log(WEIGHT) ~ as.factor(AGE) + s(sst.amj, k=6) + te(LATITUDE, LONGITUDE) + s(julian, k = 4) + s(weight_at_age_anom), data=lag58)
@@ -637,12 +640,16 @@ gam.check(lag.null5)
 lag.alt5 <- gam(log(WEIGHT) ~ as.factor(AGE) + sst.amj*era + te(LATITUDE, LONGITUDE) + s(julian, k = 4) + s(weight_at_age_anom), data=lag58)
 gam.check(lag.alt5)
 
+lag.by5 <- gam(log(WEIGHT) ~ as.factor(AGE) + s(sst.amj, by=era, k=6) + te(LATITUDE, LONGITUDE) + s(julian, k = 4) + s(weight_at_age_anom), data=lag58)
+gam.check(lag.by5)
+
 summary(lag.alt5)
 AICc(lag.null5, lag.alt5, log.null5, log.alt5) #better with lagged weight anoms
 
 AICc_5.8lag <- AICc(lag.null5, lag.alt5) 
 AICc_5.8lag # null better
 
+AICc(lag.null5, lag.alt5, log.null5, log.alt5, lag.by1)
 
 # age 9-12
 lag.null9 <- gam(log(WEIGHT) ~ as.factor(AGE) + s(sst.amj, k=6) + te(LATITUDE, LONGITUDE) + s(julian, k = 4) + s(weight_at_age_anom), data=lag912)
@@ -651,12 +658,16 @@ gam.check(lag.null9)
 lag.alt9 <- gam(log(WEIGHT) ~ as.factor(AGE) + sst.amj*era + te(LATITUDE, LONGITUDE) + s(julian, k = 4) + s(weight_at_age_anom), data=lag912)
 gam.check(lag.alt9)
 
+lag.by9 <- gam(log(WEIGHT) ~ as.factor(AGE) + s(sst.amj, by=era, k=6) + te(LATITUDE, LONGITUDE) + s(julian, k = 4) + s(weight_at_age_anom), data=lag912)
+gam.check(lag.by9)
+
 summary(lag.alt9)
 AICc(lag.null9, lag.alt9, log.null9, log.alt9) #better w lagged weight anom
 
 AICc_9.12lag <- AICc(lag.null9, lag.alt9) 
 AICc_9.12lag # null better
 
+AICc(lag.null9, lag.alt9, log.null9, log.alt9, lag.by9) #by lowest
 
 ## fit brms models to attempt to calculate valid credible intervals -----------------------------
 
