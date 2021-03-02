@@ -421,7 +421,7 @@ orditorp(late_highk,display="sites",cex=1.25,air=0.01)
 orditorp(late_highk,display="species",col="red",air=0.01)
 
 #try with only stations with pollock
-pol_only <- late_only[which(late_only$logCPUE_Gadus_chalcogrammus<0),c(38:45)]
+pol_only <- late_only[which(late_only$logCPUE_Gadus_chalcogrammus>0),c(38:45)]
 pol_mat <- as.matrix(pol_only) 
 
 pol_highk <- metaMDS(pol_mat, # Our community-by-species matrix
