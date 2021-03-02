@@ -689,6 +689,27 @@ AICc_9.12lag # null better
 AICc(lag.null9, lag.alt9, log.null9, log.alt9, lag.by9) #by lowest
 
 
+#let's look at models a little more 
+
+library(tidymv)
+library(visreg)
+
+plot_smooths(lag.by9, series = sst.amj, comparison = era)
+
+visreg(lag.by9, "sst.amj", "era", gg=TRUE, scale='response' )
+
+#some maps======
+
+ggplot(data = world) +
+  geom_sf() +
+  coord_sf(xlim = c(-180, -155), ylim = c(53, 63), expand = TRUE) +
+  annotation_scale(location = "bl", width_hint = 0.5) +
+  # annotation_north_arrow(location = "bl", which_north = "true", 
+  #                        pad_x = unit(0.75, "in"), pad_y = unit(0.5, "in"),
+  #                        style = north_arrow_fancy_orienteering) +  
+  geom_point(aes(LONGITUDE, LATITUDE, colour=log_sc_weight), data=lagdat[which(lagdat$AGE<11),]) +   
+  scale_colour_gradient2(low="blue", high="red", guide="colorbar") + facet_wrap(~era*AGE) 
+
 
 ## fit brms models to attempt to calculate valid credible intervals -----------------------------
 
