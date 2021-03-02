@@ -429,8 +429,8 @@ pol_highk <- metaMDS(pol_mat, # Our community-by-species matrix
                       k=6, # The number of reduced dimensions
                       na.rm=TRUE,
                       noshare=TRUE,
-                      trymax=50,
-                      maxit=50) 
+                      trymax=100,
+                      maxit=100) 
 
 ordiplot(late_highk,type="n")
 orditorp(late_highk,display="sites",cex=1.25,air=0.01)
