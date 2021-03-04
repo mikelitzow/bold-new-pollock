@@ -456,6 +456,9 @@ ggplot(logscale.dat, aes(WEIGHT, log_sc_weight)) +
 
 #repeating steps from above to compare w v w/o era*sst 
 
+#March 4 2020 we are dropping era from the models because there just isn't enough SST variation in late era 
+#the cold temps are entirely missing, seems to be leading to nonsensical models
+
 #==
 dat1_2 <- filter(logscale.dat, AGE %in% 1:2)
 
@@ -614,8 +617,9 @@ wtotalmeans <- scale.dat %>% group_by(AGE) %>% summarize(mean_overall_weight_at_
 
 bothmeans <- left_join(wmeans, wtotalmeans)
 
-bothmeans$weight_at_age_anom <- NA
-bothmeans$weight_at_age_anom <- bothmeans$mean_annual_weight_at_age - bothmeans$mean_overall_weight_at_age 
+#lag to same age in previous year
+bothmeans$sameage_lastyr_weight_anom <- NA
+bothmeans$sameage_lastyr_weight_anom <- bothmeans$mean_annual_weight_at_age - bothmeans$mean_overall_weight_at_age 
 
 bothmeans$lag_year <- NA
 bothmeans$lag_year <- bothmeans$YEAR + 1
@@ -624,7 +628,17 @@ bothmeans$lag_year <- bothmeans$YEAR + 1
 
 mergemeans <- bothmeans[,c(2,5:6)]
 
-lagdat <- left_join(logscale.dat, mergemeans, by = c("YEAR" = "lag_year", "AGE"="AGE"))
+lagdat1 <- left_join(logscale.dat, mergemeans, by = c("YEAR" = "lag_year", "AGE"="AGE"))
+
+#lag to previous age in previous year
+lagdat1$prev_age <- NA
+lagdat1$prev_age <- lagdat1$AGE - 1
+
+mergemeans2 <- bothmeans[,c(2,5:6)]
+mergemeans2$prevage_lastyr_weight_anom <- mergemeans2$sameage_lastyr_weight_anom
+mergemeans2 <- mergemeans2[,c(1,3:4)]
+
+lagdat <- left_join(lagdat1, mergemeans2, by = c("YEAR" = "lag_year", "prev_age"="AGE"))
 
 lag12 <- lagdat[which(lagdat$AGE<3),]
 lag58 <- lagdat[which(lagdat$AGE<9 & lagdat$AGE>4),]
@@ -635,13 +649,13 @@ lag912 <- lagdat[which(lagdat$AGE<13 & lagdat$AGE>8),]
 
 
 # age 1-2
-lag.null1 <- gam(log_sc_weight ~ as.factor(AGE) + s(sst.amj, k=6) + te(LATITUDE, LONGITUDE) + s(julian, k = 4) + s(weight_at_age_anom), data=lag12)
+lag.null1 <- gam(log_sc_weight ~ as.factor(AGE) + s(sst.amj, k=6) + te(LATITUDE, LONGITUDE) + s(julian, k = 4) + s(sameage_lastyr_weight_anom), data=lag12)
 gam.check(lag.null1) #bad hessian
 
-lag.alt1 <- gam(log_sc_weight ~ as.factor(AGE) + sst.amj*era + te(LATITUDE, LONGITUDE) + s(julian, k = 4) + s(weight_at_age_anom), data=lag12)
+lag.alt1 <- gam(log_sc_weight ~ as.factor(AGE) + sst.amj*era + te(LATITUDE, LONGITUDE) + s(julian, k = 4) + s(sameage_lastyr_weight_anom), data=lag12)
 gam.check(lag.alt1)
 
-lag.by1 <- gam(log_sc_weight ~ as.factor(AGE) +  s(sst.amj, by=era, k=6) + te(LATITUDE, LONGITUDE) + s(julian, k = 4) + s(weight_at_age_anom), data=lag12)
+lag.by1 <- gam(log_sc_weight ~ as.factor(AGE) +  s(sst.amj, by=era, k=6) + te(LATITUDE, LONGITUDE) + s(julian, k = 4) + s(sameage_lastyr_weight_anom), data=lag12)
 gam.check(lag.by1) #bad hessian
 
 summary(lag.alt1)
@@ -653,13 +667,13 @@ AICc_1.2lag #
 AICc(lag.null1, lag.alt1, log.null1, log.alt1, lag.by1) #by still better
 
 # age 5-8
-lag.null5 <- gam(log_sc_weight ~ as.factor(AGE) + s(sst.amj, k=6) + te(LATITUDE, LONGITUDE) + s(julian, k = 4) + s(weight_at_age_anom), data=lag58)
+lag.null5 <- gam(log_sc_weight ~ as.factor(AGE) + s(sst.amj, k=6) + te(LATITUDE, LONGITUDE) + s(julian, k = 4) + s(sameage_lastyr_weight_anom), data=lag58)
 gam.check(lag.null5)
 
-lag.alt5 <- gam(log_sc_weight ~ as.factor(AGE) + sst.amj*era + te(LATITUDE, LONGITUDE) + s(julian, k = 4) + s(weight_at_age_anom), data=lag58)
+lag.alt5 <- gam(log_sc_weight ~ as.factor(AGE) + sst.amj*era + te(LATITUDE, LONGITUDE) + s(julian, k = 4) + s(sameage_lastyr_weight_anom), data=lag58)
 gam.check(lag.alt5)
 
-lag.by5 <- gam(log_sc_weight ~ as.factor(AGE) + s(sst.amj, by=era, k=6) + te(LATITUDE, LONGITUDE) + s(julian, k = 4) + s(weight_at_age_anom), data=lag58)
+lag.by5 <- gam(log_sc_weight ~ as.factor(AGE) + s(sst.amj, by=era, k=6) + te(LATITUDE, LONGITUDE) + s(julian, k = 4) + s(sameage_lastyr_weight_anom), data=lag58)
 gam.check(lag.by5) #bad hessian
 
 summary(lag.alt5)
@@ -671,13 +685,13 @@ AICc_5.8lag # null better
 AICc(lag.null5, lag.alt5, log.null5, log.alt5, lag.by5) #by better in this case too
 
 # age 9-12
-lag.null9 <- gam(log_sc_weight ~ as.factor(AGE) + s(sst.amj, k=6) + te(LATITUDE, LONGITUDE) + s(julian, k = 4) + s(weight_at_age_anom), data=lag912)
+lag.null9 <- gam(log_sc_weight ~ as.factor(AGE) + s(sst.amj, k=6) + te(LATITUDE, LONGITUDE) + s(julian, k = 4) + s(sameage_lastyr_weight_anom), data=lag912)
 gam.check(lag.null9) #bad hessian
 
-lag.alt9 <- gam(log_sc_weight ~ as.factor(AGE) + sst.amj*era + te(LATITUDE, LONGITUDE) + s(julian, k = 4) + s(weight_at_age_anom), data=lag912)
+lag.alt9 <- gam(log_sc_weight ~ as.factor(AGE) + sst.amj*era + te(LATITUDE, LONGITUDE) + s(julian, k = 4) + s(sameage_lastyr_weight_anom), data=lag912)
 gam.check(lag.alt9) #bad hessian
 
-lag.by9 <- gam(log_sc_weight ~ as.factor(AGE) + s(sst.amj, by=era, k=6) + te(LATITUDE, LONGITUDE) + s(julian, k = 4) + s(weight_at_age_anom), data=lag912)
+lag.by9 <- gam(log_sc_weight ~ as.factor(AGE) + s(sst.amj, by=era, k=6) + te(LATITUDE, LONGITUDE) + s(julian, k = 4) + s(sameage_lastyr_weight_anom), data=lag912)
 gam.check(lag.by9) #bad hessian
 
 summary(lag.alt9)
