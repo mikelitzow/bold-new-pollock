@@ -466,17 +466,17 @@ dat1_2 <- filter(logscale.dat, AGE %in% 1:2)
 log.null1 <- gam(log_sc_weight ~ as.factor(AGE) + s(sst.amj, k=6) + te(LATITUDE, LONGITUDE) + s(julian, k = 4), data=dat1_2)
 gam.check(log.null1)
 
-log.alt1 <- gam(log_sc_weight ~ as.factor(AGE) + sst.amj*era + te(LATITUDE, LONGITUDE) + s(julian, k = 4), data=dat1_2)
-gam.check(log.alt1)
+#log.alt1 <- gam(log_sc_weight ~ as.factor(AGE) + sst.amj*era + te(LATITUDE, LONGITUDE) + s(julian, k = 4), data=dat1_2)
+#gam.check(log.alt1)
 
-log.by1 <- gam(log_sc_weight ~ as.factor(AGE) + s(sst.amj, by=era, k=6) + te(LATITUDE, LONGITUDE) + s(julian, k = 4), data=dat1_2)
-gam.check(log.by1) #
+# log.by1 <- gam(log_sc_weight ~ as.factor(AGE) + s(sst.amj, by=era, k=6) + te(LATITUDE, LONGITUDE) + s(julian, k = 4), data=dat1_2)
+# gam.check(log.by1) #
 
 summary(log.alt1)
 
-AICc_1.2 <- AICc(log.null1, log.alt1) 
-AICc_1.2 # null model is better
-AICc(log.null1, log.alt1, log.by1) #by lower
+AICc_1.2 <- AICc(log.null1) 
+AICc_1.2 # 
+
 
 #==
 dat5_8 <- filter(logscale.dat, AGE %in% 5:8)
@@ -485,17 +485,17 @@ dat5_8 <- filter(logscale.dat, AGE %in% 5:8)
 log.null5 <- gam(log_sc_weight ~ as.factor(AGE) + s(sst.amj, k=6) + te(LATITUDE, LONGITUDE) + s(julian, k = 4), data=dat5_8)
 gam.check(log.null5) #not great
 
-log.alt5 <- gam(log_sc_weight ~ as.factor(AGE) + sst.amj*era + te(LATITUDE, LONGITUDE) + s(julian, k = 4), data=dat5_8)
-gam.check(log.alt5)
+#log.alt5 <- gam(log_sc_weight ~ as.factor(AGE) + sst.amj*era + te(LATITUDE, LONGITUDE) + s(julian, k = 4), data=dat5_8)
+#gam.check(log.alt5)
 
-log.by5 <- gam(log_sc_weight ~ as.factor(AGE) + s(sst.amj, by=era, k=6) + te(LATITUDE, LONGITUDE) + s(julian, k = 4), data=dat5_8)
-gam.check(log.by5)
+# log.by5 <- gam(log_sc_weight ~ as.factor(AGE) + s(sst.amj, by=era, k=6) + te(LATITUDE, LONGITUDE) + s(julian, k = 4), data=dat5_8)
+# gam.check(log.by5)
 
 summary(log.alt5)
 
-AICc_5.8 <- AICc(log.null5, log.alt5) 
-AICc_5.8 # null model is better
-AICc(log.null5, log.alt5, log.by5) #by better
+AICc_5.8 <- AICc(log.null5) 
+AICc_5.8 # 
+
 
 #==
 dat9_12 <- filter(logscale.dat, AGE %in% 9:12)
@@ -504,17 +504,17 @@ dat9_12 <- filter(logscale.dat, AGE %in% 9:12)
 log.null9 <- gam(log_sc_weight ~ as.factor(AGE) + s(sst.amj, k=6) + te(LATITUDE, LONGITUDE) + s(julian, k = 4), data=dat9_12)
 gam.check(log.null9)
 
-log.alt9 <- gam(log_sc_weight ~ as.factor(AGE) + sst.amj*era + te(LATITUDE, LONGITUDE) + s(julian, k = 4), data=dat9_12)
-gam.check(log.alt9)
+#log.alt9 <- gam(log_sc_weight ~ as.factor(AGE) + sst.amj*era + te(LATITUDE, LONGITUDE) + s(julian, k = 4), data=dat9_12)
+#gam.check(log.alt9)
 
-log.by9 <- gam(log_sc_weight ~ as.factor(AGE) + s(sst.amj, by=era, k=6) + te(LATITUDE, LONGITUDE) + s(julian, k = 4), data=dat9_12)
-gam.check(log.by9) #bad hessian
+#log.by9 <- gam(log_sc_weight ~ as.factor(AGE) + s(sst.amj, by=era, k=6) + te(LATITUDE, LONGITUDE) + s(julian, k = 4), data=dat9_12)
+#gam.check(log.by9) #bad hessian
 
 summary(log.alt9)
 
-AICc_9.12 <- AICc(log.null9, log.alt9) 
-AICc_9.12 # alt model is better; but nominal p-values are pretty high consider the # of obs in the model!
-AICc(log.null9, log.alt9, log.by9) #by much lower AIC
+AICc_9.12 <- AICc(log.null9) 
+AICc_9.12 # 
+
 
 #conclusions don't appear to change vs previous (non-log) models
 
@@ -648,59 +648,68 @@ lag912 <- lagdat[which(lagdat$AGE<13 & lagdat$AGE>8),]
 #models==
 
 
-# age 1-2
-lag.null1 <- gam(log_sc_weight ~ as.factor(AGE) + s(sst.amj, k=6) + te(LATITUDE, LONGITUDE) + s(julian, k = 4) + s(sameage_lastyr_weight_anom), data=lag12)
-gam.check(lag.null1) #bad hessian
+# age 1
+#age 1 has to be different because no previous year
+lag1 <- lag12[which(lag12$AGE==1),]
+lag.null1 <- gam(log_sc_weight ~ s(sst.amj, k=6) + te(LATITUDE, LONGITUDE) + s(julian, k = 4) + s(sameage_lastyr_weight_anom), data=lag1)
+gam.check(lag.null1) #
 
-lag.alt1 <- gam(log_sc_weight ~ as.factor(AGE) + sst.amj*era + te(LATITUDE, LONGITUDE) + s(julian, k = 4) + s(sameage_lastyr_weight_anom), data=lag12)
-gam.check(lag.alt1)
+AICc(lag.null1) #
 
-lag.by1 <- gam(log_sc_weight ~ as.factor(AGE) +  s(sst.amj, by=era, k=6) + te(LATITUDE, LONGITUDE) + s(julian, k = 4) + s(sameage_lastyr_weight_anom), data=lag12)
-gam.check(lag.by1) #bad hessian
+AICc_1lag <- AICc(lag.null1) #
+AICc_1lag # 
 
-summary(lag.alt1)
-AICc(lag.null1, lag.alt1, log.null1, log.alt1) #yes improves model
 
-AICc_1.2lag <- AICc(lag.null1, lag.alt1) #null still better
-AICc_1.2lag # 
+# age 2
+lag2 <- lag12[which(lag12$AGE==2),]
+lag.null2 <- gam(log_sc_weight ~  s(sst.amj, k=6) + te(LATITUDE, LONGITUDE) + s(julian, k = 4) + s(prevage_lastyr_weight_anom), data=lag2)
+gam.check(lag.null2) #
 
-AICc(lag.null1, lag.alt1, log.null1, log.alt1, lag.by1) #by still better
+AICc(lag.null2) #
+
+AICc_2lag <- AICc(lag.null2) #
+AICc_2lag # 
+
 
 # age 5-8
-lag.null5 <- gam(log_sc_weight ~ as.factor(AGE) + s(sst.amj, k=6) + te(LATITUDE, LONGITUDE) + s(julian, k = 4) + s(sameage_lastyr_weight_anom), data=lag58)
+lag.null5 <- gam(log_sc_weight ~ as.factor(AGE) + s(sst.amj, k=6) + te(LATITUDE, LONGITUDE) + s(julian, k = 4) + s(prevage_lastyr_weight_anom), data=lag58)
 gam.check(lag.null5)
+summary(lag.null5)
+plot(lag.null5)
 
-lag.alt5 <- gam(log_sc_weight ~ as.factor(AGE) + sst.amj*era + te(LATITUDE, LONGITUDE) + s(julian, k = 4) + s(sameage_lastyr_weight_anom), data=lag58)
-gam.check(lag.alt5)
+# lag.alt5 <- gam(log_sc_weight ~ as.factor(AGE) + sst.amj*era + te(LATITUDE, LONGITUDE) + s(julian, k = 4) + s(sameage_lastyr_weight_anom), data=lag58)
+# gam.check(lag.alt5)
+# 
+# lag.by5 <- gam(log_sc_weight ~ as.factor(AGE) + s(sst.amj, by=era, k=6) + te(LATITUDE, LONGITUDE) + s(julian, k = 4) + s(sameage_lastyr_weight_anom), data=lag58)
+# gam.check(lag.by5) #bad hessian
 
-lag.by5 <- gam(log_sc_weight ~ as.factor(AGE) + s(sst.amj, by=era, k=6) + te(LATITUDE, LONGITUDE) + s(julian, k = 4) + s(sameage_lastyr_weight_anom), data=lag58)
-gam.check(lag.by5) #bad hessian
 
-summary(lag.alt5)
-AICc(lag.null5, lag.alt5, log.null5, log.alt5) #better with lagged weight anoms
+AICc(lag.null5, log.null5) #better with lagged weight anoms
 
-AICc_5.8lag <- AICc(lag.null5, lag.alt5) 
+AICc_5.8lag <- AICc(lag.null5) 
 AICc_5.8lag # null better
 
-AICc(lag.null5, lag.alt5, log.null5, log.alt5, lag.by5) #by better in this case too
+
 
 # age 9-12
-lag.null9 <- gam(log_sc_weight ~ as.factor(AGE) + s(sst.amj, k=6) + te(LATITUDE, LONGITUDE) + s(julian, k = 4) + s(sameage_lastyr_weight_anom), data=lag912)
+lag.null9 <- gam(log_sc_weight ~ as.factor(AGE) + s(sst.amj, k=6) + te(LATITUDE, LONGITUDE) + s(julian, k = 4) + s(prevage_lastyr_weight_anom), data=lag912)
 gam.check(lag.null9) #bad hessian
+summary(lag.null9)
+plot(lag.null9)
 
-lag.alt9 <- gam(log_sc_weight ~ as.factor(AGE) + sst.amj*era + te(LATITUDE, LONGITUDE) + s(julian, k = 4) + s(sameage_lastyr_weight_anom), data=lag912)
-gam.check(lag.alt9) #bad hessian
-
-lag.by9 <- gam(log_sc_weight ~ as.factor(AGE) + s(sst.amj, by=era, k=6) + te(LATITUDE, LONGITUDE) + s(julian, k = 4) + s(sameage_lastyr_weight_anom), data=lag912)
-gam.check(lag.by9) #bad hessian
+# lag.alt9 <- gam(log_sc_weight ~ as.factor(AGE) + sst.amj*era + te(LATITUDE, LONGITUDE) + s(julian, k = 4) + s(sameage_lastyr_weight_anom), data=lag912)
+# gam.check(lag.alt9) #bad hessian
+# 
+# lag.by9 <- gam(log_sc_weight ~ as.factor(AGE) + s(sst.amj, by=era, k=6) + te(LATITUDE, LONGITUDE) + s(julian, k = 4) + s(sameage_lastyr_weight_anom), data=lag912)
+# gam.check(lag.by9) #bad hessian
 
 summary(lag.alt9)
-AICc(lag.null9, lag.alt9, log.null9, log.alt9) #better w lagged weight anom
+AICc(lag.null9, log.null9) #better w lagged weight anom
 
-AICc_9.12lag <- AICc(lag.null9, lag.alt9) 
+AICc_9.12lag <- AICc(lag.null9) 
 AICc_9.12lag # null better
 
-AICc(lag.null9, lag.alt9, log.null9, log.alt9, lag.by9) #by lowest
+
 
 
 #let's look at models a little more 
