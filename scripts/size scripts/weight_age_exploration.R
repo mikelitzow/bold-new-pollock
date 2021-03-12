@@ -651,8 +651,14 @@ lag912 <- lagdat[which(lagdat$AGE<13 & lagdat$AGE>8),]
 # age 1
 #age 1 has to be different because no previous year
 lag1 <- lag12[which(lag12$AGE==1),]
-lag.null1 <- gam(log_sc_weight ~ s(sst.amj, k=6) + te(LATITUDE, LONGITUDE) + s(julian, k = 4) + s(sameage_lastyr_weight_anom), data=lag1)
+lag.null1 <- gam(log_sc_weight ~ s(sst.amj, k=4) + te(LATITUDE, LONGITUDE) + s(julian, k = 4) + s(sameage_lastyr_weight_anom, k=4), data=lag1, method="REML")
 gam.check(lag.null1) #
+summary(lag.null1) #wow R2 SO MUCH BETTER
+plot(lag.null1) #v wiggly
+draw(lag.null1, select=1)
+draw(lag.null1, select=2)
+draw(lag.null1, select=3)
+draw(lag.null1, select=4)
 
 AICc(lag.null1) #
 
@@ -662,8 +668,16 @@ AICc_1lag #
 
 # age 2
 lag2 <- lag12[which(lag12$AGE==2),]
-lag.null2 <- gam(log_sc_weight ~  s(sst.amj, k=6) + te(LATITUDE, LONGITUDE) + s(julian, k = 4) + s(prevage_lastyr_weight_anom), data=lag2)
+lag.null2 <- gam(log_sc_weight ~  s(sst.amj, k=4) + te(LATITUDE, LONGITUDE) + s(julian, k = 4) + s(prevage_lastyr_weight_anom, k=4), data=lag2)
 gam.check(lag.null2) #
+summary(lag.null2)
+plot(lag.null2) #v wiggly
+draw(lag.null2, select=1)
+draw(lag.null2, select=2)
+draw(lag.null2, select=3)
+draw(lag.null2, select=4)
+
+visreg(lag.null2, "sst.amj", scale="response",ylab="Log of scaled weight-at-age", xlab="April-June SST")
 
 AICc(lag.null2) #
 
@@ -692,8 +706,8 @@ AICc_5.8lag # null better
 
 
 # age 9-12
-lag.null9 <- gam(log_sc_weight ~ as.factor(AGE) + s(sst.amj, k=6) + te(LATITUDE, LONGITUDE) + s(julian, k = 4) + s(prevage_lastyr_weight_anom), data=lag912)
-gam.check(lag.null9) #bad hessian
+lag.null9 <- gam(log_sc_weight ~ as.factor(AGE) + s(sst.amj, k=3) + te(LATITUDE, LONGITUDE) + s(julian, k = 4) + s(prevage_lastyr_weight_anom), data=lag912)
+gam.check(lag.null9) #hessian good at k=3 for sst, bad above that
 summary(lag.null9)
 plot(lag.null9)
 
@@ -702,6 +716,8 @@ plot(lag.null9)
 # 
 # lag.by9 <- gam(log_sc_weight ~ as.factor(AGE) + s(sst.amj, by=era, k=6) + te(LATITUDE, LONGITUDE) + s(julian, k = 4) + s(sameage_lastyr_weight_anom), data=lag912)
 # gam.check(lag.by9) #bad hessian
+
+visreg(lag.null9, "sst.amj", scale="response",ylab="Log of scaled weight-at-age", xlab="April-June SST")
 
 summary(lag.alt9)
 AICc(lag.null9, log.null9) #better w lagged weight anom
