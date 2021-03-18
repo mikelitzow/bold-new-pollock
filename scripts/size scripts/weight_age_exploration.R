@@ -660,6 +660,9 @@ draw(lag.null1, select=2)
 draw(lag.null1, select=3)
 draw(lag.null1, select=4)
 
+visreg(lag.null1, "sst.amj", scale="response",ylab="Log of scaled weight-at-age", xlab="April-June SST")
+
+
 AICc(lag.null1) #
 
 AICc_1lag <- AICc(lag.null1) #
@@ -686,7 +689,7 @@ AICc_2lag #
 
 
 # age 5-8
-lag.null5 <- gam(log_sc_weight ~ as.factor(AGE) + s(sst.amj, k=6) + te(LATITUDE, LONGITUDE) + s(julian, k = 4) + s(prevage_lastyr_weight_anom), data=lag58)
+lag.null5 <- gam(log_sc_weight ~ as.factor(AGE) + s(sst.amj, k=4) + te(LATITUDE, LONGITUDE) + s(julian, k = 4) + s(prevage_lastyr_weight_anom, k=4), data=lag58)
 gam.check(lag.null5)
 summary(lag.null5)
 plot(lag.null5)
@@ -697,6 +700,8 @@ plot(lag.null5)
 # lag.by5 <- gam(log_sc_weight ~ as.factor(AGE) + s(sst.amj, by=era, k=6) + te(LATITUDE, LONGITUDE) + s(julian, k = 4) + s(sameage_lastyr_weight_anom), data=lag58)
 # gam.check(lag.by5) #bad hessian
 
+visreg(lag.null5, "sst.amj", scale="response",ylab="Log of scaled weight-at-age", xlab="April-June SST")
+
 
 AICc(lag.null5, log.null5) #better with lagged weight anoms
 
@@ -706,7 +711,7 @@ AICc_5.8lag # null better
 
 
 # age 9-12
-lag.null9 <- gam(log_sc_weight ~ as.factor(AGE) + s(sst.amj, k=3) + te(LATITUDE, LONGITUDE) + s(julian, k = 4) + s(prevage_lastyr_weight_anom), data=lag912)
+lag.null9 <- gam(log_sc_weight ~ as.factor(AGE) + s(sst.amj, k=3) + te(LATITUDE, LONGITUDE) + s(julian, k = 4) + s(prevage_lastyr_weight_anom, k=4), data=lag912)
 gam.check(lag.null9) #hessian good at k=3 for sst, bad above that
 summary(lag.null9)
 plot(lag.null9)
