@@ -644,7 +644,7 @@ lag12 <- lagdat[which(lagdat$AGE<3),]
 lag34 <- lagdat[which(lagdat$AGE<5 & lagdat$AGE>2),]
 lag58 <- lagdat[which(lagdat$AGE<9 & lagdat$AGE>4),]
 lag912 <- lagdat[which(lagdat$AGE<13 & lagdat$AGE>8),]
-
+lag1315 <- lagdat[which(lagdat$AGE<16 & lagdat$AGE>12),]
 
 #models==
 
@@ -690,7 +690,7 @@ AICc_2lag #
 
 
 # age 3-4
-lag.null3 <- gam(log_sc_weight ~ as.factor(AGE) + s(sst.amj, k=4) + te(LATITUDE, LONGITUDE) + s(julian, k = 4) + s(prevage_lastyr_weight_anom, k=4), data=lag34)
+lag.null3 <- gam(log_sc_weight ~ as.factor(AGE) + s(sst.amj, k=4) + te(LATITUDE, LONGITUDE) + s(julian, k = 4) + s(prevage_lastyr_weight_anom, k=4), data=lag34, method="REML")
 gam.check(lag.null3)
 summary(lag.null3)
 plot(lag.null3)
@@ -748,6 +748,22 @@ AICc(lag.null9, log.null9) #better w lagged weight anom
 
 AICc_9.12lag <- AICc(lag.null9) 
 AICc_9.12lag # null better
+
+
+# age 13-15
+lag.null13 <- gam(log_sc_weight ~ as.factor(AGE) + s(sst.amj, k=4) + te(LATITUDE, LONGITUDE) + s(julian, k = 4) + s(prevage_lastyr_weight_anom, k=4), data=lag1315, method="REML")
+gam.check(lag.null13)
+summary(lag.null13)
+plot(lag.null13)
+
+
+visreg(lag.null13, "sst.amj", scale="response",ylab="Log of scaled weight-at-age", xlab="April-June SST")
+
+
+#AICc(lag.null13, log.null13) #better with lagged weight anoms
+
+AICc_13.15lag <- AICc(lag.null13) 
+AICc_13.15lag #
 
 
 
