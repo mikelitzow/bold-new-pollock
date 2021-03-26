@@ -21,12 +21,39 @@ latemeans <- periods_analysis_dat[which(periods_analysis_dat$YEAR>=2014),] %>% g
 allmeans1 <- left_join(periods_analysis_dat, earlymeans)
 allmeans <- left_join(allmeans1, latemeans)
 
-allmeans$diff_all_late <- allmeans$mean_station_bottemp - allmeans$late_mean_station_bottemp
+justmeans <- left_join(earlymeans, latemeans)
+justmeans$diff_evl <- justmeans$early_mean_station_bottemp - justmeans$late_mean_station_bottemp
 
-  allmeans$diff_early_late <- allmeans$early_mean_station_bottemp - allmeans$late_mean_station_bottemp
+#allmeans$diff_all_late <- allmeans$mean_station_bottemp - allmeans$late_mean_station_bottemp
+
+ # allmeans$diff_early_late <- allmeans$early_mean_station_bottemp - allmeans$late_mean_station_bottemp
 
   ggplot(allmeans, aes(diff_all_late, mean_station_bottemp)) + geom_point()
   #nearly ALL warmer
+  
+  ggplot(justmeans, aes(diff_evl)) + geom_histogram()
+  #nearly ALL warmer
+  
+ diffmapdat <- left_join(justmeans, periods_analysis_dat[,c(1:4)])
+  
+  ggplot(data = world) +
+    geom_sf() +
+    coord_sf(xlim = c(-180, -155), ylim = c(54, 66), expand = TRUE) +
+    stat_summary_2d(aes(LONGITUDE,LATITUDE,  z=diff_evl), bins = 30, fun = mean, 
+                    data= diffmapdat[which(diffmapdat$STRATUM!="70" &
+                                             diffmapdat$STRATUM!="71" & 
+                                             diffmapdat$STRATUM!="81" ),]) +   
+    scale_fill_distiller(palette = "Spectral")
+  
+  early_sebs_mean <- mean(diffmapdat$early_mean_station_bottemp[which(diffmapdat$STRATUM!="70" &
+                                   diffmapdat$STRATUM!="71" & 
+                                   diffmapdat$STRATUM!="81" )])
+  
+  late_sebs_mean <- mean(diffmapdat$late_mean_station_bottemp[which(diffmapdat$STRATUM!="70" &
+                                                                        diffmapdat$STRATUM!="71" & 
+                                                                        diffmapdat$STRATUM!="81" )])
+  
+  late_sebs_mean - early_sebs_mean
   
   tempmod <- lm(late_mean_station_bottemp ~ mean_station_bottemp,
                 data=allmeans[which(allmeans$STRATUM!="70" &
