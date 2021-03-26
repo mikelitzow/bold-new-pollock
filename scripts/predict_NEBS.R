@@ -59,8 +59,8 @@ pdat$shelf[which(pdat$STRATUM==50 |
 #needs lat/long albers and period
 
 #what is highest mean station bottemp in early?
-maxmean_bottemp_early <- max(pdat$mean_station_bottemp[which(pdat$YEAR<2014)])
-#12.13
+maxmean_bottemp_early <- max(pdat$mean_station_bottemp[which(pdat$YEAR<2014 & pdat$region=="SEBS")])
+#6.72
 
 pdat_limited <- pdat[which(pdat$mean_station_bottemp<maxmean_bottemp_early),]
 
