@@ -348,3 +348,20 @@ ggplot(pdat_NEBS, aes(predicted, logCPUE, col=lat_albers)) + geom_point() + geom
   scale_colour_distiller(palette = "Spectral") #hmm maybe underestimates cold stations (blue band near top)
 
 
+
+
+
+#repeat with adjusted temps=======
+
+#here subtract the difference in mean temps before vs after (1.38) for SEBS from NEBS stations
+
+pdat$adjusted_bottom_temp <- pdat$mean_station_bottemp
+pdat$adjusted_bottom_temp[which(pdat$shelf=="NEBS")] <- pdat$adjusted_bottom_temp-1.38
+
+pdat$adjusted_bottom_temp <- pdat$mean_station_bottemp
+for(i in 1:length(pdat$mean_station_bottemp)){
+  if (pdat$shelf[i]=="NEBS") {pdat$adjusted_bottom_temp[i] <- pdat$adjusted_bottom_temp[i] - 1.38} 
+  #print(i)
+}
+
+
