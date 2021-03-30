@@ -243,12 +243,11 @@ plot_grid(p5, p6, p7, p8, p9, p10, nrow=2)
 
 # plot_pred_dat <- pdat_NEBS[,c(1:3, 5, 20, 24:26, 29, 31)] %>% pivot_longer(!c(LATITUDE, LONGITUDE, STATION, YEAR, region, period, shelf), 
 #                                                                        names_to="response_type", values_to="value")
-plot_pred_dat <- pdat_NEBS[,c(1:3, 5, 45, 50, 53:56)] %>% pivot_longer(!c(LATITUDE, LONGITUDE, STATION, YEAR,  region, period, shelf), 
-                                                                           names_to="response_type", values_to="value")
+# plot_pred_dat <- pdat_NEBS[,c(1:3, 5, 45, 50, 53:56)] %>% pivot_longer(!c(LATITUDE, LONGITUDE, STATION, YEAR,  region, period, shelf), 
+#                                                                            names_to="response_type", values_to="value")
 
-plot_pred_dat <- pdat_NEBS[,c(1:3, 5, 45, 50, 53:55)] %>% pivot_longer(!c(LATITUDE, LONGITUDE, STATION, YEAR,  region, period, shelf), 
+plot_pred_dat <- pdat_NEBS[,c(1:3, 5, 45, 50, 53:54, 56)] %>% pivot_longer(!c(LATITUDE, LONGITUDE, STATION, YEAR,  region, period, shelf), 
                                                                        names_to="response_type", values_to="value")
-
 
 
 View(plot_pred_dat)
@@ -278,16 +277,6 @@ ggplot(data = world) +
   facet_wrap(~interaction(response_type, YEAR), nrow=4)  +
   scale_fill_distiller(palette = "Spectral")
 
-ggplot(data = world) +
-  geom_sf() +
-  coord_sf(xlim = c(-180, -155), ylim = c(58, 66), expand = TRUE) +
-  # annotation_scale(location = "bl", width_hint = 0.5) +
-  # annotation_north_arrow(location = "bl", which_north = "true", 
-  #                        pad_x = unit(0.75, "in"), pad_y = unit(0.5, "in"),
-  #                        style = north_arrow_fancy_orienteering) +  
-  stat_summary_2d(aes(LONGITUDE,LATITUDE,  z=value), bins = 20, fun = mean, data=plot_pred_dat) + 
-  facet_wrap(~interaction( YEAR, response_type), nrow=3)  +
-  scale_fill_distiller(palette = "Spectral")
 
 ggplot(data = world) +
   geom_sf() +
@@ -364,4 +353,32 @@ for(i in 1:length(pdat$mean_station_bottemp)){
   #print(i)
 }
 
+pdat_NEBS_Ad <- pdat[which(pdat$region=="NEBS"),]
+
+nebs_sel_adjusted <- pdat_NEBS_Ad[,c(7, 13, 14:15, 45, 50:55)]
+
+NEBSpred3 <- predict.gam(pmod$gam, newdata = nebs_sel_adjusted)
+length(NEBSpred3)
+length(nebs_sel_adjusted$BOT_DEPTH) #same length
+
+pdat_NEBS_Ad$predicted_adjusted <- NEBSpred3
+
+
+#pivot longer so that can plot on same scale!
+
+plot_ad_pred_dat <- pdat_NEBS_Ad[,c(1:3, 5, 45, 50, 53:54, 56)] %>% pivot_longer(!c(LATITUDE, LONGITUDE, STATION, YEAR,  region, period, shelf), 
+                                                                           names_to="response_type", values_to="value")
+
+View(plot_ad_pred_dat)
+
+ggplot(data = world) +
+  geom_sf() +
+  coord_sf(xlim = c(-180, -155), ylim = c(58, 66), expand = TRUE) +
+  # annotation_scale(location = "bl", width_hint = 0.5) +
+  # annotation_north_arrow(location = "bl", which_north = "true", 
+  #                        pad_x = unit(0.75, "in"), pad_y = unit(0.5, "in"),
+  #                        style = north_arrow_fancy_orienteering) +  
+  stat_summary_2d(aes(LONGITUDE,LATITUDE,  z=value), bins = 20, fun = mean, data=plot_ad_pred_dat) + 
+  facet_wrap(~interaction( YEAR, response_type), nrow=2)  +
+  scale_fill_distiller(palette = "Spectral")
 
