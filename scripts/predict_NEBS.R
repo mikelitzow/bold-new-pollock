@@ -386,12 +386,12 @@ ggplot(data = world) +
 
 #for figures draft
 #edit below
-plot_pred_dat2 <- plot_pred_dat
+plot_ad_pred_dat2 <- plot_ad_pred_dat
 
-plot_pred_dat2$response_type2 <- plot_pred_dat2$response_type
+plot_ad_pred_dat2$response_type2 <- plot_ad_pred_dat2$response_type
 
-plot_pred_dat2$response_type2[which(plot_pred_dat$response_type=="logCPUE_Gadus_chalcogrammus")] <- "Actual"
-plot_pred_dat2$response_type2[which(plot_pred_dat$response_type=="predicted")] <- "Predicted"
+plot_ad_pred_dat2$response_type2[which(plot_ad_pred_dat$response_type=="logCPUE_Gadus_chalcogrammus")] <- "Actual"
+plot_ad_pred_dat2$response_type2[which(plot_ad_pred_dat$response_type=="predicted_adjusted")] <- "Predicted"
 
 ggplot(data = world) +
   geom_sf() +
@@ -400,7 +400,7 @@ ggplot(data = world) +
   # annotation_north_arrow(location = "bl", which_north = "true", 
   #                        pad_x = unit(0.75, "in"), pad_y = unit(0.5, "in"),
   #                        style = north_arrow_fancy_orienteering) +  
-  stat_summary_2d(aes(LONGITUDE,LATITUDE,  z=value), bins = 20, fun = mean, data=plot_pred_dat2) + 
+  stat_summary_2d(aes(LONGITUDE,LATITUDE,  z=value), bins = 20, fun = mean, data=plot_ad_pred_dat2) + 
   facet_wrap(response_type2~YEAR, nrow=2)  +
   scale_fill_distiller(palette = "Spectral")
 
