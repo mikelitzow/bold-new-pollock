@@ -4,6 +4,11 @@
 library(ggplot2)
 library(sjPlot)
 
+wd <- getwd()
+binmeta_clean_anom<- read.csv(file=paste(wd,"/data/clean_binned_anom_data.csv", sep=""), row.names = 1)
+
+
+
 binmeta_clean_anom$log_sum_WGTCPUE_LEN <- log(binmeta_clean_anom$sum_wgtCPUE_len + 1)
 
 
