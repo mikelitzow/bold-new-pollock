@@ -143,13 +143,13 @@ all_analysis_dat$shelf[which(all_analysis_dat$STRATUM==50 |
 
 ggplot(data = world) +
   geom_sf() +
-  coord_sf(xlim = c(-180, -155), ylim = c(53, 65), expand = TRUE) +
+  coord_sf(xlim = c(-178, -155), ylim = c(53, 65), expand = TRUE) +
   annotation_scale(location = "bl", width_hint = 0.5) +
   # geom_point(aes(LONGITUDE, LATITUDE, colour=mean_station_bottemp), data=all_analysis_dat) +   
   # scale_colour_gradient2(low="blue", high="red", guide="colorbar") + 
   geom_point(aes(LONGITUDE, LATITUDE, 
-                 col=shelf), data=all_analysis_dat) 
-
+                 col=shelf), data=all_analysis_dat) + theme_bw()
+#xlim needs to be -178 not -180 or else y-axis disappears because of how package treats the date line
 
 all_analysis_dat$period <- NA
 
