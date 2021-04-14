@@ -345,7 +345,7 @@ ggplot(pdat_NEBS, aes(predicted, logCPUE, col=lat_albers)) + geom_point() + geom
 #here subtract the difference in mean temps before vs after (1.38) for SEBS from NEBS stations
 
 pdat$adjusted_bottom_temp <- pdat$mean_station_bottemp
-pdat$adjusted_bottom_temp[which(pdat$shelf=="NEBS")] <- pdat$adjusted_bottom_temp-1.38
+#pdat$adjusted_bottom_temp[which(pdat$shelf=="NEBS")] <- pdat$adjusted_bottom_temp-1.38
 
 pdat$adjusted_bottom_temp <- pdat$mean_station_bottemp
 for(i in 1:length(pdat$mean_station_bottemp)){
@@ -373,7 +373,7 @@ View(plot_ad_pred_dat)
 
 ggplot(data = world) +
   geom_sf() +
-  coord_sf(xlim = c(-180, -155), ylim = c(58, 66), expand = TRUE) +
+  coord_sf(xlim = c(-178, -155), ylim = c(58, 66), expand = TRUE) +
   # annotation_scale(location = "bl", width_hint = 0.5) +
   # annotation_north_arrow(location = "bl", which_north = "true", 
   #                        pad_x = unit(0.75, "in"), pad_y = unit(0.5, "in"),
@@ -395,7 +395,7 @@ plot_ad_pred_dat2$response_type2[which(plot_ad_pred_dat$response_type=="predicte
 
 ggplot(data = world) +
   geom_sf() +
-  coord_sf(xlim = c(-180, -155), ylim = c(58, 66), expand = TRUE) +
+  coord_sf(xlim = c(-178, -155), ylim = c(58, 66), expand = TRUE) +
   # annotation_scale(location = "bl", width_hint = 0.5) +
   # annotation_north_arrow(location = "bl", which_north = "true", 
   #                        pad_x = unit(0.75, "in"), pad_y = unit(0.5, "in"),
