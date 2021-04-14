@@ -148,7 +148,12 @@ ggplot(data = world) +
   # geom_point(aes(LONGITUDE, LATITUDE, colour=mean_station_bottemp), data=all_analysis_dat) +   
   # scale_colour_gradient2(low="blue", high="red", guide="colorbar") + 
   geom_point(aes(LONGITUDE, LATITUDE, 
-                 col=shelf), data=all_analysis_dat) + theme_bw()
+                 col=shelf), data=all_analysis_dat) + theme_bw() + 
+  scale_color_manual(name="Region", 
+   labels = c("EBS inner shelf", "EBS middle shelf", "EBS outer shelf", "NEBS"),
+   values = c("EBS_inner"="#d01c8b", "EBS_middle"="#f1b6da", "EBS_outer"="#b8e186", "NEBS"="#4dac26")) +
+  theme( legend.position = c(0.87, 0.85), legend.key = element_blank(),
+         legend.background=element_blank()) 
 #xlim needs to be -178 not -180 or else y-axis disappears because of how package treats the date line
 
 all_analysis_dat$period <- NA
