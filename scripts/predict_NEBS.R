@@ -402,7 +402,9 @@ ggplot(data = world) +
   #                        style = north_arrow_fancy_orienteering) +  
   stat_summary_2d(aes(LONGITUDE,LATITUDE,  z=value), bins = 20, fun = mean, data=plot_ad_pred_dat2) + 
   facet_wrap(response_type2~YEAR, nrow=2)  +
-  scale_fill_distiller(palette = "Spectral")
+  scale_fill_distiller(palette = "Spectral") + theme_bw() +
+  theme( legend.position = c(0.97, 0.25), legend.key = element_blank(),
+         legend.background=element_blank(), legend.title = element_blank()) 
 
 
 
