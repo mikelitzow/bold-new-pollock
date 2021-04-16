@@ -48,12 +48,6 @@ trawljoin <- left_join(sel.trawl.dat[which(sel.trawl.dat$SCIENTIFIC=="Gadus chal
 
 
 #seems to catch all sex.dat rows except ~20K rows w missing STRATUM values
-fuzziertestjoin <- left_join(sel.trawl.dat[which(sel.trawl.dat$SCIENTIFIC=="Gadus chalcogrammus"),c(1:6,9:18,20:21)], 
-                                 sex.dat, by = c("LATITUDE", "LONGITUDE", "YEAR", "VESSEL", "HAUL"))
-length(fuzziertestjoin$YEAR) #no new rows
-
-
-View(sex.dat[is.na(sex.dat$STRATUM),])
 
 #for now going to proceed - the rows that are not matching actually don't seem to have a good match
 
@@ -80,28 +74,6 @@ trawljoin$bin[which(trawljoin$LENGTH>500)]<- "500+"
 trawljoin <- trawljoin[which(is.finite(trawljoin$SEX)==TRUE),]
 trawljoin <- droplevels(trawljoin)
 
-# binneddat <- trawljoin %>% group_by(YEAR, STATION, STRATUM, SCIENTIFIC, VESSEL, CRUISE, HAUL, SEX, bin) %>%
-#   summarize(bin_sum_WGTCPUE_LEN=sum(WGTCPUE_LENGTH, na.rm=TRUE), bin_sum_NUMCPUE_LEN=sum(NUMCPUE_LENGTH, na.rm=TRUE),
-#             n=n()) 
-
-#try without sex
-# binneddat <- trawljoin %>% group_by(YEAR, STATION, STRATUM, SCIENTIFIC, VESSEL, CRUISE, HAUL, bin) %>%
-#   summarize(bin_sum_WGTCPUE_LEN=sum(WGTCPUE_LENGTH, na.rm=TRUE), bin_sum_NUMCPUE_LEN=sum(NUMCPUE_LENGTH, na.rm=TRUE),
-#             n=n()) 
-# #new trying to retain missing rows
-# binneddat <- trawljoin %>% group_by(YEAR, STATION, STRATUM, SCIENTIFIC, VESSEL, CRUISE, HAUL, bin) %>%
-#   summarize(bin_sum_WGTCPUE_LEN=sum(WGTCPUE_LENGTH, na.rm=TRUE), bin_sum_NUMCPUE_LEN=sum(NUMCPUE_LENGTH, na.rm=TRUE),
-#             n=n()) 
-# 
-# binneddat <- trawljoin %>% group_by(YEAR, STATION, STRATUM, SCIENTIFIC, VESSEL, CRUISE, HAUL, bin) %>%
-#   summarize(bin_sum_WGTCPUE_LEN=sum(WGTCPUE_LENGTH, na.rm=TRUE), bin_sum_NUMCPUE_LEN=sum(NUMCPUE_LENGTH, na.rm=TRUE),
-#             n=n(), .drop = FALSE)
-# 
-# trawljoin$bin <- as.factor(trawljoin$bin)
-# binneddat <- trawljoin %>% group_by(YEAR, STATION, STRATUM, SCIENTIFIC, VESSEL, CRUISE, HAUL, bin) %>%
-#   summarize(bin_sum_WGTCPUE_LEN=sum(WGTCPUE_LENGTH, na.rm=TRUE, .drop = FALSE), 
-#             bin_sum_NUMCPUE_LEN=sum(NUMCPUE_LENGTH, na.rm=TRUE, .drop = FALSE),
-#             count=count(bin , .drop = FALSE))
 
 
 #going to need to be a for loop instead I think
@@ -201,24 +173,6 @@ binmeta_clean_anom <- left_join(per_sub, binmeta_clean, by=c("YEAR", "HAUL",
 write.csv(binmeta_clean_anom, file=paste(wd,"/data/clean_binned_anom_data.csv", sep=""))
 
 
-length(binmeta_clean$YEAR)
-length(per_sub$YEAR)
-
-binmeta_clean <- binmeta_clean[!duplicated(binmeta_clean),] 
-
-length(binmeta_clean$YEAR)
-length(per_sub$YEAR)
 
 
-#periods_analysis_dat is also loaded in trawl_biomass_GAM_explor.R
-wd <- getwd()
-periods_analysis_dat <- read.csv(paste(wd,"/data/processed_periods_analysis_data.csv",sep=""), row.names = 1)
 
-periods_meta <- periods_analysis_dat[,c(1:15, 49:52)]
-
-binjoin2 <- left_join(periods_meta, binneddat)
-binmeta2 <- binjoin2[!duplicated(binjoin2),] #check length is same as binneddat
-#there are some rows here that don't match for sure, return to this
-#going to remove 562 rows that have NAs in all columns from binned dat, these seem to be hauls in periods_meta that have no match
-#in binneddat, but do we want to retain these? Are they zeros?
-binmeta2 <- binmeta2[which(is.finite(binmeta2$bin_sum_WGTCPUE_LEN)==TRUE),]
