@@ -168,10 +168,15 @@ output$haul <- as.numeric(output$haul)
 output$bin <- as.factor(output$bin)
 output$vessel <- as.integer(output$vessel)
 
-binjoin <- left_join(trawljoin[,c(1:21)], output, by=c("YEAR"="year", "HAUL"="haul", 
-                                                       "VESSEL"="vessel"))
+#remove duplicates created when removing individual data otherwise leftjoin/merge creates
+#many many duplicates
+trawlmetadata <- trawljoin[,c(1:19)]
+trawlmetadata <- trawlmetadata[duplicated(trawlmetadata)==FALSE,]
+
+binjoin <- left_join(trawlmetadata, output, by=c("YEAR"="year", "HAUL"="haul", "VESSEL"="vessel"))
+
 length(binjoin$YEAR)
-length(output$year)
+length(output$year) #length difference seems to be NAs in output
 
 binmeta_clean <- binjoin[!duplicated(binjoin),] 
 
@@ -179,6 +184,16 @@ wd <- getwd()
 write.csv(binmeta_clean, file=paste(wd,"/data/clean_binned_meta_data.csv", sep=""))
 
 
+#troubleshooting
+output3 <- output %>%
+      unite("joincol", c(year, haul, vessel), remove=FALSE)
+
+trawljoin2 <- trawljoin %>%
+  unite("joincol", c(YEAR, HAUL, VESSEL), remove=FALSE)
+
+binjoin4 <- left_join(trawljoin2[,c(1:5,7:11,13,15:21)], output3[,c(1,4,6)], by="joincol")
+
+binjoin5 <- merge(trawljoin2[,c(1:5,7:11,13,15:21)], output3[,c(1,4,6)], by="joincol")
 
 #let's move forwarrd with this and come back to troubleshoot the join
 
