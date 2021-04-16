@@ -184,44 +184,6 @@ wd <- getwd()
 write.csv(binmeta_clean, file=paste(wd,"/data/clean_binned_meta_data.csv", sep=""))
 
 
-#troubleshooting
-output3 <- output %>%
-      unite("joincol", c(year, haul, vessel), remove=FALSE)
-
-trawljoin2 <- trawljoin %>%
-  unite("joincol", c(YEAR, HAUL, VESSEL), remove=FALSE)
-
-binjoin4 <- left_join(trawljoin2[,c(1:5,7:11,13,15:21)], output3[,c(1,4,6)], by="joincol")
-
-binjoin5 <- merge(trawljoin2[,c(1:5,7:11,13,15:21)], output3[,c(1,4,6)], by="joincol")
-
-#let's move forwarrd with this and come back to troubleshoot the join
-
-length(output$year)
-length(binjoin$YEAR)
-
-#build one col by one col, see where duplicates come in
-binjoin1 <- left_join(trawljoin[,c(5,15)], output, by=c("YEAR"="year", "HAUL"="haul"))
-length(output$year)
-length(binjoin1$YEAR) #even this is repeating!!
-
-#switch direction??
-binjoin2 <- left_join( output, trawljoin[,c(5,15)], by=c("year" = "YEAR", "haul" = "HAUL"))
-length(output$year)
-length(binjoin2$year) #also repeats
-
-mergetry <- merge(output, trawljoin[,c(5,15)], by.x= c("year", "haul"), ,by.y= c("YEAR", "HAUL"))
-length(output$year)
-length(mergetry$year)
-
-
-#SHOULD BE ABLE TO REMOVE THIS if loop works
-binjoin <- left_join(trawljoin[,c(1:21)], binneddat) #this creates a ton of duplicate rows
-#I tried everything I could think of to stop them form being created but can't figure it out
-#I'll just remove the duplicates, this is a bit clumbsy but kind of stuck otherwise
-binmeta <- binjoin[!duplicated(binjoin),] #check length is same as binneddat, looks good
-
-
 
 #bottom temp anom join=====
 
