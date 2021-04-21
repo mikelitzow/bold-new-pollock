@@ -87,12 +87,14 @@ output <- data.frame(year = character(outlen),
                       haul = character(outlen),
                      bin = character(outlen),
                      vessel = character(outlen),
+                     station = character(outlen),
                      sum_wgtCPUE_len = integer(outlen),
                       stringsAsFactors = FALSE)
 yrs <- unique(trawljoin$YEAR)
 bins <- unique(trawljoin$bin)
 
 #need to add in vessel too b/c haul is not unique w/in yr
+#adding in station as well because some vessel/haul/yr are also not unique
 
 k<-1
 i<-1
@@ -109,15 +111,19 @@ for(i in 1:length(yrs)){
     temp_haul_dat <- temp_yr_dat[which(temp_yr_dat$HAUL==temp_haul),]
     temp_vessels <- unique(temp_haul_dat$VESSEL)
     
-    #now sum within a haul for each bin 
+    #now sum within a haul/station for each bin 
     
   for(h in 1:length(temp_vessels)){   
     temp_ves <- temp_vessels[h]
     temp_ves_dat <- temp_haul_dat[which(temp_haul_dat$VESSEL==temp_ves),]
+    temp_stations <- unique(temp_ves_dat$STATION)
     
+    for(b in 1:length(temp_stations)){
+      temp_stat <- temp_stations[b]
+      temp_stat_dat <- temp_ves_dat[which(temp_ves_dat$STATION==temp_stat),]   
     for(l in 1:5){
       temp_bin <- bins[l]
-      temp_bin_dat <- temp_ves_dat[which(temp_ves_dat$bin==temp_bin),]
+      temp_bin_dat <- temp_stat_dat[which(temp_stat_dat$bin==temp_bin),]
       
       #NO NAs in WGTCPUE_LENGTH, so not going to na.rm  
       output$sum_wgtCPUE_len[k] <- sum(temp_bin_dat$WGTCPUE_LENGTH)
@@ -125,9 +131,10 @@ for(i in 1:length(yrs)){
       output$haul[k] <- temp_haul
       output$bin[k] <- temp_bin
       output$vessel[k] <- temp_ves
+      output$station[k] <- temp_stat
       
       k<-k+1
-    }}
+    }}}
    # k<-k+1
   }
  # k<-k+1
@@ -145,12 +152,12 @@ output$vessel <- as.integer(output$vessel)
 trawlmetadata <- trawljoin[,c(1:19)]
 trawlmetadata <- trawlmetadata[duplicated(trawlmetadata)==FALSE,]
 
-binjoin <- left_join(trawlmetadata, output, by=c("YEAR"="year", "HAUL"="haul", "VESSEL"="vessel"))
+binjoin <- left_join(trawlmetadata, output, by=c("YEAR"="year", "HAUL"="haul", "VESSEL"="vessel", "STATION"="station"))
 
 length(binjoin$YEAR)
 length(output$year) #length difference seems to be NAs in output
 
-binmeta_clean <- binjoin[!duplicated(binjoin),] 
+binmeta_clean <- binjoin[!duplicated(binjoin),] #should not be any
 
 wd <- getwd()
 write.csv(binmeta_clean, file=paste(wd,"/data/clean_binned_meta_data.csv", sep=""))
