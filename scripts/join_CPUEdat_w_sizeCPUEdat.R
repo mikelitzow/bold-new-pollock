@@ -170,13 +170,13 @@ write.csv(binmeta_clean, file=paste(wd,"/data/clean_binned_meta_data.csv", sep="
 wd <- getwd()
 periods_analysis_dat<- read.csv(file=paste(wd,"/data/processed_periods_analysis_data.csv", sep=""), row.names = 1)
 
-per_sub <- periods_analysis_dat[,c(5,10,12,50:52)]
+per_sub <- periods_analysis_dat[,c(3,5,10,12,50:52)]
 per_sub$HAUL <- as.factor(per_sub$HAUL)
 
 binmeta_clean$HAUL <- as.factor(binmeta_clean$HAUL)
 
 binmeta_clean_anom <- left_join(per_sub, binmeta_clean, by=c("YEAR", "HAUL", 
-                                                        "VESSEL"))
+                                                        "VESSEL", "STATION"))
 write.csv(binmeta_clean_anom, file=paste(wd,"/data/clean_binned_anom_data.csv", sep=""))
 
 
