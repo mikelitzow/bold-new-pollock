@@ -141,6 +141,16 @@ all_analysis_dat$shelf[which(all_analysis_dat$STRATUM==50 |
                                all_analysis_dat$STRATUM==62 | 
                                all_analysis_dat$STRATUM==90)] <- "EBS_outer"
 
+load(paste(wd,"/data/Bering_Chukchi_contours.RData",sep=""))
+
+contour.lines.adj <- contour.lines
+contour.lines.adj$z20$x_adj <- contour.lines.adj$z20$x - 360
+contour.lines.adj$z50$x_adj <- contour.lines.adj$z50$x - 360
+contour.lines.adj$z100$x_adj <- contour.lines.adj$z100$x - 360
+contour.lines.adj$z200$x_adj <- contour.lines.adj$z200$x - 360
+contour.lines.adj$z1000$x_adj <- contour.lines.adj$z1000$x - 360
+
+#Manuscript
 ggplot(data = world) +
   geom_sf() +
   coord_sf(xlim = c(-178, -155), ylim = c(53, 65), expand = TRUE) +
@@ -148,13 +158,15 @@ ggplot(data = world) +
   # geom_point(aes(LONGITUDE, LATITUDE, colour=mean_station_bottemp), data=all_analysis_dat) +   
   # scale_colour_gradient2(low="blue", high="red", guide="colorbar") + 
   geom_point(aes(LONGITUDE, LATITUDE, 
-                 col=shelf), data=all_analysis_dat) + theme_bw() + 
+                 col=region), data=all_analysis_dat) + theme_bw() + 
   scale_color_manual(name="Region", 
-   labels = c("EBS inner shelf", "EBS middle shelf", "EBS outer shelf", "NEBS"),
-   values = c("EBS_inner"="#d01c8b", "EBS_middle"="#f1b6da", "EBS_outer"="#b8e186", "NEBS"="#4dac26")) +
+   labels = c("NEBS", "SEBS"),
+   values = c("NEBS"="#d8b365", "SEBS"="#5ab4ac")) +
   theme( legend.position = c(0.87, 0.85), legend.key = element_blank(),
-         legend.background=element_blank()) 
-#xlim needs to be -178 not -180 or else y-axis disappears because of how package treats the date line
+         legend.background=element_blank()) + #geom_path(aes(x_adj,y), data=contour.lines.adj$z20, col="dark blue") +
+  geom_path(aes(x_adj,y), data=contour.lines.adj$z50, col="#9ecae1") + geom_path(aes(x_adj,y), data=contour.lines.adj$z100, col="#3182bd") +
+  geom_path(aes(x_adj,y), data=contour.lines.adj$z200, col="navy blue") #+ geom_path(aes(x_adj,y), data=contour.lines.adj$z1000, col="dark green") 
+
 
 all_analysis_dat$period <- NA
 
