@@ -646,6 +646,19 @@ lag58 <- lagdat[which(lagdat$AGE<9 & lagdat$AGE>4),]
 lag912 <- lagdat[which(lagdat$AGE<13 & lagdat$AGE>8),]
 lag1315 <- lagdat[which(lagdat$AGE<16 & lagdat$AGE>12),]
 
+lag3only <- lagdat[which(lagdat$AGE==3),]
+lag4only <- lagdat[which(lagdat$AGE==4),]
+lag5only <- lagdat[which(lagdat$AGE==5),]
+lag6only <- lagdat[which(lagdat$AGE==6),]
+lag7only <- lagdat[which(lagdat$AGE==7),]
+lag8only <- lagdat[which(lagdat$AGE==8),]
+lag9only <- lagdat[which(lagdat$AGE==9),]
+lag10only <- lagdat[which(lagdat$AGE==10),]
+lag11only <- lagdat[which(lagdat$AGE==11),]
+lag12only <- lagdat[which(lagdat$AGE==12),]
+lag13only <- lagdat[which(lagdat$AGE==13),]
+
+
 #models==
 
 
@@ -764,6 +777,221 @@ visreg(lag.null13, "sst.amj", scale="response",ylab="Log of scaled weight-at-age
 
 AICc_13.15lag <- AICc(lag.null13) 
 AICc_13.15lag #
+
+
+#each age modeled separately===========
+
+
+# age 3
+
+lag.null3 <- gam(log_sc_weight ~  s(sst.amj, k=4) + te(LATITUDE, LONGITUDE) + s(julian, k = 4) + s(prevage_lastyr_weight_anom, k=4), data=lag3only)
+gam.check(lag.null3) #
+summary(lag.null3)
+plot(lag.null3) #
+draw(lag.null3, select=1)
+draw(lag.null3, select=2)
+draw(lag.null3, select=3)
+draw(lag.null3, select=4)
+
+visreg(lag.null3, "sst.amj", scale="response",ylab="Log of scaled weight-at-age", xlab="April-June SST")
+
+AICc(lag.null3) #
+
+AICc_3lag <- AICc(lag.null3) #
+AICc_3lag # 
+
+
+# age 4
+
+lag.null4 <- gam(log_sc_weight ~  s(sst.amj, k=4) + te(LATITUDE, LONGITUDE) + s(julian, k = 4) + s(prevage_lastyr_weight_anom, k=4), data=lag4only)
+gam.check(lag.null4) #
+summary(lag.null4)
+plot(lag.null4) #
+draw(lag.null4, select=1)
+draw(lag.null4, select=2)
+draw(lag.null4, select=3)
+draw(lag.null4, select=4)
+
+visreg(lag.null4, "sst.amj", scale="response",ylab="Log of scaled weight-at-age", xlab="April-June SST")
+
+AICc(lag.null4) #
+
+AICc_4lag <- AICc(lag.null4) #
+AICc_4lag # 
+
+
+
+# age 5
+
+lag.null5 <- gam(log_sc_weight ~  s(sst.amj, k=4) + te(LATITUDE, LONGITUDE) + s(julian, k = 4) + s(prevage_lastyr_weight_anom, k=4), data=lag5only)
+gam.check(lag.null5) #
+summary(lag.null5)
+plot(lag.null5) #
+draw(lag.null5, select=1)
+draw(lag.null5, select=2)
+draw(lag.null5, select=3)
+draw(lag.null5, select=4)
+
+visreg(lag.null5, "sst.amj", scale="response",ylab="Log of scaled weight-at-age", xlab="April-June SST")
+
+AICc(lag.null5) #
+
+AICc_5lag <- AICc(lag.null5) #
+AICc_5lag # 
+
+
+# age 6
+
+lag.null6 <- gam(log_sc_weight ~  s(sst.amj, k=4) + te(LATITUDE, LONGITUDE) + s(julian, k = 4) + s(prevage_lastyr_weight_anom, k=4), data=lag6only)
+gam.check(lag.null6) #
+summary(lag.null6)
+plot(lag.null6) #
+draw(lag.null6, select=1)
+draw(lag.null6, select=2)
+draw(lag.null6, select=3)
+draw(lag.null6, select=4)
+
+visreg(lag.null6, "sst.amj", scale="response",ylab="Log of scaled weight-at-age", xlab="April-June SST")
+
+AICc(lag.null6) #
+
+AICc_6lag <- AICc(lag.null6) #
+AICc_6lag # 
+
+
+# age 7
+
+lag.null7 <- gam(log_sc_weight ~  s(sst.amj, k=4) + te(LATITUDE, LONGITUDE) + s(julian, k = 4) + s(prevage_lastyr_weight_anom, k=4), data=lag7only)
+gam.check(lag.null7) #
+summary(lag.null7)
+plot(lag.null7) #
+draw(lag.null7, select=1)
+draw(lag.null7, select=2)
+draw(lag.null7, select=3)
+draw(lag.null7, select=4)
+
+visreg(lag.null7, "sst.amj", scale="response",ylab="Log of scaled weight-at-age", xlab="April-June SST")
+
+AICc(lag.null7) #
+
+AICc_7lag <- AICc(lag.null7) #
+AICc_7lag # 
+
+
+# age 8
+
+lag.null8 <- gam(log_sc_weight ~  s(sst.amj, k=4) + te(LATITUDE, LONGITUDE) + s(julian, k = 4) + s(prevage_lastyr_weight_anom, k=4), data=lag8only)
+gam.check(lag.null8) #
+summary(lag.null8)
+plot(lag.null8) #
+draw(lag.null8, select=1)
+draw(lag.null8, select=2)
+draw(lag.null8, select=3)
+draw(lag.null8, select=4)
+
+visreg(lag.null8, "sst.amj", scale="response",ylab="Log of scaled weight-at-age", xlab="April-June SST")
+
+AICc(lag.null8) #
+
+AICc_8lag <- AICc(lag.null8) #
+AICc_8lag # 
+
+
+# age 9
+
+lag.null9 <- gam(log_sc_weight ~  s(sst.amj, k=4) + te(LATITUDE, LONGITUDE) + s(julian, k = 4) + s(prevage_lastyr_weight_anom, k=4), data=lag9only)
+gam.check(lag.null9) #
+summary(lag.null9)
+plot(lag.null9) #
+draw(lag.null9, select=1)
+draw(lag.null9, select=2)
+draw(lag.null9, select=3)
+draw(lag.null9, select=4)
+
+visreg(lag.null9, "sst.amj", scale="response",ylab="Log of scaled weight-at-age", xlab="April-June SST")
+
+AICc(lag.null9) #
+
+AICc_9lag <- AICc(lag.null9) #
+AICc_9lag # 
+
+
+
+# age 10
+
+lag.null10 <- gam(log_sc_weight ~  s(sst.amj, k=4) + te(LATITUDE, LONGITUDE) + s(julian, k = 4) + s(prevage_lastyr_weight_anom, k=4), data=lag10only)
+gam.check(lag.null10) #
+summary(lag.null10)
+plot(lag.null10) #
+draw(lag.null10, select=1)
+draw(lag.null10, select=2)
+draw(lag.null10, select=3)
+draw(lag.null10, select=4)
+
+visreg(lag.null10, "sst.amj", scale="response",ylab="Log of scaled weight-at-age", xlab="April-June SST")
+
+AICc(lag.null10) #
+
+AICc_10lag <- AICc(lag.null10) #
+AICc_10lag # 
+
+
+# age 11
+
+lag.null11 <- gam(log_sc_weight ~  s(sst.amj, k=4) + te(LATITUDE, LONGITUDE) + s(julian, k = 4) + s(prevage_lastyr_weight_anom, k=4), data=lag11only)
+gam.check(lag.null11) #
+summary(lag.null11)
+plot(lag.null11) #
+draw(lag.null11, select=1)
+draw(lag.null11, select=2)
+draw(lag.null11, select=3)
+draw(lag.null11, select=4)
+
+visreg(lag.null11, "sst.amj", scale="response",ylab="Log of scaled weight-at-age", xlab="April-June SST")
+
+AICc(lag.null11) #
+
+AICc_11lag <- AICc(lag.null11) #
+AICc_11lag # 
+
+
+# age 12
+
+lag.null12 <- gam(log_sc_weight ~  s(sst.amj, k=4) + te(LATITUDE, LONGITUDE) + s(julian, k = 4) + s(prevage_lastyr_weight_anom, k=4), data=lag12only)
+gam.check(lag.null12) #
+summary(lag.null12)
+plot(lag.null12) #
+draw(lag.null12, select=1)
+draw(lag.null12, select=2)
+draw(lag.null12, select=3)
+draw(lag.null12, select=4)
+
+visreg(lag.null12, "sst.amj", scale="response",ylab="Log of scaled weight-at-age", xlab="April-June SST")
+
+AICc(lag.null12) #
+
+AICc_12lag <- AICc(lag.null12) #
+AICc_12lag # 
+
+
+
+# age 13
+
+lag.null13 <- gam(log_sc_weight ~  s(sst.amj, k=4) + te(LATITUDE, LONGITUDE) + s(julian, k = 4) + s(prevage_lastyr_weight_anom, k=4), data=lag13only)
+gam.check(lag.null13) #
+summary(lag.null13)
+plot(lag.null13) #
+draw(lag.null13, select=1)
+draw(lag.null13, select=2)
+draw(lag.null13, select=3)
+draw(lag.null13, select=4)
+
+visreg(lag.null13, "sst.amj", scale="response",ylab="Log of scaled weight-at-age", xlab="April-June SST")
+
+AICc(lag.null13) #
+
+AICc_13lag <- AICc(lag.null13) #
+AICc_13lag # 
 
 
 
