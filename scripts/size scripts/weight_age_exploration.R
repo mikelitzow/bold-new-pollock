@@ -77,7 +77,7 @@ amj.ts <- ggplot(clim.dat, aes(year, south.sst.amj)) +
   geom_line() +
   geom_point()
 
-amj.ts
+amj.ts + ylab("April-June SST") + xlab("Year") + theme_bw()
 
 png("./figs/winter_spring_ebs_sst_plots.png", width=6, height = 3, units='in', res=300)
 
@@ -674,7 +674,7 @@ draw(lag.null1, select=2)
 draw(lag.null1, select=3)
 draw(lag.null1, select=4)
 
-visreg(lag.null1, "sst.amj", scale="response",ylab="Log of scaled weight-at-age", xlab="April-June SST")
+v1 <- visreg(lag.null1, "sst.amj", scale="response",ylab="Log of scaled weight-at-age", xlab="April-June SST")
 
 
 AICc(lag.null1) #
@@ -694,7 +694,7 @@ draw(lag.null2, select=2)
 draw(lag.null2, select=3)
 draw(lag.null2, select=4)
 
-visreg(lag.null2, "sst.amj", scale="response",ylab="Log of scaled weight-at-age", xlab="April-June SST")
+v2 <- visreg(lag.null2, "sst.amj", scale="response",ylab="Log of scaled weight-at-age", xlab="April-June SST")
 
 AICc(lag.null2) #
 
@@ -793,7 +793,7 @@ draw(lag.null3, select=2)
 draw(lag.null3, select=3)
 draw(lag.null3, select=4)
 
-visreg(lag.null3, "sst.amj", scale="response",ylab="Log of scaled weight-at-age", xlab="April-June SST")
+v3 <- visreg(lag.null3, "sst.amj", scale="response",ylab="Log of scaled weight-at-age", xlab="April-June SST")
 
 AICc(lag.null3) #
 
@@ -812,7 +812,7 @@ draw(lag.null4, select=2)
 draw(lag.null4, select=3)
 draw(lag.null4, select=4)
 
-visreg(lag.null4, "sst.amj", scale="response",ylab="Log of scaled weight-at-age", xlab="April-June SST")
+v4 <- visreg(lag.null4, "sst.amj", scale="response",ylab="Log of scaled weight-at-age", xlab="April-June SST")
 
 AICc(lag.null4) #
 
@@ -832,7 +832,7 @@ draw(lag.null5, select=2)
 draw(lag.null5, select=3)
 draw(lag.null5, select=4)
 
-visreg(lag.null5, "sst.amj", scale="response",ylab="Log of scaled weight-at-age", xlab="April-June SST")
+v5 <- visreg(lag.null5, "sst.amj", scale="response",ylab="Log of scaled weight-at-age", xlab="April-June SST")
 
 AICc(lag.null5) #
 
@@ -851,7 +851,7 @@ draw(lag.null6, select=2)
 draw(lag.null6, select=3)
 draw(lag.null6, select=4)
 
-visreg(lag.null6, "sst.amj", scale="response",ylab="Log of scaled weight-at-age", xlab="April-June SST")
+v6 <- visreg(lag.null6, "sst.amj", scale="response",ylab="Log of scaled weight-at-age", xlab="April-June SST")
 
 AICc(lag.null6) #
 
@@ -870,7 +870,7 @@ draw(lag.null7, select=2)
 draw(lag.null7, select=3)
 draw(lag.null7, select=4)
 
-visreg(lag.null7, "sst.amj", scale="response",ylab="Log of scaled weight-at-age", xlab="April-June SST")
+v7 <- visreg(lag.null7, "sst.amj", scale="response",ylab="Log of scaled weight-at-age", xlab="April-June SST")
 
 AICc(lag.null7) #
 
@@ -889,7 +889,7 @@ draw(lag.null8, select=2)
 draw(lag.null8, select=3)
 draw(lag.null8, select=4)
 
-visreg(lag.null8, "sst.amj", scale="response",ylab="Log of scaled weight-at-age", xlab="April-June SST")
+v8 <- visreg(lag.null8, "sst.amj", scale="response",ylab="Log of scaled weight-at-age", xlab="April-June SST")
 
 AICc(lag.null8) #
 
@@ -908,7 +908,7 @@ draw(lag.null9, select=2)
 draw(lag.null9, select=3)
 draw(lag.null9, select=4)
 
-visreg(lag.null9, "sst.amj", scale="response",ylab="Log of scaled weight-at-age", xlab="April-June SST")
+v9 <- visreg(lag.null9, "sst.amj", scale="response",ylab="Log of scaled weight-at-age", xlab="April-June SST")
 
 AICc(lag.null9) #
 
@@ -928,7 +928,7 @@ draw(lag.null10, select=2)
 draw(lag.null10, select=3)
 draw(lag.null10, select=4)
 
-visreg(lag.null10, "sst.amj", scale="response",ylab="Log of scaled weight-at-age", xlab="April-June SST")
+v10 <- visreg(lag.null10, "sst.amj", scale="response",ylab="Log of scaled weight-at-age", xlab="April-June SST")
 
 AICc(lag.null10) #
 
@@ -992,6 +992,61 @@ AICc(lag.null13) #
 
 AICc_13lag <- AICc(lag.null13) #
 AICc_13lag # 
+
+
+#plot each age models======
+
+# vv2 <- visregList(v10, v9, v8, v7, v6, v5, v4, v3, v2,
+                # #  v2, v3, v4, v5, v6, v7, v8, v9, v10,
+                #   collapse=TRUE,
+                #   labels=c("Age 10", "Age 9", "Age 8",
+                #            "Age 7", "Age 6", "Age 5",
+                #            "Age 4", "Age 3", "Age 2"))
+                           
+vv2 <- visregList(v8, v9, v10, 
+                  v5, v6, v7, 
+                  v2, v3, v4,
+  collapse=TRUE,
+  labels=c("Age 8", "Age 9", "Age 10",
+           "Age 5", "Age 6", "Age 7",
+           "Age 2", "Age 3", "Age 4"))
+
+par(mfrow=c(4,3), mar = c(4,4,4,4))
+plot(vv2,
+     ylab="Log weight at age (scaled anomaly)",
+     xlab="April-June SST")
+
+
+vv3 <- visregList(v1, 
+  v2, v3, v4, v5, v6, v7, v8, v9, v10,
+  collapse=FALSE
+  ))
+par(mfrow=c(4,3), mar = c(4,4,4,4))
+plot(vv3)
+
+
+#multi-panel latxlong
+library(cowplot)
+
+cc1 <- draw(lag.null1, select=2)
+cc2 <- draw(lag.null2, select=2)
+cc3 <- draw(lag.null3, select=2)
+cc4 <- draw(lag.null4, select=2)
+cc5 <- draw(lag.null5, select=2)
+cc6 <- draw(lag.null6, select=2)
+cc7 <- draw(lag.null7, select=2)
+cc8 <- draw(lag.null8, select=2)
+cc9 <- draw(lag.null9, select=2)
+cc10 <- draw(lag.null10, select=2)
+
+plot_grid(cc1, cc2, cc3,
+          cc4, cc5, cc6, cc7,
+          cc8, cc9, cc10, 
+          labels = c('Age 1', 'Age 2', 'Age 3', 'Age 4', 'Age 5', 'Age 6',
+                     'Age 7', 'Age 8', 'Age 9', 'Age 10'), label_size = 12)
+
+c1 <- getViz(lag.null1)
+plot(sm(c1, 2)) + l_fitRaster() + l_fitContour() + l_points()
 
 
 
