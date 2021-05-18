@@ -665,7 +665,7 @@ lag13only <- lagdat[which(lagdat$AGE==13),]
 # age 1
 #age 1 has to be different because no previous year
 lag1 <- lag12[which(lag12$AGE==1),]
-lag.null1 <- gam(log_sc_weight ~ s(sst.amj, k=4) + te(LATITUDE, LONGITUDE) + s(julian, k = 4) + s(sameage_lastyr_weight_anom, k=4), data=lag1, method="REML")
+lag.null1 <- gam(log_sc_weight ~ s(sst.amj, k=4) + te(LONGITUDE, LATITUDE) + s(julian, k = 4) + s(sameage_lastyr_weight_anom, k=4), data=lag1, method="REML")
 gam.check(lag.null1) #
 summary(lag.null1) #wow R2 SO MUCH BETTER
 plot(lag.null1) #v wiggly
@@ -682,10 +682,28 @@ AICc(lag.null1) #
 AICc_1lag <- AICc(lag.null1) #
 AICc_1lag # 
 
+R2.a1 <- 1-var(residuals(lag.null1))/(var(model.response(model.frame(lag.null1))))
+
+lag.null1.nosst <- gam(log_sc_weight ~   te(LONGITUDE, LATITUDE) + s(julian, k = 4) + s(sameage_lastyr_weight_anom, k=4), data=lag1)
+R2.a1.nosst <- 1-var(residuals(lag.null1.nosst))/(var(model.response(model.frame(lag.null1.nosst))))
+R2.a1 - R2.a1.nosst 
+
+lag.null1.nolatlong <- gam(log_sc_weight ~  s(sst.amj, k=4) +  s(julian, k = 4) + s(sameage_lastyr_weight_anom, k=4), data=lag1)
+R2.a1.nolatlong <- 1-var(residuals(lag.null1.nolatlong))/(var(model.response(model.frame(lag.null1.nolatlong))))
+R2.a1 - R2.a1.nolatlong 
+
+lag.null1.nojul <- gam(log_sc_weight ~  s(sst.amj, k=4) + te(LONGITUDE, LATITUDE) + s(sameage_lastyr_weight_anom, k=4), data=lag1)
+R2.a1.nojul <- 1-var(residuals(lag.null1.nojul))/(var(model.response(model.frame(lag.null1.nojul))))
+R2.a1 - R2.a1.nojul 
+
+lag.null1.nolag <- gam(log_sc_weight ~  s(sst.amj, k=4) + te(LONGITUDE, LATITUDE) + s(julian, k = 4) + s(sameage_lastyr_weight_anom, k=4), data=lag1)
+R2.a1.nolag <- 1-var(residuals(lag.null1.nolag))/(var(model.response(model.frame(lag.null1.nolag))))
+R2.a1 - R2.a1.nolag 
+
 
 # age 2
 lag2 <- lag12[which(lag12$AGE==2),]
-lag.null2 <- gam(log_sc_weight ~  s(sst.amj, k=4) + te(LATITUDE, LONGITUDE) + s(julian, k = 4) + s(prevage_lastyr_weight_anom, k=4), data=lag2)
+lag.null2 <- gam(log_sc_weight ~  s(sst.amj, k=4) + te(LONGITUDE, LATITUDE) + s(julian, k = 4) + s(prevage_lastyr_weight_anom, k=4), data=lag2)
 gam.check(lag.null2) #
 summary(lag.null2)
 plot(lag.null2) #v wiggly
@@ -701,9 +719,27 @@ AICc(lag.null2) #
 AICc_2lag <- AICc(lag.null2) #
 AICc_2lag # 
 
+R2.a2 <- 1-var(residuals(lag.null2))/(var(model.response(model.frame(lag.null2))))
+
+lag.null2.nosst <- gam(log_sc_weight ~   te(LONGITUDE, LATITUDE) + s(julian, k = 4) + s(prevage_lastyr_weight_anom, k=4), data=lag2)
+R2.a2.nosst <- 1-var(residuals(lag.null2.nosst))/(var(model.response(model.frame(lag.null2.nosst))))
+R2.a2 - R2.a2.nosst 
+
+lag.null2.nolatlong <- gam(log_sc_weight ~  s(sst.amj, k=4) +  s(julian, k = 4) + s(prevage_lastyr_weight_anom, k=4), data=lag2)
+R2.a2.nolatlong <- 1-var(residuals(lag.null2.nolatlong))/(var(model.response(model.frame(lag.null2.nolatlong))))
+R2.a2 - R2.a2.nolatlong 
+
+lag.null2.nojul <- gam(log_sc_weight ~  s(sst.amj, k=4) + te(LONGITUDE, LATITUDE) + s(prevage_lastyr_weight_anom, k=4), data=lag2)
+R2.a2.nojul <- 1-var(residuals(lag.null2.nojul))/(var(model.response(model.frame(lag.null2.nojul))))
+R2.a2 - R2.a2.nojul 
+
+lag.null2.nolag <- gam(log_sc_weight ~  s(sst.amj, k=4) + te(LONGITUDE, LATITUDE) + s(julian, k = 4) + s(prevage_lastyr_weight_anom, k=4), data=lag2)
+R2.a2.nolag <- 1-var(residuals(lag.null2.nolag))/(var(model.response(model.frame(lag.null2.nolag))))
+R2.a2 - R2.a2.nolag 
+
 
 # age 3-4
-lag.null3 <- gam(log_sc_weight ~ as.factor(AGE) + s(sst.amj, k=4) + te(LATITUDE, LONGITUDE) + s(julian, k = 4) + s(prevage_lastyr_weight_anom, k=4), data=lag34, method="REML")
+lag.null3 <- gam(log_sc_weight ~ as.factor(AGE) + s(sst.amj, k=4) + te(LONGITUDE, LATITUDE) + s(julian, k = 4) + s(prevage_lastyr_weight_anom, k=4), data=lag34, method="REML")
 gam.check(lag.null3)
 summary(lag.null3)
 plot(lag.null3)
@@ -721,7 +757,7 @@ AICc_3.4lag #
 
 
 # age 5-8
-lag.null5 <- gam(log_sc_weight ~ as.factor(AGE) + s(sst.amj, k=4) + te(LATITUDE, LONGITUDE) + s(julian, k = 4) + s(prevage_lastyr_weight_anom, k=4), data=lag58)
+lag.null5 <- gam(log_sc_weight ~ as.factor(AGE) + s(sst.amj, k=4) + te(LONGITUDE, LATITUDE) + s(julian, k = 4) + s(prevage_lastyr_weight_anom, k=4), data=lag58)
 gam.check(lag.null5)
 summary(lag.null5)
 plot(lag.null5)
@@ -743,7 +779,7 @@ AICc_5.8lag # null better
 
 
 # age 9-12
-lag.null9 <- gam(log_sc_weight ~ as.factor(AGE) + s(sst.amj, k=3) + te(LATITUDE, LONGITUDE) + s(julian, k = 4) + s(prevage_lastyr_weight_anom, k=4), data=lag912)
+lag.null9 <- gam(log_sc_weight ~ as.factor(AGE) + s(sst.amj, k=3) + te(LONGITUDE, LATITUDE) + s(julian, k = 4) + s(prevage_lastyr_weight_anom, k=4), data=lag912)
 gam.check(lag.null9) #hessian good at k=3 for sst, bad above that
 summary(lag.null9)
 plot(lag.null9)
@@ -764,7 +800,7 @@ AICc_9.12lag # null better
 
 
 # age 13-15
-lag.null13 <- gam(log_sc_weight ~ as.factor(AGE) + s(sst.amj, k=4) + te(LATITUDE, LONGITUDE) + s(julian, k = 4) + s(prevage_lastyr_weight_anom, k=4), data=lag1315, method="REML")
+lag.null13 <- gam(log_sc_weight ~ as.factor(AGE) + s(sst.amj, k=4) + te(LONGITUDE, LATITUDE) + s(julian, k = 4) + s(prevage_lastyr_weight_anom, k=4), data=lag1315, method="REML")
 gam.check(lag.null13)
 summary(lag.null13)
 plot(lag.null13)
@@ -784,7 +820,7 @@ AICc_13.15lag #
 
 # age 3
 
-lag.null3 <- gam(log_sc_weight ~  s(sst.amj, k=4) + te(LATITUDE, LONGITUDE) + s(julian, k = 4) + s(prevage_lastyr_weight_anom, k=4), data=lag3only)
+lag.null3 <- gam(log_sc_weight ~  s(sst.amj, k=4) + te(LONGITUDE, LATITUDE) + s(julian, k = 4) + s(prevage_lastyr_weight_anom, k=4), data=lag3only)
 gam.check(lag.null3) #
 summary(lag.null3)
 plot(lag.null3) #
@@ -800,10 +836,28 @@ AICc(lag.null3) #
 AICc_3lag <- AICc(lag.null3) #
 AICc_3lag # 
 
+R2.a3 <- 1-var(residuals(lag.null3))/(var(model.response(model.frame(lag.null3))))
+
+lag.null3.nosst <- gam(log_sc_weight ~   te(LONGITUDE, LATITUDE) + s(julian, k = 4) + s(prevage_lastyr_weight_anom, k=4), data=lag3only)
+R2.a3.nosst <- 1-var(residuals(lag.null3.nosst))/(var(model.response(model.frame(lag.null3.nosst))))
+R2.a3 - R2.a3.nosst 
+
+lag.null3.nolatlong <- gam(log_sc_weight ~  s(sst.amj, k=4) +  s(julian, k = 4) + s(prevage_lastyr_weight_anom, k=4), data=lag3only)
+R2.a3.nolatlong <- 1-var(residuals(lag.null3.nolatlong))/(var(model.response(model.frame(lag.null3.nolatlong))))
+R2.a3 - R2.a3.nolatlong 
+
+lag.null3.nojul <- gam(log_sc_weight ~  s(sst.amj, k=4) + te(LONGITUDE, LATITUDE) + s(prevage_lastyr_weight_anom, k=4), data=lag3only)
+R2.a3.nojul <- 1-var(residuals(lag.null3.nojul))/(var(model.response(model.frame(lag.null3.nojul))))
+R2.a3 - R2.a3.nojul 
+
+lag.null3.nolag <- gam(log_sc_weight ~  s(sst.amj, k=4) + te(LONGITUDE, LATITUDE) + s(julian, k = 4) + s(prevage_lastyr_weight_anom, k=4), data=lag3only)
+R2.a3.nolag <- 1-var(residuals(lag.null3.nolag))/(var(model.response(model.frame(lag.null3.nolag))))
+R2.a3 - R2.a3.nolag 
+
 
 # age 4
 
-lag.null4 <- gam(log_sc_weight ~  s(sst.amj, k=4) + te(LATITUDE, LONGITUDE) + s(julian, k = 4) + s(prevage_lastyr_weight_anom, k=4), data=lag4only)
+lag.null4 <- gam(log_sc_weight ~  s(sst.amj, k=4) + te(LONGITUDE, LATITUDE) + s(julian, k = 4) + s(prevage_lastyr_weight_anom, k=4), data=lag4only)
 gam.check(lag.null4) #
 summary(lag.null4)
 plot(lag.null4) #
@@ -819,11 +873,28 @@ AICc(lag.null4) #
 AICc_4lag <- AICc(lag.null4) #
 AICc_4lag # 
 
+R2.a4 <- 1-var(residuals(lag.null4))/(var(model.response(model.frame(lag.null4))))
+
+lag.null4.nosst <- gam(log_sc_weight ~   te(LONGITUDE, LATITUDE) + s(julian, k = 4) + s(prevage_lastyr_weight_anom, k=4), data=lag4only)
+R2.a4.nosst <- 1-var(residuals(lag.null4.nosst))/(var(model.response(model.frame(lag.null4.nosst))))
+R2.a4 - R2.a4.nosst 
+
+lag.null4.nolatlong <- gam(log_sc_weight ~  s(sst.amj, k=4) +  s(julian, k = 4) + s(prevage_lastyr_weight_anom, k=4), data=lag4only)
+R2.a4.nolatlong <- 1-var(residuals(lag.null4.nolatlong))/(var(model.response(model.frame(lag.null4.nolatlong))))
+R2.a4 - R2.a4.nolatlong 
+
+lag.null4.nojul <- gam(log_sc_weight ~  s(sst.amj, k=4) + te(LONGITUDE, LATITUDE) + s(prevage_lastyr_weight_anom, k=4), data=lag4only)
+R2.a4.nojul <- 1-var(residuals(lag.null4.nojul))/(var(model.response(model.frame(lag.null4.nojul))))
+R2.a4 - R2.a4.nojul 
+
+lag.null4.nolag <- gam(log_sc_weight ~  s(sst.amj, k=4) + te(LONGITUDE, LATITUDE) + s(julian, k = 4) + s(prevage_lastyr_weight_anom, k=4), data=lag4only)
+R2.a4.nolag <- 1-var(residuals(lag.null4.nolag))/(var(model.response(model.frame(lag.null4.nolag))))
+R2.a4 - R2.a4.nolag 
 
 
 # age 5
 
-lag.null5 <- gam(log_sc_weight ~  s(sst.amj, k=4) + te(LATITUDE, LONGITUDE) + s(julian, k = 4) + s(prevage_lastyr_weight_anom, k=4), data=lag5only)
+lag.null5 <- gam(log_sc_weight ~  s(sst.amj, k=4) + te(LONGITUDE, LATITUDE) + s(julian, k = 4) + s(prevage_lastyr_weight_anom, k=4), data=lag5only)
 gam.check(lag.null5) #
 summary(lag.null5)
 plot(lag.null5) #
@@ -839,10 +910,28 @@ AICc(lag.null5) #
 AICc_5lag <- AICc(lag.null5) #
 AICc_5lag # 
 
+R2.a5 <- 1-var(residuals(lag.null5))/(var(model.response(model.frame(lag.null5))))
+
+lag.null5.nosst <- gam(log_sc_weight ~   te(LONGITUDE, LATITUDE) + s(julian, k = 4) + s(prevage_lastyr_weight_anom, k=4), data=lag5only)
+R2.a5.nosst <- 1-var(residuals(lag.null5.nosst))/(var(model.response(model.frame(lag.null5.nosst))))
+R2.a5 - R2.a5.nosst 
+
+lag.null5.nolatlong <- gam(log_sc_weight ~  s(sst.amj, k=4) +  s(julian, k = 4) + s(prevage_lastyr_weight_anom, k=4), data=lag5only)
+R2.a5.nolatlong <- 1-var(residuals(lag.null5.nolatlong))/(var(model.response(model.frame(lag.null5.nolatlong))))
+R2.a5 - R2.a5.nolatlong 
+
+lag.null5.nojul <- gam(log_sc_weight ~  s(sst.amj, k=4) + te(LONGITUDE, LATITUDE) + s(prevage_lastyr_weight_anom, k=4), data=lag5only)
+R2.a5.nojul <- 1-var(residuals(lag.null5.nojul))/(var(model.response(model.frame(lag.null5.nojul))))
+R2.a5 - R2.a5.nojul 
+
+lag.null5.nolag <- gam(log_sc_weight ~  s(sst.amj, k=4) + te(LONGITUDE, LATITUDE) + s(julian, k = 4) + s(prevage_lastyr_weight_anom, k=4), data=lag5only)
+R2.a5.nolag <- 1-var(residuals(lag.null5.nolag))/(var(model.response(model.frame(lag.null5.nolag))))
+R2.a5 - R2.a5.nolag 
+
 
 # age 6
 
-lag.null6 <- gam(log_sc_weight ~  s(sst.amj, k=4) + te(LATITUDE, LONGITUDE) + s(julian, k = 4) + s(prevage_lastyr_weight_anom, k=4), data=lag6only)
+lag.null6 <- gam(log_sc_weight ~  s(sst.amj, k=4) + te(LONGITUDE, LATITUDE) + s(julian, k = 4) + s(prevage_lastyr_weight_anom, k=4), data=lag6only)
 gam.check(lag.null6) #
 summary(lag.null6)
 plot(lag.null6) #
@@ -858,10 +947,28 @@ AICc(lag.null6) #
 AICc_6lag <- AICc(lag.null6) #
 AICc_6lag # 
 
+R2.a6 <- 1-var(residuals(lag.null6))/(var(model.response(model.frame(lag.null6))))
+
+lag.null6.nosst <- gam(log_sc_weight ~   te(LONGITUDE, LATITUDE) + s(julian, k = 4) + s(prevage_lastyr_weight_anom, k=4), data=lag6only)
+R2.a6.nosst <- 1-var(residuals(lag.null6.nosst))/(var(model.response(model.frame(lag.null6.nosst))))
+R2.a6 - R2.a6.nosst 
+
+lag.null6.nolatlong <- gam(log_sc_weight ~  s(sst.amj, k=4) +  s(julian, k = 4) + s(prevage_lastyr_weight_anom, k=4), data=lag6only)
+R2.a6.nolatlong <- 1-var(residuals(lag.null6.nolatlong))/(var(model.response(model.frame(lag.null6.nolatlong))))
+R2.a6 - R2.a6.nolatlong 
+
+lag.null6.nojul <- gam(log_sc_weight ~  s(sst.amj, k=4) + te(LONGITUDE, LATITUDE) + s(prevage_lastyr_weight_anom, k=4), data=lag6only)
+R2.a6.nojul <- 1-var(residuals(lag.null6.nojul))/(var(model.response(model.frame(lag.null6.nojul))))
+R2.a6 - R2.a6.nojul 
+
+lag.null6.nolag <- gam(log_sc_weight ~  s(sst.amj, k=4) + te(LONGITUDE, LATITUDE) + s(julian, k = 4) + s(prevage_lastyr_weight_anom, k=4), data=lag6only)
+R2.a6.nolag <- 1-var(residuals(lag.null6.nolag))/(var(model.response(model.frame(lag.null6.nolag))))
+R2.a6 - R2.a6.nolag 
+
 
 # age 7
 
-lag.null7 <- gam(log_sc_weight ~  s(sst.amj, k=4) + te(LATITUDE, LONGITUDE) + s(julian, k = 4) + s(prevage_lastyr_weight_anom, k=4), data=lag7only)
+lag.null7 <- gam(log_sc_weight ~  s(sst.amj, k=4) + te(LONGITUDE, LATITUDE) + s(julian, k = 4) + s(prevage_lastyr_weight_anom, k=4), data=lag7only)
 gam.check(lag.null7) #
 summary(lag.null7)
 plot(lag.null7) #
@@ -877,10 +984,28 @@ AICc(lag.null7) #
 AICc_7lag <- AICc(lag.null7) #
 AICc_7lag # 
 
+R2.a7 <- 1-var(residuals(lag.null7))/(var(model.response(model.frame(lag.null7))))
+
+lag.null7.nosst <- gam(log_sc_weight ~   te(LONGITUDE, LATITUDE) + s(julian, k = 4) + s(prevage_lastyr_weight_anom, k=4), data=lag7only)
+R2.a7.nosst <- 1-var(residuals(lag.null7.nosst))/(var(model.response(model.frame(lag.null7.nosst))))
+R2.a7 - R2.a7.nosst 
+
+lag.null7.nolatlong <- gam(log_sc_weight ~  s(sst.amj, k=4) +  s(julian, k = 4) + s(prevage_lastyr_weight_anom, k=4), data=lag7only)
+R2.a7.nolatlong <- 1-var(residuals(lag.null7.nolatlong))/(var(model.response(model.frame(lag.null7.nolatlong))))
+R2.a7 - R2.a7.nolatlong 
+
+lag.null7.nojul <- gam(log_sc_weight ~  s(sst.amj, k=4) + te(LONGITUDE, LATITUDE) + s(prevage_lastyr_weight_anom, k=4), data=lag7only)
+R2.a7.nojul <- 1-var(residuals(lag.null7.nojul))/(var(model.response(model.frame(lag.null7.nojul))))
+R2.a7 - R2.a7.nojul 
+
+lag.null7.nolag <- gam(log_sc_weight ~  s(sst.amj, k=4) + te(LONGITUDE, LATITUDE) + s(julian, k = 4) + s(prevage_lastyr_weight_anom, k=4), data=lag7only)
+R2.a7.nolag <- 1-var(residuals(lag.null7.nolag))/(var(model.response(model.frame(lag.null7.nolag))))
+R2.a7 - R2.a7.nolag 
+
 
 # age 8
 
-lag.null8 <- gam(log_sc_weight ~  s(sst.amj, k=4) + te(LATITUDE, LONGITUDE) + s(julian, k = 4) + s(prevage_lastyr_weight_anom, k=4), data=lag8only)
+lag.null8 <- gam(log_sc_weight ~  s(sst.amj, k=4) + te(LONGITUDE, LATITUDE) + s(julian, k = 4) + s(prevage_lastyr_weight_anom, k=4), data=lag8only)
 gam.check(lag.null8) #
 summary(lag.null8)
 plot(lag.null8) #
@@ -896,10 +1021,28 @@ AICc(lag.null8) #
 AICc_8lag <- AICc(lag.null8) #
 AICc_8lag # 
 
+R2.a8 <- 1-var(residuals(lag.null8))/(var(model.response(model.frame(lag.null8))))
+
+lag.null8.nosst <- gam(log_sc_weight ~   te(LONGITUDE, LATITUDE) + s(julian, k = 4) + s(prevage_lastyr_weight_anom, k=4), data=lag8only)
+R2.a8.nosst <- 1-var(residuals(lag.null8.nosst))/(var(model.response(model.frame(lag.null8.nosst))))
+R2.a8 - R2.a8.nosst 
+
+lag.null8.nolatlong <- gam(log_sc_weight ~  s(sst.amj, k=4) +  s(julian, k = 4) + s(prevage_lastyr_weight_anom, k=4), data=lag8only)
+R2.a8.nolatlong <- 1-var(residuals(lag.null8.nolatlong))/(var(model.response(model.frame(lag.null8.nolatlong))))
+R2.a8 - R2.a8.nolatlong 
+
+lag.null8.nojul <- gam(log_sc_weight ~  s(sst.amj, k=4) + te(LONGITUDE, LATITUDE) + s(prevage_lastyr_weight_anom, k=4), data=lag8only)
+R2.a8.nojul <- 1-var(residuals(lag.null8.nojul))/(var(model.response(model.frame(lag.null8.nojul))))
+R2.a8 - R2.a8.nojul 
+
+lag.null8.nolag <- gam(log_sc_weight ~  s(sst.amj, k=4) + te(LONGITUDE, LATITUDE) + s(julian, k = 4) + s(prevage_lastyr_weight_anom, k=4), data=lag8only)
+R2.a8.nolag <- 1-var(residuals(lag.null8.nolag))/(var(model.response(model.frame(lag.null8.nolag))))
+R2.a8 - R2.a8.nolag 
+
 
 # age 9
 
-lag.null9 <- gam(log_sc_weight ~  s(sst.amj, k=4) + te(LATITUDE, LONGITUDE) + s(julian, k = 4) + s(prevage_lastyr_weight_anom, k=4), data=lag9only)
+lag.null9 <- gam(log_sc_weight ~  s(sst.amj, k=4) + te(LONGITUDE, LATITUDE) + s(julian, k = 4) + s(prevage_lastyr_weight_anom, k=4), data=lag9only)
 gam.check(lag.null9) #
 summary(lag.null9)
 plot(lag.null9) #
@@ -915,11 +1058,28 @@ AICc(lag.null9) #
 AICc_9lag <- AICc(lag.null9) #
 AICc_9lag # 
 
+R2.a9 <- 1-var(residuals(lag.null9))/(var(model.response(model.frame(lag.null9))))
+
+lag.null9.nosst <- gam(log_sc_weight ~   te(LONGITUDE, LATITUDE) + s(julian, k = 4) + s(prevage_lastyr_weight_anom, k=4), data=lag9only)
+R2.a9.nosst <- 1-var(residuals(lag.null9.nosst))/(var(model.response(model.frame(lag.null9.nosst))))
+R2.a9 - R2.a9.nosst 
+
+lag.null9.nolatlong <- gam(log_sc_weight ~  s(sst.amj, k=4) +  s(julian, k = 4) + s(prevage_lastyr_weight_anom, k=4), data=lag9only)
+R2.a9.nolatlong <- 1-var(residuals(lag.null9.nolatlong))/(var(model.response(model.frame(lag.null9.nolatlong))))
+R2.a9 - R2.a9.nolatlong 
+
+lag.null9.nojul <- gam(log_sc_weight ~  s(sst.amj, k=4) + te(LONGITUDE, LATITUDE) + s(prevage_lastyr_weight_anom, k=4), data=lag9only)
+R2.a9.nojul <- 1-var(residuals(lag.null9.nojul))/(var(model.response(model.frame(lag.null9.nojul))))
+R2.a9 - R2.a9.nojul 
+
+lag.null9.nolag <- gam(log_sc_weight ~  s(sst.amj, k=4) + te(LONGITUDE, LATITUDE) + s(julian, k = 4) + s(prevage_lastyr_weight_anom, k=4), data=lag9only)
+R2.a9.nolag <- 1-var(residuals(lag.null9.nolag))/(var(model.response(model.frame(lag.null9.nolag))))
+R2.a9 - R2.a9.nolag 
 
 
 # age 10
 
-lag.null10 <- gam(log_sc_weight ~  s(sst.amj, k=4) + te(LATITUDE, LONGITUDE) + s(julian, k = 4) + s(prevage_lastyr_weight_anom, k=4), data=lag10only)
+lag.null10 <- gam(log_sc_weight ~  s(sst.amj, k=4) + te(LONGITUDE, LATITUDE) + s(julian, k = 4) + s(prevage_lastyr_weight_anom, k=4), data=lag10only)
 gam.check(lag.null10) #
 summary(lag.null10)
 plot(lag.null10) #
@@ -935,10 +1095,28 @@ AICc(lag.null10) #
 AICc_10lag <- AICc(lag.null10) #
 AICc_10lag # 
 
+R2.a10 <- 1-var(residuals(lag.null10))/(var(model.response(model.frame(lag.null10))))
+
+lag.null10.nosst <- gam(log_sc_weight ~   te(LONGITUDE, LATITUDE) + s(julian, k = 4) + s(prevage_lastyr_weight_anom, k=4), data=lag10only)
+R2.a10.nosst <- 1-var(residuals(lag.null10.nosst))/(var(model.response(model.frame(lag.null10.nosst))))
+R2.a10 - R2.a10.nosst 
+
+lag.null10.nolatlong <- gam(log_sc_weight ~  s(sst.amj, k=4) +  s(julian, k = 4) + s(prevage_lastyr_weight_anom, k=4), data=lag10only)
+R2.a10.nolatlong <- 1-var(residuals(lag.null10.nolatlong))/(var(model.response(model.frame(lag.null10.nolatlong))))
+R2.a10 - R2.a10.nolatlong 
+
+lag.null10.nojul <- gam(log_sc_weight ~  s(sst.amj, k=4) + te(LONGITUDE, LATITUDE) + s(prevage_lastyr_weight_anom, k=4), data=lag10only)
+R2.a10.nojul <- 1-var(residuals(lag.null10.nojul))/(var(model.response(model.frame(lag.null10.nojul))))
+R2.a10 - R2.a10.nojul 
+
+lag.null10.nolag <- gam(log_sc_weight ~  s(sst.amj, k=4) + te(LONGITUDE, LATITUDE) + s(julian, k = 4) + s(prevage_lastyr_weight_anom, k=4), data=lag3only)
+R2.a10.nolag <- 1-var(residuals(lag.null10.nolag))/(var(model.response(model.frame(lag.null10.nolag))))
+R2.a10 - R2.a10.nolag 
+
 
 # age 11
 
-lag.null11 <- gam(log_sc_weight ~  s(sst.amj, k=4) + te(LATITUDE, LONGITUDE) + s(julian, k = 4) + s(prevage_lastyr_weight_anom, k=4), data=lag11only)
+lag.null11 <- gam(log_sc_weight ~  s(sst.amj, k=4) + te(LONGITUDE, LATITUDE) + s(julian, k = 4) + s(prevage_lastyr_weight_anom, k=4), data=lag11only)
 gam.check(lag.null11) #
 summary(lag.null11)
 plot(lag.null11) #
@@ -957,7 +1135,7 @@ AICc_11lag #
 
 # age 12
 
-lag.null12 <- gam(log_sc_weight ~  s(sst.amj, k=4) + te(LATITUDE, LONGITUDE) + s(julian, k = 4) + s(prevage_lastyr_weight_anom, k=4), data=lag12only)
+lag.null12 <- gam(log_sc_weight ~  s(sst.amj, k=4) + te(LONGITUDE, LATITUDE) + s(julian, k = 4) + s(prevage_lastyr_weight_anom, k=4), data=lag12only)
 gam.check(lag.null12) #
 summary(lag.null12)
 plot(lag.null12) #
@@ -977,7 +1155,7 @@ AICc_12lag #
 
 # age 13
 
-lag.null13 <- gam(log_sc_weight ~  s(sst.amj, k=4) + te(LATITUDE, LONGITUDE) + s(julian, k = 4) + s(prevage_lastyr_weight_anom, k=4), data=lag13only)
+lag.null13 <- gam(log_sc_weight ~  s(sst.amj, k=4) + te(LONGITUDE, LATITUDE) + s(julian, k = 4) + s(prevage_lastyr_weight_anom, k=4), data=lag13only)
 gam.check(lag.null13) #
 summary(lag.null13)
 plot(lag.null13) #
@@ -986,7 +1164,7 @@ draw(lag.null13, select=2)
 draw(lag.null13, select=3)
 draw(lag.null13, select=4)
 
-visreg(lag.null13, "sst.amj", scale="response",ylab="Log of scaled weight-at-age", xlab="April-June SST")
+visreg(lag.null13, "sst.amj", scale="response",ylab="Scaled log (weight-at-age)", xlab="April-June SST")
 
 AICc(lag.null13) #
 
@@ -1013,7 +1191,7 @@ vv2 <- visregList(v8, v9, v10,
 
 par(mfrow=c(4,3), mar = c(4,4,4,4))
 plot(vv2,
-     ylab="Log weight at age (scaled anomaly)",
+     ylab="Scaled log (weight-at-age)",
      xlab="April-June SST")
 
 
@@ -1046,7 +1224,101 @@ plot_grid(cc1, cc2, cc3,
                      'Age 7', 'Age 8', 'Age 9', 'Age 10'), label_size = 12)
 
 c1 <- getViz(lag.null1)
-plot(sm(c1, 2)) + l_fitRaster() + l_fitContour() + l_points()
+pc1 <- plot(sm(c1, 2)) + l_fitRaster() + l_fitContour() + labs(title = NULL) + l_points() +
+  geom_polygon(data = map_data ("world"), 
+               aes(x=long, y = lat,group=group),fill=NA,color="black",
+               inherit.aes = F)+coord_sf(xlim = c(-177, -158.5), ylim = c(54.5, 62), expand = TRUE) 
+
+
+c2 <- getViz(lag.null2)
+pc2 <- plot(sm(c2, 2)) + l_fitRaster() + l_fitContour() + labs(title = NULL) + l_points() +
+  geom_polygon(data = map_data ("world"), 
+               aes(x=long, y = lat,group=group),fill=NA,color="black",
+               inherit.aes = F)+coord_sf(xlim = c(-177, -158.5), ylim = c(54.5, 62), expand = TRUE) 
+
+
+c3 <- getViz(lag.null3)
+pc3 <- plot(sm(c3, 2)) + l_fitRaster() + l_fitContour() + labs(title = NULL) + l_points() +
+  geom_polygon(data = map_data ("world"), 
+               aes(x=long, y = lat,group=group),fill=NA,color="black",
+               inherit.aes = F)+coord_sf(xlim = c(-177, -158.5), ylim = c(54.5, 62), expand = TRUE) 
+
+
+c4 <- getViz(lag.null4)
+pc4 <- plot(sm(c4, 2)) + l_fitRaster() + l_fitContour() + labs(title = NULL) + l_points() +
+  geom_polygon(data = map_data ("world"), 
+               aes(x=long, y = lat,group=group),fill=NA,color="black",
+               inherit.aes = F)+coord_sf(xlim = c(-177, -158.5), ylim = c(54.5, 62), expand = TRUE) 
+
+
+c5 <- getViz(lag.null5)
+pc5 <- plot(sm(c5, 2)) + l_fitRaster() + l_fitContour() + labs(title = NULL) + l_points() +
+  geom_polygon(data = map_data ("world"), 
+               aes(x=long, y = lat,group=group),fill=NA,color="black",
+               inherit.aes = F)+coord_sf(xlim = c(-177, -158.5), ylim = c(54.5, 62), expand = TRUE) 
+
+
+
+c6 <- getViz(lag.null6)
+pc6 <- plot(sm(c6, 2)) + l_fitRaster() + l_fitContour() + labs(title = NULL) + l_points() +
+  geom_polygon(data = map_data ("world"), 
+               aes(x=long, y = lat,group=group),fill=NA,color="black",
+               inherit.aes = F)+coord_sf(xlim = c(-177, -158.5), ylim = c(54.5, 62), expand = TRUE) 
+
+
+c7 <- getViz(lag.null7)
+pc7 <- plot(sm(c7, 2)) + l_fitRaster() + l_fitContour() + labs(title = NULL) + l_points() +
+  geom_polygon(data = map_data ("world"), 
+               aes(x=long, y = lat,group=group),fill=NA,color="black",
+               inherit.aes = F)+coord_sf(xlim = c(-177, -158.5), ylim = c(54.5, 62), expand = TRUE) 
+
+
+
+c8 <- getViz(lag.null8)
+pc8 <- plot(sm(c8, 2)) + l_fitRaster() + l_fitContour() + labs(title = NULL) + l_points() +
+  geom_polygon(data = map_data ("world"), 
+               aes(x=long, y = lat,group=group),fill=NA,color="black",
+               inherit.aes = F)+coord_sf(xlim = c(-177, -158.5), ylim = c(54.5, 62), expand = TRUE) 
+
+
+
+c9 <- getViz(lag.null9)
+pc9 <- plot(sm(c9, 2)) + l_fitRaster() + l_fitContour() + labs(title = NULL) + l_points() +
+  geom_polygon(data = map_data ("world"), 
+               aes(x=long, y = lat,group=group),fill=NA,color="black",
+               inherit.aes = F)+coord_sf(xlim = c(-177, -158.5), ylim = c(54.5, 62), expand = TRUE) 
+
+
+
+c10 <- getViz(lag.null10)
+pc10 <- plot(sm(c10, 2)) + l_fitRaster() + l_fitContour() + 
+  labs(title = NULL) + l_points() +
+  geom_polygon(data = map_data ("world"), 
+               aes(x=long, y = lat,group=group),fill=NA,color="black",
+               inherit.aes = F)+coord_sf(xlim = c(-177, -158.5), ylim = c(54.5, 62), expand = TRUE) 
+  # l_fitRaster(pTrans = function(.p) 0.5) + 
+  # l_fitContour() + l_points() 
+
+gridPrint(pc1, pc2, pc3, pc4, pc5,
+pc6, pc7, pc8, pc9, pc10, ncol = 3)
+
+#map for fig 1=====
+
+#all_analysis_dat required, see script 'NEBS_depth_temp_plot.R'
+ggplot(data = world) +
+  geom_sf() +
+  coord_sf(xlim = c(-178, -155), ylim = c(53, 63), expand = TRUE) +
+  annotation_scale(location = "bl", width_hint = 0.5) +
+  # geom_point(aes(LONGITUDE, LATITUDE, colour=mean_station_bottemp), data=all_analysis_dat) +   
+  # scale_colour_gradient2(low="blue", high="red", guide="colorbar") + 
+  geom_point(aes(LONGITUDE, LATITUDE), data=all_analysis_dat[which(all_analysis_dat$region=="SEBS"),]) + theme_bw() + 
+  theme( legend.position = c(0.87, 0.85), legend.key = element_blank(),
+         legend.background=element_blank()) + #geom_path(aes(x_adj,y), data=contour.lines.adj$z20, col="dark blue") +
+  geom_path(aes(x_adj,y), data=contour.lines.adj$z50, col="#9ecae1") + geom_path(aes(x_adj,y), data=contour.lines.adj$z100, col="#3182bd") +
+  geom_path(aes(x_adj,y), data=contour.lines.adj$z200, col="navy blue") #+ geom_path(aes(x_adj,y), data=contour.lines.adj$z1000, col="dark green") 
+
+
+
 
 
 
