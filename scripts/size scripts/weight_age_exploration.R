@@ -1349,11 +1349,11 @@ ggplot(data = world) +
   annotation_scale(location = "bl", width_hint = 0.5) +
   # geom_point(aes(LONGITUDE, LATITUDE, colour=mean_station_bottemp), data=all_analysis_dat) +   
   # scale_colour_gradient2(low="blue", high="red", guide="colorbar") + 
-  geom_point(aes(LONGITUDE, LATITUDE), data=all_analysis_dat[which(all_analysis_dat$region=="SEBS"),]) + theme_bw() + 
+  geom_point(aes(LONGITUDE, LATITUDE), size=0.1, data=all_analysis_dat[which(all_analysis_dat$region=="SEBS"),]) + theme_bw() + 
   theme( legend.position = c(0.87, 0.85), legend.key = element_blank(),
-         legend.background=element_blank()) + #geom_path(aes(x_adj,y), data=contour.lines.adj$z20, col="dark blue") +
-  geom_path(aes(x_adj,y), data=contour.lines.adj$z50, col="#9ecae1") + geom_path(aes(x_adj,y), data=contour.lines.adj$z100, col="#3182bd") +
-  geom_path(aes(x_adj,y), data=contour.lines.adj$z200, col="navy blue") #+ geom_path(aes(x_adj,y), data=contour.lines.adj$z1000, col="dark green") 
+         legend.background=element_blank()) #+ #geom_path(aes(x_adj,y), data=contour.lines.adj$z20, col="dark blue") +
+ # geom_path(aes(x_adj,y), data=contour.lines.adj$z50, col="#9ecae1") + geom_path(aes(x_adj,y), data=contour.lines.adj$z100, col="#3182bd") +
+ #  geom_path(aes(x_adj,y), data=contour.lines.adj$z200, col="navy blue") #+ geom_path(aes(x_adj,y), data=contour.lines.adj$z1000, col="dark green") 
 
 
 
