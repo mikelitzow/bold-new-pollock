@@ -4,6 +4,10 @@
 #hmm still seems to remove NEBS
 #use pol.trawl.dat instead from data_explor_survey.R
 
+wd <- getwd()
+sel.trawl.dat <- read.csv(paste(wd,"/data/select_trawl_dat.csv",sep=""), row.names = 1)
+
+
 #to do this I am going to need to:
 # 1 - get mean station temp for NEBS
 # 2 - figure out which stations are NEBS!
@@ -166,6 +170,10 @@ ggplot(data = world) +
          legend.background=element_blank()) + #geom_path(aes(x_adj,y), data=contour.lines.adj$z20, col="dark blue") +
   geom_path(aes(x_adj,y), data=contour.lines.adj$z50, col="#9ecae1") + geom_path(aes(x_adj,y), data=contour.lines.adj$z100, col="#3182bd") +
   geom_path(aes(x_adj,y), data=contour.lines.adj$z200, col="navy blue") #+ geom_path(aes(x_adj,y), data=contour.lines.adj$z1000, col="dark green") 
+
+
+
+
 
 
 all_analysis_dat$period <- NA
