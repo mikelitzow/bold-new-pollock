@@ -77,7 +77,7 @@ amj.ts <- ggplot(clim.dat, aes(year, south.sst.amj)) +
   geom_line() +
   geom_point()
 
-amj.ts + ylab("April-June SST") + xlab("Year") + theme_bw()
+amj.ts + ylab("April-June SST (°C)") + xlab("Year") + theme_bw()
 
 png("./figs/winter_spring_ebs_sst_plots.png", width=6, height = 3, units='in', res=300)
 
@@ -1109,7 +1109,7 @@ lag.null10.nojul <- gam(log_sc_weight ~  s(sst.amj, k=4) + te(LONGITUDE, LATITUD
 R2.a10.nojul <- 1-var(residuals(lag.null10.nojul))/(var(model.response(model.frame(lag.null10.nojul))))
 R2.a10 - R2.a10.nojul 
 
-lag.null10.nolag <- gam(log_sc_weight ~  s(sst.amj, k=4) + te(LONGITUDE, LATITUDE) + s(julian, k = 4) + s(prevage_lastyr_weight_anom, k=4), data=lag3only)
+lag.null10.nolag <- gam(log_sc_weight ~  s(sst.amj, k=4) + te(LONGITUDE, LATITUDE) + s(julian, k = 4) + s(prevage_lastyr_weight_anom, k=4), data=lag10only)
 R2.a10.nolag <- 1-var(residuals(lag.null10.nolag))/(var(model.response(model.frame(lag.null10.nolag))))
 R2.a10 - R2.a10.nolag 
 
@@ -1125,12 +1125,31 @@ draw(lag.null11, select=2)
 draw(lag.null11, select=3)
 draw(lag.null11, select=4)
 
-visreg(lag.null11, "sst.amj", scale="response",ylab="Log of scaled weight-at-age", xlab="April-June SST")
+v11 <- visreg(lag.null11, "sst.amj", scale="response",ylab="Log of scaled weight-at-age", xlab="April-June SST")
 
 AICc(lag.null11) #
 
 AICc_11lag <- AICc(lag.null11) #
 AICc_11lag # 
+
+R2.a11 <- 1-var(residuals(lag.null11))/(var(model.response(model.frame(lag.null11))))
+
+lag.null11.nosst <- gam(log_sc_weight ~   te(LONGITUDE, LATITUDE) + s(julian, k = 4) + s(prevage_lastyr_weight_anom, k=4), data=lag11only)
+R2.a11.nosst <- 1-var(residuals(lag.null11.nosst))/(var(model.response(model.frame(lag.null11.nosst))))
+R2.a11 - R2.a11.nosst 
+
+lag.null11.nolatlong <- gam(log_sc_weight ~  s(sst.amj, k=4) +  s(julian, k = 4) + s(prevage_lastyr_weight_anom, k=4), data=lag11only)
+R2.a11.nolatlong <- 1-var(residuals(lag.null11.nolatlong))/(var(model.response(model.frame(lag.null11.nolatlong))))
+R2.a11 - R2.a11.nolatlong 
+
+lag.null11.nojul <- gam(log_sc_weight ~  s(sst.amj, k=4) + te(LONGITUDE, LATITUDE) + s(prevage_lastyr_weight_anom, k=4), data=lag11only)
+R2.a11.nojul <- 1-var(residuals(lag.null11.nojul))/(var(model.response(model.frame(lag.null11.nojul))))
+R2.a11 - R2.a11.nojul 
+
+lag.null11.nolag <- gam(log_sc_weight ~  s(sst.amj, k=4) + te(LONGITUDE, LATITUDE) + s(julian, k = 4) + s(prevage_lastyr_weight_anom, k=4), data=lag11only)
+R2.a11.nolag <- 1-var(residuals(lag.null11.nolag))/(var(model.response(model.frame(lag.null11.nolag))))
+R2.a11 - R2.a11.nolag 
+
 
 
 # age 12
@@ -1144,12 +1163,31 @@ draw(lag.null12, select=2)
 draw(lag.null12, select=3)
 draw(lag.null12, select=4)
 
-visreg(lag.null12, "sst.amj", scale="response",ylab="Log of scaled weight-at-age", xlab="April-June SST")
+v12 <- visreg(lag.null12, "sst.amj", scale="response",ylab="Log of scaled weight-at-age", xlab="April-June SST")
 
 AICc(lag.null12) #
 
 AICc_12lag <- AICc(lag.null12) #
 AICc_12lag # 
+
+R2.a12 <- 1-var(residuals(lag.null12))/(var(model.response(model.frame(lag.null12))))
+
+lag.null12.nosst <- gam(log_sc_weight ~   te(LONGITUDE, LATITUDE) + s(julian, k = 4) + s(prevage_lastyr_weight_anom, k=4), data=lag12only)
+R2.a12.nosst <- 1-var(residuals(lag.null12.nosst))/(var(model.response(model.frame(lag.null12.nosst))))
+R2.a12 - R2.a12.nosst 
+
+lag.null12.nolatlong <- gam(log_sc_weight ~  s(sst.amj, k=4) +  s(julian, k = 4) + s(prevage_lastyr_weight_anom, k=4), data=lag12only)
+R2.a12.nolatlong <- 1-var(residuals(lag.null12.nolatlong))/(var(model.response(model.frame(lag.null12.nolatlong))))
+R2.a12 - R2.a12.nolatlong 
+
+lag.null12.nojul <- gam(log_sc_weight ~  s(sst.amj, k=4) + te(LONGITUDE, LATITUDE) + s(prevage_lastyr_weight_anom, k=4), data=lag12only)
+R2.a12.nojul <- 1-var(residuals(lag.null12.nojul))/(var(model.response(model.frame(lag.null12.nojul))))
+R2.a12 - R2.a12.nojul 
+
+lag.null12.nolag <- gam(log_sc_weight ~  s(sst.amj, k=4) + te(LONGITUDE, LATITUDE) + s(julian, k = 4) + s(prevage_lastyr_weight_anom, k=4), data=lag12only)
+R2.a12.nolag <- 1-var(residuals(lag.null12.nolag))/(var(model.response(model.frame(lag.null12.nolag))))
+R2.a12 - R2.a12.nolag 
+
 
 
 
@@ -1185,7 +1223,7 @@ vv2 <- visregList(v8, v9, v10,
                   v5, v6, v7, 
                   v2, v3, v4,
   collapse=TRUE,
-  labels=c("Age 8", "Age 9", "Age 10",
+  labels=c("Age 10","Age 9","Age 8", 
            "Age 5", "Age 6", "Age 7",
            "Age 2", "Age 3", "Age 4"))
 
@@ -1193,7 +1231,7 @@ par(mfrow=c(4,3), mar = c(4,4,4,4))
 plot(vv2,
      ylab="Scaled log (weight-at-age)",
      xlab="April-June SST")
-
+#OK labels are all messed up now
 
 vv3 <- visregList(v1, 
   v2, v3, v4, v5, v6, v7, v8, v9, v10,
