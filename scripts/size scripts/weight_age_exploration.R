@@ -1249,6 +1249,9 @@ plot(vv3)
 
 #multi-panel latxlong
 library(cowplot)
+library(gratia)
+library(visreg)
+library(mgcViz)
 
 cc1 <- draw(lag.null1, select=2)
 cc2 <- draw(lag.null2, select=2)
@@ -1268,35 +1271,35 @@ plot_grid(cc1, cc2, cc3,
                      'Age 7', 'Age 8', 'Age 9', 'Age 10'), label_size = 12)
 
 c1 <- getViz(lag.null1)
-pc1 <- plot(sm(c1, 2)) + l_fitRaster() + l_fitContour() + labs(title = NULL) + l_points() +
+pc1 <- plot(sm(c1, 2)) + l_fitRaster() + l_fitContour() + labs(title = NULL) + #l_points() +
   geom_polygon(data = map_data ("world"), 
                aes(x=long, y = lat,group=group),fill=NA,color="black",
                inherit.aes = F)+coord_sf(xlim = c(-177, -158.5), ylim = c(54.5, 62), expand = TRUE) 
 
 
 c2 <- getViz(lag.null2)
-pc2 <- plot(sm(c2, 2)) + l_fitRaster() + l_fitContour() + labs(title = NULL) + l_points() +
+pc2 <- plot(sm(c2, 2)) + l_fitRaster() + l_fitContour() + labs(title = NULL) + #l_points() +
   geom_polygon(data = map_data ("world"), 
                aes(x=long, y = lat,group=group),fill=NA,color="black",
                inherit.aes = F)+coord_sf(xlim = c(-177, -158.5), ylim = c(54.5, 62), expand = TRUE) 
 
 
 c3 <- getViz(lag.null3)
-pc3 <- plot(sm(c3, 2)) + l_fitRaster() + l_fitContour() + labs(title = NULL) + l_points() +
+pc3 <- plot(sm(c3, 2)) + l_fitRaster() + l_fitContour() + labs(title = NULL) + #l_points() +
   geom_polygon(data = map_data ("world"), 
                aes(x=long, y = lat,group=group),fill=NA,color="black",
                inherit.aes = F)+coord_sf(xlim = c(-177, -158.5), ylim = c(54.5, 62), expand = TRUE) 
 
 
 c4 <- getViz(lag.null4)
-pc4 <- plot(sm(c4, 2)) + l_fitRaster() + l_fitContour() + labs(title = NULL) + l_points() +
+pc4 <- plot(sm(c4, 2)) + l_fitRaster() + l_fitContour() + labs(title = NULL) + #l_points() +
   geom_polygon(data = map_data ("world"), 
                aes(x=long, y = lat,group=group),fill=NA,color="black",
                inherit.aes = F)+coord_sf(xlim = c(-177, -158.5), ylim = c(54.5, 62), expand = TRUE) 
 
 
 c5 <- getViz(lag.null5)
-pc5 <- plot(sm(c5, 2)) + l_fitRaster() + l_fitContour() + labs(title = NULL) + l_points() +
+pc5 <- plot(sm(c5, 2)) + l_fitRaster() + l_fitContour() + labs(title = NULL) + #l_points() +
   geom_polygon(data = map_data ("world"), 
                aes(x=long, y = lat,group=group),fill=NA,color="black",
                inherit.aes = F)+coord_sf(xlim = c(-177, -158.5), ylim = c(54.5, 62), expand = TRUE) 
@@ -1304,14 +1307,14 @@ pc5 <- plot(sm(c5, 2)) + l_fitRaster() + l_fitContour() + labs(title = NULL) + l
 
 
 c6 <- getViz(lag.null6)
-pc6 <- plot(sm(c6, 2)) + l_fitRaster() + l_fitContour() + labs(title = NULL) + l_points() +
+pc6 <- plot(sm(c6, 2)) + l_fitRaster() + l_fitContour() + labs(title = NULL) + #l_points() +
   geom_polygon(data = map_data ("world"), 
                aes(x=long, y = lat,group=group),fill=NA,color="black",
                inherit.aes = F)+coord_sf(xlim = c(-177, -158.5), ylim = c(54.5, 62), expand = TRUE) 
 
 
 c7 <- getViz(lag.null7)
-pc7 <- plot(sm(c7, 2)) + l_fitRaster() + l_fitContour() + labs(title = NULL) + l_points() +
+pc7 <- plot(sm(c7, 2)) + l_fitRaster() + l_fitContour() + labs(title = NULL) + #l_points() +
   geom_polygon(data = map_data ("world"), 
                aes(x=long, y = lat,group=group),fill=NA,color="black",
                inherit.aes = F)+coord_sf(xlim = c(-177, -158.5), ylim = c(54.5, 62), expand = TRUE) 
@@ -1319,7 +1322,7 @@ pc7 <- plot(sm(c7, 2)) + l_fitRaster() + l_fitContour() + labs(title = NULL) + l
 
 
 c8 <- getViz(lag.null8)
-pc8 <- plot(sm(c8, 2)) + l_fitRaster() + l_fitContour() + labs(title = NULL) + l_points() +
+pc8 <- plot(sm(c8, 2)) + l_fitRaster() + l_fitContour() + labs(title = NULL) + #l_points() +
   geom_polygon(data = map_data ("world"), 
                aes(x=long, y = lat,group=group),fill=NA,color="black",
                inherit.aes = F)+coord_sf(xlim = c(-177, -158.5), ylim = c(54.5, 62), expand = TRUE) 
@@ -1327,7 +1330,7 @@ pc8 <- plot(sm(c8, 2)) + l_fitRaster() + l_fitContour() + labs(title = NULL) + l
 
 
 c9 <- getViz(lag.null9)
-pc9 <- plot(sm(c9, 2)) + l_fitRaster() + l_fitContour() + labs(title = NULL) + l_points() +
+pc9 <- plot(sm(c9, 2)) + l_fitRaster() + l_fitContour() + labs(title = NULL) + #l_points() +
   geom_polygon(data = map_data ("world"), 
                aes(x=long, y = lat,group=group),fill=NA,color="black",
                inherit.aes = F)+coord_sf(xlim = c(-177, -158.5), ylim = c(54.5, 62), expand = TRUE) 
@@ -1336,15 +1339,31 @@ pc9 <- plot(sm(c9, 2)) + l_fitRaster() + l_fitContour() + labs(title = NULL) + l
 
 c10 <- getViz(lag.null10)
 pc10 <- plot(sm(c10, 2)) + l_fitRaster() + l_fitContour() + 
-  labs(title = NULL) + l_points() +
+  labs(title = NULL) + #l_points() +
   geom_polygon(data = map_data ("world"), 
                aes(x=long, y = lat,group=group),fill=NA,color="black",
                inherit.aes = F)+coord_sf(xlim = c(-177, -158.5), ylim = c(54.5, 62), expand = TRUE) 
   # l_fitRaster(pTrans = function(.p) 0.5) + 
   # l_fitContour() + l_points() 
 
+c11 <- getViz(lag.null11)
+pc11 <- plot(sm(c11, 2)) + l_fitRaster() + l_fitContour() + labs(title = NULL) + #l_points() +
+  geom_polygon(data = map_data ("world"), 
+               aes(x=long, y = lat,group=group),fill=NA,color="black",
+               inherit.aes = F)+coord_sf(xlim = c(-177, -158.5), ylim = c(54.5, 62), expand = TRUE) 
+
+
+c12 <- getViz(lag.null12)
+pc12 <- plot(sm(c12, 2)) + l_fitRaster() + l_fitContour() + labs(title = NULL) + #l_points() +
+  geom_polygon(data = map_data ("world"), 
+               aes(x=long, y = lat,group=group),fill=NA,color="black",
+               inherit.aes = F)+coord_sf(xlim = c(-177, -158.5), ylim = c(54.5, 62), expand = TRUE) 
+
+
+
+
 gridPrint(pc1, pc2, pc3, pc4, pc5,
-pc6, pc7, pc8, pc9, pc10, ncol = 3)
+pc6, pc7, pc8, pc9, pc10, pc11, pc12, ncol = 3)
 
 #map for fig 1=====
 
