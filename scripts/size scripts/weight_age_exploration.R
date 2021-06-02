@@ -7,6 +7,7 @@ library(rnaturalearthdata)
 library(rgeos)
 library(rgdal)
 library(MuMIn)
+library(visreg)
 
 # set palette
 cb <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
@@ -828,6 +829,11 @@ draw(lag.null3, select=1)
 draw(lag.null3, select=2)
 draw(lag.null3, select=3)
 draw(lag.null3, select=4)
+
+lag3complete <- lag3only[complete.cases(lag3only)==TRUE,]
+lag.null3_ran <- gamm4(log_sc_weight ~  s(sst.amj, k=4) + t2(LONGITUDE, LATITUDE) + s(julian, k = 4) + s(prevage_lastyr_weight_anom, k=4) + 
+                         (1|YEAR/HAUL), data=lag3complete)
+
 
 v3 <- visreg(lag.null3, "sst.amj", scale="response",ylab="Log of scaled weight-at-age", xlab="April-June SST")
 
