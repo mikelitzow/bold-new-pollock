@@ -1832,3 +1832,25 @@ ggplot(diff, aes(effect1__, percent_diff)) +
   labs(x = "Length", y = "Percent difference (NBS vs. EBS)")
 
 ggsave("./figs/ebs_nbs_percent_diff_length_weight.png", width=6, height=4, units='in')
+
+
+#sample size table----------------------------------------------
+
+tab1 <- table(lag1$YEAR)
+tab2 <- table(lag2$YEAR)
+tab3 <- table(lag3only$YEAR)
+tab4 <- table(lag4only$YEAR)
+tab5 <- table(lag5only$YEAR)
+tab6 <- table(lag6only$YEAR)
+tab7 <- table(lag7only$YEAR)
+tab8 <- table(lag8only$YEAR)
+tab9 <- table(lag9only$YEAR)
+tab10 <- table(lag10only$YEAR)
+tab11 <- table(lag11only$YEAR)
+
+all_age_table <- cbind(tab1, tab2, tab3, tab4, tab5,
+                       tab6, tab7, tab8, tab9, tab10)
+
+table(lag1$STATIONID)
+
+
