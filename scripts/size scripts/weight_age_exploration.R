@@ -848,8 +848,12 @@ draw(lag.null3, select=3)
 draw(lag.null3, select=4)
 
 lag3complete <- lag3only[complete.cases(lag3only)==TRUE,]
-lag.null3_ran <- gamm4(log_sc_weight ~  s(sst.amj, k=4) + t2(LONGITUDE, LATITUDE) + s(julian, k = 4) + s(prevage_lastyr_weight_anom, k=4) + 
-                         (1|YEAR/HAUL), data=lag3complete)
+lag.null3_ran <- gamm4(log_sc_weight ~  s(sst.amj, k=4) + t2(LONGITUDE, LATITUDE) + s(julian, k = 4),
+                         random=~(1|YEAR/HAUL), data=lag3complete)
+summary(lag.null3_ran$gam)
+summary(lag.null3_ran$mer)
+AIC(lag.null3_ran$mer) #is lower than without random effect
+#R-sq.(adj) =  0.237 R2 is lower with random effect
 
 
 v3 <- visreg(lag.null3, "sst.amj", scale="response",ylab="Scaled log(weight-at-age)", xlab="April-June SST")
