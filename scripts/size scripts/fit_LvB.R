@@ -172,6 +172,17 @@ summary(w_mod)
 c_mod <- lm(log(LENGTH) ~ log(WEIGHT), data=cold.dat)
 summary(c_mod)
 
+plot(log(cold.dat$LENGTH), log(cold.dat$WEIGHT))
+abline(lm(log(cold.dat$LENGTH) ~ log(cold.dat$WEIGHT)))
+abline(4.0410, 0.3236)
+
+plot(log(cold.dat$LENGTH), log(cold.dat$WEIGHT))
+abline(lm(log(cold.dat$WEIGHT) ~ log(cold.dat$LENGTH)))
+
+plot(log(LENGTH)~ log(WEIGHT), data=plot.dat, col=c("blue", "red")[as.factor(period)], pch = 16, cex =0.3)
+abline(4.0410, 0.3236, col="blue")
+abline(4.0106, 0.3283, col="red")
+
 
 
 
