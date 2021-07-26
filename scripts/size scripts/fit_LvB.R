@@ -156,32 +156,32 @@ curve(LvB(x, cfywarm[1],cfywarm[2], cfywarm[3]), col=2, lwd=3, add=T)
 
 #log(L) by log(W)==============================================
 
-log_mod <- lm(log(LENGTH) ~ log(WEIGHT), data=scale.dat)
+log_mod <- lm(log(WEIGHT) ~ log(LENGTH), data=scale.dat)
 summary(log_mod)
-plot(log(LENGTH) ~ log(WEIGHT), data=scale.dat)
+plot(log(WEIGHT) ~ log(LENGTH), data=scale.dat)
 
-ggplot(plot.dat, aes(log(WEIGHT), log(LENGTH), col=period)) +
+ggplot(plot.dat, aes(log(LENGTH), log(WEIGHT), col=period)) +
   geom_point() + geom_smooth(method="lm") 
 
-plot_mod <- lm(log(LENGTH) ~ log(WEIGHT) * period, data=plot.dat)
+plot_mod <- lm(log(WEIGHT) ~ log(LENGTH) * period, data=plot.dat)
 summary(plot_mod)
 
-w_mod <- lm(log(LENGTH) ~ log(WEIGHT), data=warm.dat)
+w_mod <- lm(log(WEIGHT) ~ log(LENGTH), data=warm.dat)
 summary(w_mod)
 
-c_mod <- lm(log(LENGTH) ~ log(WEIGHT), data=cold.dat)
+c_mod <- lm(log(WEIGHT) ~ log(LENGTH), data=cold.dat)
 summary(c_mod)
 
 plot(log(cold.dat$LENGTH), log(cold.dat$WEIGHT))
-abline(lm(log(cold.dat$LENGTH) ~ log(cold.dat$WEIGHT)))
-abline(4.0410, 0.3236)
+abline(lm(log(cold.dat$WEIGHT) ~ log(cold.dat$LENGTH)))
+#abline(4.0410, 0.3236)
 
 plot(log(cold.dat$LENGTH), log(cold.dat$WEIGHT))
 abline(lm(log(cold.dat$WEIGHT) ~ log(cold.dat$LENGTH)))
 
-plot(log(LENGTH)~ log(WEIGHT), data=plot.dat, col=c("blue", "red")[as.factor(period)], pch = 16, cex =0.3)
-abline(4.0410, 0.3236, col="blue")
-abline(4.0106, 0.3283, col="red")
+plot(log(WEIGHT)~ log(LENGTH), data=plot.dat, col=c("blue", "red")[as.factor(period)], pch = 16, cex =0.3)
+abline(-12.403, 3.076, col="blue")
+abline(-12.06, 3.02, col="red")
 
 
 
