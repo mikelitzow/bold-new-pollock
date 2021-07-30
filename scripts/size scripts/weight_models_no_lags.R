@@ -944,7 +944,7 @@ plot_grid(cb1, cb2, cb3,
 cb1 <- getViz(base.null1)
 pcb1 <- plot(sm(c1, 2)) + l_fitRaster() + l_fitContour() + labs(title = NULL) + #l_points() +
   geom_polygon(data = map_data ("world"), 
-               aes(x=long, y = lat,group=group),fill=NA,color="black",
+               aes(x=long, y = lat,group=group),fill="white",color="black",
                inherit.aes = F)+coord_sf(xlim = c(-177, -158.5), ylim = c(54.5, 62), expand = FALSE) +
   scale_fill_distiller(palette = "Spectral", type = "div", limits = c(-3,3)) +
   theme(legend.position = "none")
@@ -953,7 +953,7 @@ pcb1 <- plot(sm(c1, 2)) + l_fitRaster() + l_fitContour() + labs(title = NULL) + 
 cb2 <- getViz(base.null2)
 pcb2 <- plot(sm(c2, 2)) + l_fitRaster() + l_fitContour() + labs(title = NULL) + #l_points() +
   geom_polygon(data = map_data ("world"), 
-               aes(x=long, y = lat,group=group),fill=NA,color="black",
+               aes(x=long, y = lat,group=group),fill="white",color="black",
                inherit.aes = F)+coord_sf(xlim = c(-177, -158.5), ylim = c(54.5, 62), expand = FALSE) +
   scale_fill_distiller(palette = "Spectral", type = "div", limits = c(-3,3)) +
   theme(legend.position = "none")
@@ -962,7 +962,7 @@ pcb2 <- plot(sm(c2, 2)) + l_fitRaster() + l_fitContour() + labs(title = NULL) + 
 cb3 <- getViz(base.null3)
 pcb3 <- plot(sm(c3, 2)) + l_fitRaster() + l_fitContour() + labs(title = NULL) + #l_points() +
   geom_polygon(data = map_data ("world"), 
-               aes(x=long, y = lat,group=group),fill=NA,color="black",
+               aes(x=long, y = lat,group=group),fill="white",color="black",
                inherit.aes = F)+coord_sf(xlim = c(-177, -158.5), ylim = c(54.5, 62), expand = FALSE) +
   scale_fill_distiller(palette = "Spectral", type = "div", limits = c(-3,3)) +
   theme(legend.position = "none")
@@ -971,7 +971,7 @@ pcb3 <- plot(sm(c3, 2)) + l_fitRaster() + l_fitContour() + labs(title = NULL) + 
 cb4 <- getViz(base.null4)
 pcb4 <- plot(sm(c4, 2)) + l_fitRaster() + l_fitContour() + labs(title = NULL) + #l_points() +
   geom_polygon(data = map_data ("world"), 
-               aes(x=long, y = lat,group=group),fill=NA,color="black",
+               aes(x=long, y = lat,group=group),fill="white",color="black",
                inherit.aes = F)+coord_sf(xlim = c(-177, -158.5), ylim = c(54.5, 62), expand = FALSE) +
   scale_fill_distiller(palette = "Spectral", type = "div", limits = c(-3,3)) +
   theme(legend.position = "none")
@@ -980,7 +980,7 @@ pcb4 <- plot(sm(c4, 2)) + l_fitRaster() + l_fitContour() + labs(title = NULL) + 
 cb5 <- getViz(base.null5)
 pcb5 <- plot(sm(c5, 2)) + l_fitRaster() + l_fitContour() + labs(title = NULL) + #l_points() +
   geom_polygon(data = map_data ("world"), 
-               aes(x=long, y = lat,group=group),fill=NA,color="black",
+               aes(x=long, y = lat,group=group),fill="white",color="black",
                inherit.aes = F)+coord_sf(xlim = c(-177, -158.5), ylim = c(54.5, 62), expand = FALSE) +
   scale_fill_distiller(palette = "Spectral", type = "div", limits = c(-3,3)) +
   theme(legend.position = "none")
@@ -990,7 +990,7 @@ pcb5 <- plot(sm(c5, 2)) + l_fitRaster() + l_fitContour() + labs(title = NULL) + 
 cb6 <- getViz(base.null6)
 pcb6 <- plot(sm(c6, 2)) + l_fitRaster() + l_fitContour() + labs(title = NULL) + #l_points() +
   geom_polygon(data = map_data ("world"), 
-               aes(x=long, y = lat,group=group),fill=NA,color="black",
+               aes(x=long, y = lat,group=group),fill="white",color="black",
                inherit.aes = F)+coord_sf(xlim = c(-177, -158.5), ylim = c(54.5, 62), expand = FALSE) +
   scale_fill_distiller(palette = "Spectral", type = "div", limits = c(-3,3)) +
   theme(legend.position = "none")
@@ -999,7 +999,7 @@ pcb6 <- plot(sm(c6, 2)) + l_fitRaster() + l_fitContour() + labs(title = NULL) + 
 cb7 <- getViz(base.null7)
 pcb7 <- plot(sm(c7, 2)) + l_fitRaster() + l_fitContour() + labs(title = NULL) + #l_points() +
   geom_polygon(data = map_data ("world"), 
-               aes(x=long, y = lat,group=group),fill=NA,color="black",
+               aes(x=long, y = lat,group=group),fill="white",color="black",
                inherit.aes = F)+coord_sf(xlim = c(-177, -158.5), ylim = c(54.5, 62), expand = FALSE) +
   scale_fill_distiller(palette = "Spectral", type = "div", limits = c(-3,3)) +
   theme(legend.position = "none")
@@ -1009,7 +1009,7 @@ pcb7 <- plot(sm(c7, 2)) + l_fitRaster() + l_fitContour() + labs(title = NULL) + 
 cb8 <- getViz(base.null8)
 pcb8 <- plot(sm(c8, 2)) + l_fitRaster() + l_fitContour() + labs(title = NULL) + #l_points() +
   geom_polygon(data = map_data ("world"), 
-               aes(x=long, y = lat,group=group),fill=NA,color="black",
+               aes(x=long, y = lat,group=group),fill="white",color="black",
                inherit.aes = F)+coord_sf(xlim = c(-177, -158.5), ylim = c(54.5, 62), expand = FALSE) +
   scale_fill_distiller(palette = "Spectral", type = "div", limits = c(-3,3)) +
   theme(legend.position = "none")
@@ -1019,7 +1019,7 @@ pcb8 <- plot(sm(c8, 2)) + l_fitRaster() + l_fitContour() + labs(title = NULL) + 
 cb9 <- getViz(base.null9)
 pcb9 <- plot(sm(c9, 2)) + l_fitRaster() + l_fitContour() + labs(title = NULL) + #l_points() +
   geom_polygon(data = map_data ("world"), 
-               aes(x=long, y = lat,group=group),fill=NA,color="black",
+               aes(x=long, y = lat,group=group),fill="white",color="black",
                inherit.aes = F)+coord_sf(xlim = c(-177, -158.5), ylim = c(54.5, 62), expand = FALSE) +
   scale_fill_distiller(palette = "Spectral", type = "div", limits = c(-3,3)) +
   theme(legend.position = "none")
@@ -1030,7 +1030,7 @@ cb10 <- getViz(base.null10)
 pcb10 <- plot(sm(c10, 2)) + l_fitRaster() + l_fitContour() + 
   labs(title = NULL) + #l_points() +
   geom_polygon(data = map_data ("world"), 
-               aes(x=long, y = lat,group=group),fill=NA,color="black",
+               aes(x=long, y = lat,group=group),fill="white",color="black",
                inherit.aes = F)+coord_sf(xlim = c(-177, -158.5), ylim = c(54.5, 62), expand = FALSE) +
   scale_fill_distiller(palette = "Spectral", type = "div", limits = c(-3,3)) +
   theme(legend.position = "none")
@@ -1040,7 +1040,7 @@ pcb10 <- plot(sm(c10, 2)) + l_fitRaster() + l_fitContour() +
 cb11 <- getViz(base.null11)
 pcb11 <- plot(sm(c11, 2)) + l_fitRaster() + l_fitContour() + labs(title = NULL) + #l_points() +
   geom_polygon(data = map_data ("world"), 
-               aes(x=long, y = lat,group=group),fill=NA,color="black",
+               aes(x=long, y = lat,group=group),fill="white",color="black",
                inherit.aes = F)+coord_sf(xlim = c(-177, -158.5), ylim = c(54.5, 62), expand = FALSE) +
   scale_fill_distiller(palette = "Spectral", type = "div", limits = c(-3,3), name="Effect") 
 
