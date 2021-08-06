@@ -573,9 +573,15 @@ draw(gamdropk_tek3corE, select = 2, axis.title = c("Bottom temperature anomoly",
 
 appraise(dropk_tek3corE$gam)
 
+vis.gam(dropk_tek3corE[[2]], view="bottemp_anom", 
+        type="response")
+
 anova(dropk_tek3corE[[2]])
 plot(dropk_tek3corE[[2]])
 
+visreg(dropk_tek3corE$gam, xvar='bottemp_anom', 
+       overlay=FALSE, band=TRUE, scale='response', xaxt='n', #yaxt='n',
+       line.par = list(col = 'grey29'), rug=FALSE)
 
 #linear interaction
 
@@ -620,6 +626,15 @@ plot_model(lin_tek3corE[[2]], type="resid")
 
 #anova(best_tek3corE$gam, dropk_tek3corE$gam, lin_tek3corE$gam)
 anova(dropk_tek3corE$lme, lin_tek3corE$lme)
+
+#plain old linear
+linonly <- gamm(logCPUE_Gadus_chalcogrammus ~ bottemp_anom +
+                       te(mean_station_bottemp, BOT_DEPTH, k=29), random=list(YEAR_factor=~1), 
+                     correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE),
+                     data=periods_analysis_dat, method="ML")
+gam.check(linonly[[2]]) 
+summary(linonly[[1]]) #  45260.54 45343.61 -22619.27
+summary(linonly[[2]])
 
 #drop anom completely
 drop_anom <- gamm(logCPUE_Gadus_chalcogrammus ~  te(mean_station_bottemp, BOT_DEPTH, k=29),
