@@ -86,7 +86,8 @@ plot(LENGTH~ AGE, data=plot.dat, col=as.factor(period))
 curve(LvB(x, cfcold[1],cfcold[2], cfcold[3]), col=4, lwd=3, add=T)
 curve(LvB(x, cfwarm[1],cfwarm[2], cfwarm[3]), col=2, lwd=3, add=T)
 
-plot(LENGTH~ jitter(AGE), data=plot.dat, col=c("blue", "red")[as.factor(period)], pch = 16, cex =0.3)
+plot(LENGTH~ jitter(AGE), data=plot.dat, col=c("blue", "red")[as.factor(period)], pch = 16, cex =0.3,
+     xlab="Age", ylab="Length (mm)")
 curve(LvB(x, cfcold[1],cfcold[2], cfcold[3]), col=4, lwd=3, add=T)
 curve(LvB(x, cfwarm[1],cfwarm[2], cfwarm[3]), col=2, lwd=3, add=T)
 
@@ -179,10 +180,16 @@ abline(lm(log(cold.dat$WEIGHT) ~ log(cold.dat$LENGTH)))
 plot(log(cold.dat$LENGTH), log(cold.dat$WEIGHT))
 abline(lm(log(cold.dat$WEIGHT) ~ log(cold.dat$LENGTH)))
 
-plot(log(WEIGHT)~ log(LENGTH), data=plot.dat, col=c("blue", "red")[as.factor(period)], pch = 16, cex =0.3)
+plot(log(WEIGHT)~ log(LENGTH), data=plot.dat, col=c("blue", "red")[as.factor(period)], pch = 16, cex =0.3,
+     xlab="log(Length)", ylab="log(Weight)")
 abline(-12.403, 3.076, col="blue")
 abline(-12.06, 3.02, col="red")
 
 
 
+#standard deviations for illustation=====
+
+sd(scale.dat$logWEIGHT[which(scale.dat$AGE==3)], na.rm=TRUE)
+
+sd(scale.dat$logWEIGHT[which(scale.dat$AGE==8)])
 
