@@ -34,7 +34,7 @@ for(i in 1:length(yrs)){
 tempmat <- temp_wide[,c(38:47)]
 
 tempcor <- cor(tempmat, method = "pearson", use = "complete.obs")
-corrplot(tempcor)
+#corrplot(tempcor)
 
   #save output
   for(l in 1:10){
