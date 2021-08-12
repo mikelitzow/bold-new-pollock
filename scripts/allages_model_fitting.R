@@ -568,8 +568,6 @@ draw(gamdropk_tek3corE, select = 1)
 draw(gamdropk_tek3corE, select = 1, dist=0.05)
 draw(gamdropk_tek3corE, select = 1, dist=0.01)
 draw(gamdropk_tek3corE, select = 2)
-draw(gamdropk_tek3corE, select = 2, show.data=TRUE)
-draw(gamdropk_tek3corE, select = 2, axis.title = c("Bottom temperature anomoly","Effect"))
 
 appraise(dropk_tek3corE$gam)
 
@@ -580,8 +578,13 @@ anova(dropk_tek3corE[[2]])
 plot(dropk_tek3corE[[2]])
 
 visreg(dropk_tek3corE$gam, xvar='bottemp_anom', 
-       overlay=FALSE, band=TRUE, scale='response', xaxt='n', #yaxt='n',
-       line.par = list(col = 'grey29'), rug=FALSE)
+       overlay=FALSE, band=TRUE, scale='response', #xaxt='n', #yaxt='n',
+       line.par = list(col = 'grey29'), rug=FALSE, data=periods_analysis_dat, ylim=c(1,6))
+
+
+
+viz_dropk_tek3corE <- getViz(dropk_tek3corE$gam)
+plot(viz_dropk_tek3corE)
 
 #linear interaction
 
@@ -609,6 +612,9 @@ plot(lin_tek3corE[[2]])
 visreg(lin_tek3corE$lme, "bottemp_anom", "period")
 visreg(lin_tek3corE[[2]], "bottemp_anom", "period")
 
+visreg(lin_tek3corE$gam, "bottemp_anom", by="period", data=periods_analysis_dat,
+       overlay=TRUE, partial=FALSE, rug=FALSE, ylim=c(1,6))
+
 linviz1 <- getViz(lin_tek3corE$gam)
 plot(sm(linviz1 , 1))
 
@@ -624,6 +630,9 @@ plot_model(lin_tek3corE[[2]], type="int", #pred.type = "re",
            show.values = TRUE) 
 plot_model(lin_tek3corE[[2]], type="resid")
 
+plot_model(lin_tek3corE[[2]], type="int", title="",
+           axis.title = c("Bottom temperature anomoly","log(CPUE)")) #conditioned on fixed effects
+
 #anova(best_tek3corE$gam, dropk_tek3corE$gam, lin_tek3corE$gam)
 anova(dropk_tek3corE$lme, lin_tek3corE$lme)
 
@@ -633,7 +642,7 @@ linonly <- gamm(logCPUE_Gadus_chalcogrammus ~ bottemp_anom +
                      correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE),
                      data=periods_analysis_dat, method="ML")
 gam.check(linonly[[2]]) 
-summary(linonly[[1]]) #  45260.54 45343.61 -22619.27
+summary(linonly[[1]]) # 
 summary(linonly[[2]])
 
 #drop anom completely
