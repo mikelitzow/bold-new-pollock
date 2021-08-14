@@ -641,12 +641,13 @@ anova(dropk_tek3corE$lme, lin_tek3corE$lme)
 
 #figure for manuscript
 par(mfrow=c(1,2), mai=c(0.5,0.4,0.5,0.1)) 
+visreg(lin_tek3corE$gam, "bottemp_anom", by="period", data=periods_analysis_dat,
+       overlay=TRUE, partial=FALSE, rug=FALSE, ylim=c(1,6))
 visreg(dropk_tek3corE$gam, xvar='bottemp_anom', 
        overlay=FALSE, band=TRUE, scale='response', #xaxt='n', #yaxt='n',
        line.par = list(col = 'grey29'), rug=FALSE, data=periods_analysis_dat, ylim=c(1,6))
 
-visreg(lin_tek3corE$gam, "bottemp_anom", by="period", data=periods_analysis_dat,
-       overlay=TRUE, partial=FALSE, rug=FALSE, ylim=c(1,6))
+
 
 
 
