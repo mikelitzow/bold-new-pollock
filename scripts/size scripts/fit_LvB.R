@@ -17,7 +17,7 @@ LvB <- function(t, k, L.inf, t0=0) {
 
 # Explore some reasonable parameter values for starting values:
 # We need reasonable starting values for fitting a non-linear model!
-plot(LENGTH ~ AGE, data=scale.dat)
+plot(LENGTH ~ AGE, data=scale.dat) #loaded in weight_age_exploration.R
 # Some trial values for paramters
 curve(LvB(x, k=0.05, L.inf=800), 0, 60, ylim=c(0,900), col=2, lwd=2, add=T)
 curve(LvB(x, k=0.2, L.inf=730), 0, 60, col=3, lwd=2, add=T)
@@ -38,7 +38,7 @@ curve(LvB(x, cf[1],cf[2], cf[3]), col=2, lwd=3, add=T)
 
 #only cold period 2006-2012======
 
-cold.dat <- scale.dat[which(scale.dat$YEAR>2005 & scale.dat$YEAR<2013),]
+cold.dat <- scale.dat[which(scale.dat$YEAR>2005 & scale.dat$YEAR<2014),]
 cold.dat$period <- "cold"
 
 
@@ -61,7 +61,7 @@ curve(LvB(x, cfcold[1],cfcold[2], cfcold[3]), col=2, lwd=3, add=T)
 
 #only warm period 2013-2019======
 
-warm.dat <- scale.dat[which(scale.dat$YEAR>2012),]
+warm.dat <- scale.dat[which(scale.dat$YEAR>2013),]
 warm.dat$period <- "warm"
 
 
@@ -86,6 +86,7 @@ plot(LENGTH~ AGE, data=plot.dat, col=as.factor(period))
 curve(LvB(x, cfcold[1],cfcold[2], cfcold[3]), col=4, lwd=3, add=T)
 curve(LvB(x, cfwarm[1],cfwarm[2], cfwarm[3]), col=2, lwd=3, add=T)
 
+#manuscript plot
 plot(LENGTH~ jitter(AGE), data=plot.dat, col=c("blue", "red")[as.factor(period)], pch = 16, cex =0.3,
      xlab="Age", ylab="Length (mm)")
 curve(LvB(x, cfcold[1],cfcold[2], cfcold[3]), col=4, lwd=3, add=T)
@@ -93,9 +94,9 @@ curve(LvB(x, cfwarm[1],cfwarm[2], cfwarm[3]), col=2, lwd=3, add=T)
 
 
 
-#only young cold period 2006-2012======
+#only young cold period 2006-2013======
 
-cold.y.dat <- scale.dat[which(scale.dat$YEAR>2005 & scale.dat$YEAR<2013),]
+cold.y.dat <- scale.dat[which(scale.dat$YEAR>2005 & scale.dat$YEAR<2014),]
 cold.y.dat$period <- "cold"
 cold.y.dat <- cold.y.dat[which(cold.y.dat$AGE<7),]
 
@@ -117,9 +118,9 @@ curve(LvB(x, cfycold[1],cfycold[2], cfycold[3]), col=2, lwd=3, add=T)
 
 
 
-#only young warm period 2013-2019======
+#only young warm period 2014-2019======
 
-warm.y.dat <- scale.dat[which(scale.dat$YEAR>2012),]
+warm.y.dat <- scale.dat[which(scale.dat$YEAR>2013),]
 warm.y.dat$period <- "warm"
 warm.y.dat <- warm.y.dat[which(warm.y.dat$AGE<7),]
 
@@ -180,12 +181,25 @@ abline(lm(log(cold.dat$WEIGHT) ~ log(cold.dat$LENGTH)))
 plot(log(cold.dat$LENGTH), log(cold.dat$WEIGHT))
 abline(lm(log(cold.dat$WEIGHT) ~ log(cold.dat$LENGTH)))
 
+#manuscript plot
 plot(log(WEIGHT)~ log(LENGTH), data=plot.dat, col=c("blue", "red")[as.factor(period)], pch = 16, cex =0.3,
      xlab="log(Length)", ylab="log(Weight)")
 abline(-12.403, 3.076, col="blue")
 abline(-12.06, 3.02, col="red")
 
 
+#both manuscript plots together
+par(mfrow=c(1,2), mar = c(4.2, 4, 2, 2)) 
+
+plot(LENGTH~ jitter(AGE), data=plot.dat, col=c("blue", "red")[as.factor(period)], pch = 16, cex =0.3,
+     xlab="Age", ylab="Length (mm)")
+curve(LvB(x, cfcold[1],cfcold[2], cfcold[3]), col=4, lwd=3, add=T)
+curve(LvB(x, cfwarm[1],cfwarm[2], cfwarm[3]), col=2, lwd=3, add=T)
+
+plot(log(WEIGHT)~ log(LENGTH), data=plot.dat, col=c("blue", "red")[as.factor(period)], pch = 16, cex =0.3,
+     xlab="log(Length)", ylab="log(Weight)")
+abline(-12.403, 3.076, col="blue")
+abline(-12.06, 3.02, col="red")
 
 #standard deviations for illustation=====
 
