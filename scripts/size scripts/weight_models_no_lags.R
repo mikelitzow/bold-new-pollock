@@ -26,7 +26,7 @@ AIC(base.null1_ran$mer) #10396.8 so lower than without random
 #R-sq.(adj) =  0.455 lower than without random
 
 
-vb1 <- visreg(base.null1, "sst.amj", scale="response",ylab="Scaled log(weight-at-age)", xlab="April-June SST")
+vb1 <- visreg(base.null1, "sst.amj", scale="response",ylab="Scaled log(weight-at-age)", xlab="April-June SST", rug=1)
 
 
 AICc(base.null1) #
@@ -107,7 +107,7 @@ AIC(base.null2_ran$mer) #4053.007 lower than without random
 #R-sq.(adj) =  0.248 lower than without random
 
 
-vb2 <- visreg(base.null2, "sst.amj", scale="response",ylab="Scaled log(weight-at-age)", xlab="April-June SST")
+vb2 <- visreg(base.null2, "sst.amj", scale="response",ylab="Scaled log(weight-at-age)", xlab="April-June SST", rug=1)
 
 AICc(base.null2) #
 
@@ -184,7 +184,7 @@ AIC(base.null3_ran$mer) #4278.209 lower than without random
 #R-sq.(adj) =  0.237 lower than without random
 
 
-vb3 <- visreg(base.null3, "sst.amj", scale="response",ylab="Scaled log(weight-at-age)", xlab="April-June SST")
+vb3 <- visreg(base.null3, "sst.amj", scale="response",ylab="Scaled log(weight-at-age)", xlab="April-June SST", rug=1)
 
 
 AICc_3base <- AICc(base.null3) #
@@ -258,7 +258,7 @@ summary(base.null4_ran$mer)
 AIC(base.null4_ran$mer) #5537.197 lower than without random
 #R-sq.(adj) =  0.248 lower than without random
 
-vb4 <- visreg(base.null4, "sst.amj", scale="response",ylab="Scaled log(weight-at-age)", xlab="April-June SST")
+vb4 <- visreg(base.null4, "sst.amj", scale="response",ylab="Scaled log(weight-at-age)", xlab="April-June SST", rug=1)
 
 AICc(base.null4) #
 
@@ -335,7 +335,7 @@ AIC(base.null5_ran$mer) #8091.068 lower than without random
 #R-sq.(adj) =  0.157 lower than without random
 
 
-vb5 <- visreg(base.null5, "sst.amj", scale="response",ylab="Scaled log(weight-at-age)", xlab="April-June SST")
+vb5 <- visreg(base.null5, "sst.amj", scale="response",ylab="Scaled log(weight-at-age)", xlab="April-June SST", rug=1)
 
 AICc(base.null5) #
 
@@ -412,7 +412,7 @@ AIC(base.null6_ran$mer) #9820.327 lower than without random
 #R-sq.(adj) =  0.176 lower than without random
 
 
-vb6 <- visreg(base.null6, "sst.amj", scale="response",ylab="Scaled log(weight-at-age)", xlab="April-June SST")
+vb6 <- visreg(base.null6, "sst.amj", scale="response",ylab="Scaled log(weight-at-age)", xlab="April-June SST", rug=1)
 
 AICc(base.null6) #
 
@@ -489,7 +489,7 @@ AIC(base.null7_ran$mer) #8404.48 lower than without random
 #R-sq.(adj) =  0.221 lower than without random
 
 
-vb7 <- visreg(base.null7, "sst.amj", scale="response",ylab="Scaled log(weight-at-age)", xlab="April-June SST")
+vb7 <- visreg(base.null7, "sst.amj", scale="response",ylab="Scaled log(weight-at-age)", xlab="April-June SST", rug=1)
 
 AICc(base.null7) #
 
@@ -568,7 +568,7 @@ AIC(base.null8_ran$mer) #6114.361 lower than without random
 #R-sq.(adj) =  0.193 lower than without random
 
 
-vb8 <- visreg(base.null8, "sst.amj", scale="response",ylab="Scaled log(weight-at-age)", xlab="April-June SST")
+vb8 <- visreg(base.null8, "sst.amj", scale="response",ylab="Scaled log(weight-at-age)", xlab="April-June SST", rug=1)
 
 AICc(base.null8) #
 
@@ -647,7 +647,7 @@ AIC(base.null9_ran$mer) #4921.163 lower than without random
 #R-sq.(adj) =  0.169 lower than without random
 
 
-vb9 <- visreg(base.null9, "sst.amj", scale="response",ylab="Scaled log(weight-at-age)", xlab="April-June SST")
+vb9 <- visreg(base.null9, "sst.amj", scale="response",ylab="Scaled log(weight-at-age)", xlab="April-June SST", rug=1)
 
 AICc(base.null9) #
 
@@ -725,7 +725,7 @@ AIC(base.null10_ran$mer) #4160.911 lower than without random
 #R-sq.(adj) =  0.17 lower than without random
 
 
-vb10 <- visreg(base.null10, "sst.amj", scale="response",ylab="Scaled log(weight-at-age)", xlab="April-June SST")
+vb10 <- visreg(base.null10, "sst.amj", scale="response",ylab="Scaled log(weight-at-age)", xlab="April-June SST", rug=1)
 
 AICc(base.null10) #
 
@@ -802,7 +802,7 @@ AIC(base.null11_ran$mer) #3426.587 lower than without random
 #R-sq.(adj) =  0.188 lower than without random
 
 
-vb11 <- visreg(base.null11, "sst.amj", scale="response",ylab="Scaled log(weight-at-age)", xlab="April-June SST")
+vb11 <- visreg(base.null11, "sst.amj", scale="response",ylab="Scaled log(weight-at-age)", xlab="April-June SST", rug=1)
 
 AICc(base.null11) #
 
@@ -886,11 +886,14 @@ vvb3 <- visregList(vb8, vb9, vb10, vb11,
                     labels=c("Age 8", "Age 9",  "Age 10", "Age 11", 
                    "Age 4", "Age 5", "Age 6", "Age 7",  
                     "Age 1", "Age 2", "Age 3"))
-
+vvbg <- visregList( vb1, vb2, vb3, 
+                    vb4, vb5, vb6,  vb7, 
+                    vb8, vb9, vb10, vb11, 
+                    collapse=TRUE)
 
 plot(vvb3,
      ylab="Scaled log (weight-at-age)",
-     xlab="April-June SST")
+     xlab="April-June SST", rug=1)
 
 
 #add age 11
@@ -907,7 +910,7 @@ vvb2 <- visregList(vb10, vb11,
 #par(mfrow=c(4,3), mar = c(4,4,4,4))
 plot(vvb2,
      ylab="Scaled log (weight-at-age)",
-     xlab="April-June SST")
+     xlab="April-June SST", rug=1)
 
 
 vv3 <- visregList(v1, 
@@ -947,7 +950,9 @@ pcb1 <- plot(sm(c1, 2)) + l_fitRaster() + l_fitContour() + labs(title = NULL) + 
                aes(x=long, y = lat,group=group),fill="white",color="black",
                inherit.aes = F)+coord_sf(xlim = c(-177, -158.5), ylim = c(54.5, 62), expand = FALSE) +
   scale_fill_distiller(palette = "Spectral", type = "div", limits = c(-3,3)) +
-  theme(legend.position = "none")
+  theme(legend.position = "none")+ theme(plot.margin = unit(c(0, 0, 0, 0.1), "cm"), plot.title = element_blank(),
+                                         axis.title.x = element_blank(),
+                                         axis.title.y = element_blank())
 
 
 cb2 <- getViz(base.null2)
@@ -956,7 +961,9 @@ pcb2 <- plot(sm(c2, 2)) + l_fitRaster() + l_fitContour() + labs(title = NULL) + 
                aes(x=long, y = lat,group=group),fill="white",color="black",
                inherit.aes = F)+coord_sf(xlim = c(-177, -158.5), ylim = c(54.5, 62), expand = FALSE) +
   scale_fill_distiller(palette = "Spectral", type = "div", limits = c(-3,3)) +
-  theme(legend.position = "none")
+  theme(legend.position = "none")+ theme(plot.margin = unit(c(0, 0, 0, 0.1), "cm"), plot.title = element_blank(),
+                                         axis.title.x = element_blank(),
+                                         axis.title.y = element_blank())
 
 
 cb3 <- getViz(base.null3)
@@ -965,7 +972,9 @@ pcb3 <- plot(sm(c3, 2)) + l_fitRaster() + l_fitContour() + labs(title = NULL) + 
                aes(x=long, y = lat,group=group),fill="white",color="black",
                inherit.aes = F)+coord_sf(xlim = c(-177, -158.5), ylim = c(54.5, 62), expand = FALSE) +
   scale_fill_distiller(palette = "Spectral", type = "div", limits = c(-3,3)) +
-  theme(legend.position = "none")
+  theme(legend.position = "none")+ theme(plot.margin = unit(c(0, 0, 0, 0.1), "cm"), plot.title = element_blank(),
+                                         axis.title.x = element_blank(),
+                                         axis.title.y = element_blank())
 
 
 cb4 <- getViz(base.null4)
@@ -974,7 +983,9 @@ pcb4 <- plot(sm(c4, 2)) + l_fitRaster() + l_fitContour() + labs(title = NULL) + 
                aes(x=long, y = lat,group=group),fill="white",color="black",
                inherit.aes = F)+coord_sf(xlim = c(-177, -158.5), ylim = c(54.5, 62), expand = FALSE) +
   scale_fill_distiller(palette = "Spectral", type = "div", limits = c(-3,3)) +
-  theme(legend.position = "none")
+  theme(legend.position = "none")+ theme(plot.margin = unit(c(0, 0, 0, 0.1), "cm"), plot.title = element_blank(),
+                                         axis.title.x = element_blank(),
+                                         axis.title.y = element_blank())
 
 
 cb5 <- getViz(base.null5)
@@ -983,7 +994,9 @@ pcb5 <- plot(sm(c5, 2)) + l_fitRaster() + l_fitContour() + labs(title = NULL) + 
                aes(x=long, y = lat,group=group),fill="white",color="black",
                inherit.aes = F)+coord_sf(xlim = c(-177, -158.5), ylim = c(54.5, 62), expand = FALSE) +
   scale_fill_distiller(palette = "Spectral", type = "div", limits = c(-3,3)) +
-  theme(legend.position = "none")
+  theme(legend.position = "none")+ theme(plot.margin = unit(c(0, 0, 0, 0.1), "cm"), plot.title = element_blank(),
+                                         axis.title.x = element_blank(),
+                                         axis.title.y = element_blank())
 
 
 
@@ -993,7 +1006,9 @@ pcb6 <- plot(sm(c6, 2)) + l_fitRaster() + l_fitContour() + labs(title = NULL) + 
                aes(x=long, y = lat,group=group),fill="white",color="black",
                inherit.aes = F)+coord_sf(xlim = c(-177, -158.5), ylim = c(54.5, 62), expand = FALSE) +
   scale_fill_distiller(palette = "Spectral", type = "div", limits = c(-3,3)) +
-  theme(legend.position = "none")
+  theme(legend.position = "none")+ theme(plot.margin = unit(c(0, 0, 0, 0.1), "cm"), plot.title = element_blank(),
+                                         axis.title.x = element_blank(),
+                                         axis.title.y = element_blank())
 
 
 cb7 <- getViz(base.null7)
@@ -1002,7 +1017,9 @@ pcb7 <- plot(sm(c7, 2)) + l_fitRaster() + l_fitContour() + labs(title = NULL) + 
                aes(x=long, y = lat,group=group),fill="white",color="black",
                inherit.aes = F)+coord_sf(xlim = c(-177, -158.5), ylim = c(54.5, 62), expand = FALSE) +
   scale_fill_distiller(palette = "Spectral", type = "div", limits = c(-3,3)) +
-  theme(legend.position = "none")
+  theme(legend.position = "none")+ theme(plot.margin = unit(c(0, 0, 0, 0.1), "cm"), plot.title = element_blank(),
+                                         axis.title.x = element_blank(),
+                                         axis.title.y = element_blank())
 
 
 
@@ -1012,7 +1029,9 @@ pcb8 <- plot(sm(c8, 2)) + l_fitRaster() + l_fitContour() + labs(title = NULL) + 
                aes(x=long, y = lat,group=group),fill="white",color="black",
                inherit.aes = F)+coord_sf(xlim = c(-177, -158.5), ylim = c(54.5, 62), expand = FALSE) +
   scale_fill_distiller(palette = "Spectral", type = "div", limits = c(-3,3)) +
-  theme(legend.position = "none")
+  theme(legend.position = "none")+ theme(plot.margin = unit(c(0, 0, 0, 0.1), "cm"), plot.title = element_blank(),
+                                         axis.title.x = element_blank(),
+                                         axis.title.y = element_blank())
 
 
 
@@ -1022,7 +1041,9 @@ pcb9 <- plot(sm(c9, 2)) + l_fitRaster() + l_fitContour() + labs(title = NULL) + 
                aes(x=long, y = lat,group=group),fill="white",color="black",
                inherit.aes = F)+coord_sf(xlim = c(-177, -158.5), ylim = c(54.5, 62), expand = FALSE) +
   scale_fill_distiller(palette = "Spectral", type = "div", limits = c(-3,3)) +
-  theme(legend.position = "none")
+  theme(legend.position = "none")+ theme(plot.margin = unit(c(0, 0, 0, 0.1), "cm"), plot.title = element_blank(),
+                                         axis.title.x = element_blank(),
+                                         axis.title.y = element_blank())
 
 
 
@@ -1033,7 +1054,9 @@ pcb10 <- plot(sm(c10, 2)) + l_fitRaster() + l_fitContour() +
                aes(x=long, y = lat,group=group),fill="white",color="black",
                inherit.aes = F)+coord_sf(xlim = c(-177, -158.5), ylim = c(54.5, 62), expand = FALSE) +
   scale_fill_distiller(palette = "Spectral", type = "div", limits = c(-3,3)) +
-  theme(legend.position = "none")
+  theme(legend.position = "none")+ theme(plot.margin = unit(c(0, 0, 0, 0.1), "cm"), plot.title = element_blank(),
+                                         axis.title.x = element_blank(),
+                                         axis.title.y = element_blank())
 # l_fitRaster(pTrans = function(.p) 0.5) + 
 # l_fitContour() + l_points() 
 
@@ -1042,14 +1065,25 @@ pcb11 <- plot(sm(c11, 2)) + l_fitRaster() + l_fitContour() + labs(title = NULL) 
   geom_polygon(data = map_data ("world"), 
                aes(x=long, y = lat,group=group),fill="white",color="black",
                inherit.aes = F)+coord_sf(xlim = c(-177, -158.5), ylim = c(54.5, 62), expand = FALSE) +
-  scale_fill_distiller(palette = "Spectral", type = "div", limits = c(-3,3), name="Effect") 
+  scale_fill_distiller(palette = "Spectral", type = "div", limits = c(-3,3), name="Effect") + 
+  theme(legend.position = "none", plot.margin = unit(c(0, 0, 0, 0.1), "cm"), plot.title = element_blank(),
+                                                axis.title.x = element_blank(),
+                                                axis.title.y = element_blank())
 
-
+pcb11_w_legend <- plot(sm(c11, 2)) + l_fitRaster() + l_fitContour() + labs(title = NULL) + #l_points() +
+  geom_polygon(data = map_data ("world"), 
+               aes(x=long, y = lat,group=group),fill="white",color="black",
+               inherit.aes = F)+coord_sf(xlim = c(-177, -158.5), ylim = c(54.5, 62), expand = FALSE) +
+  scale_fill_distiller(palette = "Spectral", type = "div", limits = c(-3,3), name="Effect") + 
+  theme(plot.margin = unit(c(0, 0, 0, 0), "cm"), plot.title = element_blank(),
+        axis.title.x = element_blank(),
+        axis.title.y = element_blank())
 
 
 
 gridPrint(pcb1, pcb2, pcb3, pcb4, pcb5,
-          pcb6, pcb7, pcb8, pcb9, pcb10, pcb11, ncol = 3)
+          pcb6, pcb7, pcb8, pcb9, pcb10, pcb11, ncol = 3, 
+          bottom="Longitude", left="Latitude")
 
 #map for fig 1=====
 
