@@ -675,6 +675,14 @@ draw(lag.null1, select=2)
 draw(lag.null1, select=3)
 draw(lag.null1, select=4)
 
+lag1complete <- lag1[complete.cases(lag1)==TRUE,]
+lag.null1_ran <- gamm4(log_sc_weight ~  s(sst.amj, k=4) + t2(LONGITUDE, LATITUDE) + s(julian, k = 4) + s(prevage_lastyr_weight_anom, k=4),
+                       random=~(1|YEAR/HAUL), data=lag1complete)
+summary(lag.null1_ran$gam)
+summary(lag.null1_ran$mer)
+AIC(lag.null1_ran$mer) #
+#R-sq.(adj) = 
+
 v1 <- visreg(lag.null1, "sst.amj", scale="response",ylab="Scaled log(weight-at-age)", xlab="April-June SST")
 
 
@@ -720,6 +728,14 @@ draw(lag.null2, select=1)
 draw(lag.null2, select=2)
 draw(lag.null2, select=3)
 draw(lag.null2, select=4)
+
+lag2complete <- lag2[complete.cases(lag2)==TRUE,]
+lag.null2_ran <- gamm4(log_sc_weight ~  s(sst.amj, k=4) + t2(LONGITUDE, LATITUDE) + s(julian, k = 4) + s(prevage_lastyr_weight_anom, k=4),
+                       random=~(1|YEAR/HAUL), data=lag2complete)
+summary(lag.null2_ran$gam)
+summary(lag.null2_ran$mer)
+AIC(lag.null2_ran$mer) #
+#R-sq.(adj) =  
 
 v2 <- visreg(lag.null2, "sst.amj", scale="response",ylab="Scaled log(weight-at-age)", xlab="April-June SST")
 
@@ -848,7 +864,7 @@ draw(lag.null3, select=3)
 draw(lag.null3, select=4)
 
 lag3complete <- lag3only[complete.cases(lag3only)==TRUE,]
-lag.null3_ran <- gamm4(log_sc_weight ~  s(sst.amj, k=4) + t2(LONGITUDE, LATITUDE) + s(julian, k = 4),
+lag.null3_ran <- gamm4(log_sc_weight ~  s(sst.amj, k=4) + t2(LONGITUDE, LATITUDE) + s(julian, k = 4)+ s(prevage_lastyr_weight_anom, k=4),
                          random=~(1|YEAR/HAUL), data=lag3complete)
 summary(lag.null3_ran$gam)
 summary(lag.null3_ran$mer)
@@ -900,6 +916,14 @@ draw(lag.null4, select=2)
 draw(lag.null4, select=3)
 draw(lag.null4, select=4)
 
+lag4complete <- lag4only[complete.cases(lag4only)==TRUE,]
+lag.null4_ran <- gamm4(log_sc_weight ~  s(sst.amj, k=4) + t2(LONGITUDE, LATITUDE) + s(julian, k = 4)+ s(prevage_lastyr_weight_anom, k=4),
+                       random=~(1|YEAR/HAUL), data=lag4complete)
+summary(lag.null4_ran$gam)
+summary(lag.null4_ran$mer)
+AIC(lag.null4_ran$mer) #5543.178 lower than without random
+#R-sq.(adj) =  0.257 lower than without random
+
 v4 <- visreg(lag.null4, "sst.amj", scale="response",ylab="Scaled log(weight-at-age)", xlab="April-June SST")
 
 AICc(lag.null4) #
@@ -944,6 +968,14 @@ draw(lag.null5, select=1)
 draw(lag.null5, select=2)
 draw(lag.null5, select=3)
 draw(lag.null5, select=4)
+
+lag5complete <- lag5only[complete.cases(lag5only)==TRUE,]
+lag.null5_ran <- gamm4(log_sc_weight ~  s(sst.amj, k=4) + t2(LONGITUDE, LATITUDE) + s(julian, k = 4) + s(prevage_lastyr_weight_anom, k=4),
+                       random=~(1|YEAR/HAUL), data=lag5complete)
+summary(lag.null5_ran$gam)
+summary(lag.null5_ran$mer)
+AIC(lag.null5_ran$mer) #8095.1 lower than without random
+#R-sq.(adj) =  0.176 lower than without random
 
 v5 <- visreg(lag.null5, "sst.amj", scale="response",ylab="Scaled log(weight-at-age)", xlab="April-June SST")
 
@@ -990,6 +1022,14 @@ draw(lag.null6, select=2)
 draw(lag.null6, select=3)
 draw(lag.null6, select=4)
 
+lag6complete <- lag6only[complete.cases(lag6only)==TRUE,]
+lag.null6_ran <- gamm4(log_sc_weight ~  s(sst.amj, k=4) + t2(LONGITUDE, LATITUDE) + s(julian, k = 4) + s(prevage_lastyr_weight_anom, k=4),
+                       random=~(1|YEAR/HAUL), data=lag6complete)
+summary(lag.null6_ran$gam)
+summary(lag.null6_ran$mer)
+AIC(lag.null6_ran$mer) #9817.93
+#R-sq.(adj) =  0.186 lower than without random
+
 v6 <- visreg(lag.null6, "sst.amj", scale="response",ylab="Scaled log(weight-at-age)", xlab="April-June SST")
 
 AICc(lag.null6) #
@@ -1034,6 +1074,14 @@ draw(lag.null7, select=1)
 draw(lag.null7, select=2)
 draw(lag.null7, select=3)
 draw(lag.null7, select=4)
+
+lag7complete <- lag7only[complete.cases(lag7only)==TRUE,]
+lag.null7_ran <- gamm4(log_sc_weight ~  s(sst.amj, k=4) + t2(LONGITUDE, LATITUDE) + s(julian, k = 4) + s(prevage_lastyr_weight_anom, k=4),
+                       random=~(1|YEAR/HAUL), data=lag7complete)
+summary(lag.null7_ran$gam)
+summary(lag.null7_ran$mer)
+AIC(lag.null7_ran$mer) #8408.219 lower than without random
+#R-sq.(adj) =  0.231 lower than without random
 
 v7 <- visreg(lag.null7, "sst.amj", scale="response",ylab="Scaled log(weight-at-age)", xlab="April-June SST")
 
@@ -1082,6 +1130,14 @@ draw(lag.null8, select=2)
 draw(lag.null8, select=3)
 draw(lag.null8, select=4)
 
+lag8complete <- lag8only[complete.cases(lag8only)==TRUE,]
+lag.null8_ran <- gamm4(log_sc_weight ~  s(sst.amj, k=4) + t2(LONGITUDE, LATITUDE) + s(julian, k = 4) + s(prevage_lastyr_weight_anom, k=4),
+                       random=~(1|YEAR/HAUL), data=lag8complete)
+summary(lag.null8_ran$gam)
+summary(lag.null8_ran$mer)
+AIC(lag.null8_ran$mer) #6108.928 lower than without random
+#R-sq.(adj) =  0.266 lower than without random
+
 v8 <- visreg(lag.null8, "sst.amj", scale="response",ylab="Scaled log(weight-at-age)", xlab="April-June SST")
 
 AICc(lag.null8) #
@@ -1128,6 +1184,14 @@ draw(lag.null9, select=2)
 draw(lag.null9, select=3)
 draw(lag.null9, select=4)
 
+lag9complete <- lag9only[complete.cases(lag9only)==TRUE,]
+lag.null9_ran <- gamm4(log_sc_weight ~  s(sst.amj, k=4) + t2(LONGITUDE, LATITUDE) + s(julian, k = 4) + s(prevage_lastyr_weight_anom, k=4),
+                       random=~(1|YEAR/HAUL), data=lag9complete)
+summary(lag.null9_ran$gam)
+summary(lag.null9_ran$mer)
+AIC(lag.null9_ran$mer) #4911.833 lower than without random
+#R-sq.(adj) =  0.251 lower than without random
+
 v9 <- visreg(lag.null9, "sst.amj", scale="response",ylab="Scaled log(weight-at-age)", xlab="April-June SST")
 
 AICc(lag.null9) #
@@ -1173,6 +1237,14 @@ draw(lag.null10, select=2)
 draw(lag.null10, select=3)
 draw(lag.null10, select=4)
 
+lag10complete <- lag10only[complete.cases(lag10only)==TRUE,]
+lag.null10_ran <- gamm4(log_sc_weight ~  s(sst.amj, k=4) + t2(LONGITUDE, LATITUDE) + s(julian, k = 4) + s(prevage_lastyr_weight_anom, k=4),
+                       random=~(1|YEAR/HAUL), data=lag10complete)
+summary(lag.null10_ran$gam)
+summary(lag.null10_ran$mer)
+AIC(lag.null10_ran$mer) #4157.982 lower than without random
+#R-sq.(adj) =  0.213 lower than without random
+
 v10 <- visreg(lag.null10, "sst.amj", scale="response",ylab="Scaled log(weight-at-age)", xlab="April-June SST")
 
 AICc(lag.null10) #
@@ -1217,6 +1289,14 @@ draw(lag.null11, select=1)
 draw(lag.null11, select=2)
 draw(lag.null11, select=3)
 draw(lag.null11, select=4)
+
+lag11complete <- lag11only[complete.cases(lag11only)==TRUE,]
+lag.null11_ran <- gamm4(log_sc_weight ~  s(sst.amj, k=4) + t2(LONGITUDE, LATITUDE) + s(julian, k = 4) + s(prevage_lastyr_weight_anom, k=4),
+                       random=~(1|YEAR/HAUL), data=lag11complete)
+summary(lag.null11_ran$gam)
+summary(lag.null11_ran$mer)
+AIC(lag.null11_ran$mer) #3414.909 lower than without random
+#R-sq.(adj) =  0.233 lower than without random
 
 v11 <- visreg(lag.null11, "sst.amj", scale="response",ylab="Scaled log(weight-at-age)", xlab="April-June SST")
 
