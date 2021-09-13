@@ -9,6 +9,7 @@
 library(gratia)
 library(tidyverse)
 library(mgcv)
+library(lubridate)
 
 #========================================================================================================
 #read in data
@@ -203,6 +204,8 @@ ones.nona <- ones[which( is.na(ones$south.sst.amj)==FALSE &
 ones.nona <- ones.nona[which(ones.nona$juliandate>154 & 
                                ones.nona$juliandate<212 ),]
 
+ones.nona <- ones.nona[which(ones.nona$YEAR>1995),]
+
 ggplot(ones.nona, aes(south.sst.amj, cond_fact)) + geom_point() + geom_smooth()
 
 ggplot(ones.nona, aes(juliandate, cond_fact)) + geom_point() + geom_smooth()
@@ -252,7 +255,7 @@ twos.nona <- twos[which( is.na(twos$south.sst.amj)==FALSE &
                            is.na(twos$LATITUDE)==FALSE &
                            is.na(twos$LONGITUDE)==FALSE &
                            is.na(twos$juliandate)==FALSE ),]
-
+twos.nona <- twos.nona[which(twos.nona$YEAR>1995),]
 table(twos$juliandate)
 
 jmod2 <- gam(cond_fact ~  s(south.sst.amj, k=4) + s(juliandate) + te(LATITUDE, LONGITUDE), #data=temp_cond_dat[which(temp_cond_dat$AGE==1),])
@@ -275,6 +278,7 @@ acf(Efull, na.action=na.pass) #YES
 plot(twos.nona$YEAR, Efull) #look pretty good
 
 
+
 #3=====
 
 
@@ -285,6 +289,7 @@ threes.nona <- threes[which( is.na(threes$south.sst.amj)==FALSE &
                            is.na(threes$LATITUDE)==FALSE &
                            is.na(threes$LONGITUDE)==FALSE &
                            is.na(threes$juliandate)==FALSE ),]
+threes.nona <- threes.nona[which(threes.nona$YEAR>1995),]
 
 table(threes$juliandate)
 
@@ -320,6 +325,7 @@ fours.nona <- fours[which( is.na(fours$south.sst.amj)==FALSE &
                                is.na(fours$LATITUDE)==FALSE &
                                is.na(fours$LONGITUDE)==FALSE &
                                is.na(fours$juliandate)==FALSE ),]
+fours.nona <- fours.nona[which(fours.nona$YEAR>1995),]
 
 table(fours$juliandate)
 
@@ -354,6 +360,7 @@ fives.nona <- fives[which( is.na(fives$south.sst.amj)==FALSE &
                              is.na(fives$LATITUDE)==FALSE &
                              is.na(fives$LONGITUDE)==FALSE &
                              is.na(fives$juliandate)==FALSE ),]
+fives.nona <- fives.nona[which(fives.nona$YEAR>1995),]
 
 table(fives$juliandate)
 
@@ -388,6 +395,7 @@ sixes.nona <- sixes[which( is.na(sixes$south.sst.amj)==FALSE &
                              is.na(sixes$LATITUDE)==FALSE &
                              is.na(sixes$LONGITUDE)==FALSE &
                              is.na(sixes$juliandate)==FALSE ),]
+sixes.nona <- sixes.nona[which(sixes.nona$YEAR>1995),]
 
 table(sixes$juliandate)
 
@@ -423,6 +431,7 @@ sevens.nona <- sevens[which( is.na(sevens$south.sst.amj)==FALSE &
                              is.na(sevens$LATITUDE)==FALSE &
                              is.na(sevens$LONGITUDE)==FALSE &
                              is.na(sevens$juliandate)==FALSE ),]
+sevens.nona <- sevens.nona[which(sevens.nona$YEAR>1995),]
 
 table(sevens$juliandate)
 
@@ -458,6 +467,7 @@ eights.nona <- eights[which( is.na(eights$south.sst.amj)==FALSE &
                                is.na(eights$LATITUDE)==FALSE &
                                is.na(eights$LONGITUDE)==FALSE &
                                is.na(eights$juliandate)==FALSE ),]
+eights.nona <- eights.nona[which(eights.nona$YEAR>1995),]
 
 table(eights$juliandate)
 
@@ -492,6 +502,7 @@ nines.nona <- nines[which( is.na(nines$south.sst.amj)==FALSE &
                                is.na(nines$LATITUDE)==FALSE &
                                is.na(nines$LONGITUDE)==FALSE &
                                is.na(nines$juliandate)==FALSE ),]
+nines.nona <- nines.nona[which(nines.nona$YEAR>1995),]
 
 table(nines$juliandate)
 
@@ -527,6 +538,7 @@ tens.nona <- tens[which( is.na(tens$south.sst.amj)==FALSE &
                              is.na(tens$LATITUDE)==FALSE &
                              is.na(tens$LONGITUDE)==FALSE &
                              is.na(tens$juliandate)==FALSE ),]
+tens.nona <- tens.nona[which(tens.nona$YEAR>1995),]
 
 table(tens$juliandate)
 
