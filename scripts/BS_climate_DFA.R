@@ -166,12 +166,18 @@ proc_rot = solve(H_inv) %*% mod.best$states
 mm <- 2 #2 processes
 
 clim_names <- rownames(e.clim.dat)
- ylbl <- clim_names
+clim_names_edit <- c("South SST Nov-March" , "South SST Apr-May",  "North SST Nov-Mar" ,  "North SST Apr-May",        
+                       "Arctic oscillation Jan-March", "Southeast wind Oct-Apr","Northwest wind Oct-Apr", "Southeast wind May-Sep",       
+                       "Northwest wind May-Sep", "Summer cold pool extent", "Summer bottom temperature", "Ice area Jan-Apr",        
+                       "M8 March ice", "M5 March ice", "M4 March ice", "MASIE ice extent Jan-Apr", 
+                       "North wind stress Apr-Jun", "South wind stress Apr-Jun", "M2 Jan-May temp 60-72m", "M2 Jan-May salinity 10-15m",
+                       "M2 Jul-Sep salinity 10-15m",   "M2 Jan-May salinity 40-55m", "M2 Jul-Sep salinity 40-55m" ,  "M2 Oct-Dec salinity 40-55m"  )
+ ylbl <- clim_names_edit
  w_ts <- seq(dim(e.clim.dat)[2])
  layout(matrix(c(1, 2, 3, 4, 5, 6), mm, 2), widths = c(2, 1))
 ## par(mfcol=c(mm,2), mai=c(0.5,0.5,0.5,0.1), omi=c(0,0,0,0))
 # jpeg("figs/ugly_DFA_trends_loadings.jpg")
-par(mfcol=c(mm,2), mar = c(1,1,1,1), omi = c(0, 0, 0, 0))
+par(mfcol=c(mm,2), mar = c(2,2,2,2), omi = c(0, 0, 0, 0))
 ## plot the processes
 for (i in 1:mm) {
   ylm <- c(-1, 1) * max(abs(proc_rot[i, ]))
@@ -198,7 +204,7 @@ clr <- c("brown", "brown", "brown", "brown",
          "red",  "red",  "red",  "red", 
          "green",  "green",
          "darkblue", 
-         "pink", "pink","pink","pink","pink")
+         "darkgrey", "darkgrey","darkgrey","darkgrey","darkgrey")
 minZ <- 0
 ylm <- c(-1, 1) * max(abs(Z_rot))
 for (i in 1:mm) {
@@ -270,7 +276,7 @@ get_DFA_fits <- function(MLEobj, dd = NULL, alpha = 0.05) {
 # dat <- all.clim.dat - y_bar
 # rownames(dat) <- rownames(all.clim.dat)
 
-dat <- scale(e.clim.dat)
+#dat <- scale(e.clim.dat)
 
 head(e.clim.dat)
 
@@ -302,7 +308,7 @@ for (i in driv) {
 ## get model fits & CI's
 mod_fit <- get_DFA_fits(mod.best)
 ## plot the fits
-par(mfrow = c(N_ts/4, 4), mar = c(1, 1, 1, 1), omi = c(0, 
+par(mfrow = c(N_ts/4, 4), mar = c(2, 2, 1.5, 1.5), omi = c(0, 
                                                              0, 0, 0))
 for (i in 1:N_ts) {
   up <- mod_fit$up[i, ]
@@ -402,15 +408,19 @@ acf(resids$model.residuals, na.action=na.pass)
 
 #manupulate data for DFA========
 
-# save the full data set for later use...
-#all.clim.dat <- t(as.matrix(dat))
+# load environmental data
+dat <- read.csv("data/climate data.csv", row.names = 1)
 
-# now fit DFA models
-# first the early era
-# e.cli.dat = as.matrix(dat[rownames(dat) %in% 1950:1988,])
 
-#new early data
+# plot TS for SI
+do.dat <- as.data.frame(scale(dat)) # scale to plot on 1 axis
+plot.dat <- gather(do.dat)
+plot.dat$year <- 1951:2019
+
+
+
 l.cli.dat = as.matrix(dat[rownames(dat) %in% 2014:2019,])
+
 
 #remove two columns w all zeros
 l.cli.dat <- l.cli.dat[,-c(14:15)]
@@ -468,78 +478,87 @@ mod.best = MARSS(l.clim.dat, model=model.list, z.score=TRUE, form="dfa", control
 
 saveRDS(mod.best, file="scripts/DFA_best_modpost2014.RDS")
 
-
-# and rotate the loadings
-Z.est = coef(mod.best, type="matrix")$Z
-H.inv = varimax(coef(mod.best, type="matrix")$Z)$rotmat #hmm wrong dimensions?
-Z.rot = as.data.frame(Z.est %*% H.inv)
-
-proc_rot = solve(H.inv) %*% mod.best$states
-
-# reverse trend 2 to plot
-Z.rot[,2] <- -Z.rot[,2]
-
-Z.rot$names <- rownames(all.clim.dat)
-Z.rot <- arrange(Z.rot, V1)
-Z.rot <- gather(Z.rot[,c(1,2)])
-Z.rot$names <- rownames(all.clim.dat)
-#Z.rot$plot.names <- reorder(Z.rot$names, 1:14)
-
-
-
-#plot=========
-# get CI and plot loadings...
-modCI <- MARSSparamCIs(mod.best)
-
-#BELOW HERE is where things get bad
-# plot.CI <- data.frame(names=rownames(all.clim.dat), mean=modCI$par$Z, upCI=modCI$par.upCI$Z,
-#                            lowCI=modCI$par.lowCI$Z)
-plot.CI <- data.frame(mean=modCI$par$Z, upCI=modCI$par.upCI$Z,
-                      lowCI=modCI$par.lowCI$Z)
-
-plot.CI <- arrange(plot.CI, mean)
-plot.CI$names.order <- reorder(plot.CI$names, plot.CI$mean)
-dodge <- position_dodge(width=0.9)
-
-clim.plot <- ggplot(Z.rot, aes(names, value, fill=key)) + geom_bar(stat="identity", position="dodge") #+
-# theme_bw() + ylab("Loading") + xlab("") + 
-# scale_fill_manual(values=c("Trend 1" = cb[2], "Trend 2" = cb[3])) +
-# theme(legend.position = c(0.8,0.2), legend.title=element_blank()) + geom_hline(yintercept = 0) +
-# theme(axis.text.x  = element_text(angle=45, hjust=1, size=12)) + ylim(-0.6, 0.8)
-
-#based on nwfsc-timeseries.github.io
-
-yr_frst <- 2014
-
-## get number of time series
-N_ts <- dim(l.clim.dat)[1]
-## get length of time series
-TT <- dim(l.clim.dat)[2]
-
-## get the estimated ZZ
-Z_est <- coef(mod.best, type = "matrix")$Z
-## get the inverse of the rotation matrix
-H_inv <- varimax(Z_est)$rotmat
-
-## rotate factor loadings
-Z_rot = Z_est %*% H_inv
-## rotate processes
-proc_rot = solve(H_inv) %*% mod.best$states
-
-mm <- 2 #2 processes
-
-clim_names <- rownames(e.clim.dat)
-ylbl <- clim_names
-w_ts <- seq(dim(e.clim.dat)[2])
-layout(matrix(c(1, 2, 3, 4, 5, 6), mm, 2), widths = c(2, 1))
-## par(mfcol=c(mm,2), mai=c(0.5,0.5,0.5,0.1), omi=c(0,0,0,0))
-# jpeg("figs/ugly_DFA_trends_loadings.jpg")
-par(mfcol=c(mm,2), mar = c(1,1,1,1), omi = c(0, 0, 0, 0))
-## plot the processes
+# 
+# # and rotate the loadings
+ Z.est = coef(mod.best, type="matrix")$Z
+# H.inv = varimax(coef(mod.best, type="matrix")$Z)$rotmat #hmm wrong dimensions? Do you rotate if only 1 trend?
+# Z.rot = as.data.frame(Z.est %*% H.inv)
+Z.rot <- Z.est 
+# 
+# proc_rot = solve(H.inv) %*% mod.best$states
+# 
+# # reverse trend 2 to plot
+# Z.rot[,2] <- -Z.rot[,2]
+# 
+# Z.rot$names <- rownames(all.clim.dat)
+# Z.rot <- arrange(Z.rot, V1)
+# Z.rot <- gather(Z.rot[,c(1,2)])
+# Z.rot$names <- rownames(all.clim.dat)
+# #Z.rot$plot.names <- reorder(Z.rot$names, 1:14)
+# 
+# 
+# 
+# #plot=========
+# # get CI and plot loadings...
+ modCI <- MARSSparamCIs(mod.best)
+# 
+# #BELOW HERE is where things get bad
+# # plot.CI <- data.frame(names=rownames(all.clim.dat), mean=modCI$par$Z, upCI=modCI$par.upCI$Z,
+# #                            lowCI=modCI$par.lowCI$Z)
+ plot.CI <- data.frame(mean=modCI$par$Z, upCI=modCI$par.upCI$Z,
+                       lowCI=modCI$par.lowCI$Z)
+# 
+ plot.CI <- arrange(plot.CI, mean)
+# plot.CI$names.order <- reorder(plot.CI$names, plot.CI$mean)
+ dodge <- position_dodge(width=0.9)
+# 
+# clim.plot <- ggplot(Z.rot, aes(names, value, fill=key)) + geom_bar(stat="identity", position="dodge") #+
+# # theme_bw() + ylab("Loading") + xlab("") + 
+# # scale_fill_manual(values=c("Trend 1" = cb[2], "Trend 2" = cb[3])) +
+# # theme(legend.position = c(0.8,0.2), legend.title=element_blank()) + geom_hline(yintercept = 0) +
+# # theme(axis.text.x  = element_text(angle=45, hjust=1, size=12)) + ylim(-0.6, 0.8)
+# 
+# #based on nwfsc-timeseries.github.io
+# 
+ yr_frst <- 2014
+# 
+# ## get number of time series
+ N_ts <- dim(l.clim.dat)[1]
+# ## get length of time series
+ TT <- dim(l.clim.dat)[2]
+# 
+# ## get the estimated ZZ
+ Z_est <- coef(mod.best, type = "matrix")$Z #single trend so don't rotate
+ Z.rot <- Z.est  #single trend so don't rotate
+# ## get the inverse of the rotation matrix
+# H_inv <- varimax(Z_est)$rotmat
+# 
+# ## rotate factor loadings
+# Z_rot = Z_est %*% H_inv
+# ## rotate processes
+# proc_rot = solve(H_inv) %*% mod.best$states
+  proc_rot =  mod.best$states #single trend so don't rotate
+# 
+ mm <- 1 #2 processes
+# 
+ clim_names <- rownames(l.clim.dat)
+ clim_names_late <- c("South SST Nov-March" , "South SST Apr-May",  "North SST Nov-Mar" ,  "North SST Apr-May",        
+                      "Arctic oscillation Jan-March", "Southeast wind Oct-Apr","Northwest wind Oct-Apr", "Southeast wind May-Sep",       
+                      "Northwest wind May-Sep", "Summer cold pool extent", "Summer bottom temperature", "Ice area Jan-Apr",        
+                      "M8 March ice", "MASIE ice extent Jan-Apr", 
+                      "North wind stress Apr-Jun", "South wind stress Apr-Jun", "M2 Jan-May temp 60-72m", "M2 Jan-May salinity 10-15m",
+                      "M2 Jul-Sep salinity 10-15m",   "M2 Jan-May salinity 40-55m", "M2 Jul-Sep salinity 40-55m" ,  "M2 Oct-Dec salinity 40-55m"  )
+ ylbl <- clim_names_late
+ w_ts <- seq(dim(l.clim.dat)[2])
+ layout(matrix(c(1, 2, 3, 4, 5, 6), mm, 2), widths = c(2, 1))
+# ## par(mfcol=c(mm,2), mai=c(0.5,0.5,0.5,0.1), omi=c(0,0,0,0))
+# # jpeg("figs/ugly_DFA_trends_loadings.jpg")
+ par(mfcol=c(mm,2), mar = c(2,2,2,2), omi = c(0, 0, 0, 0))
+# ## plot the processes
 for (i in 1:mm) {
   ylm <- c(-1, 1) * max(abs(proc_rot[i, ]))
   ## set up plot area
-  plot(w_ts, proc_rot[i, ], type = "n", bty = "L", #ylim = ylm, 
+  plot(w_ts, proc_rot[i, ], type = "n", bty = "L", #ylim = ylm,
        xlab = "", ylab = "", xaxt = "n")
   ## draw zero-line
   abline(h = 0, col = "gray")
@@ -551,22 +570,22 @@ for (i in 1:mm) {
   #axis(1, 12 * (0:dim(all.clim.dat)[2]) + 1, yr_frst + 0:dim(all.clim.dat)[2])
   axis(1, 1:70, yr_frst + 0:dim(all.clim.dat)[2])
 }
-## plot the loadings
-clr <- c("brown", "brown", "brown", "brown", 
-         "blue", 
-         "darkgreen", "darkgreen", "darkgreen", "darkgreen", 
-         "darkred", 
-         "purple", 
+# ## plot the loadings
+clr <- c("brown", "brown", "brown", "brown",
+         "blue",
+         "darkgreen", "darkgreen", "darkgreen", "darkgreen",
+         "darkred",
+         "purple",
          "darkorange",
-         "red",  "red",  "red",  "red", 
+         "red",  "red",  
          "green",  "green",
-         "darkblue", 
-         "pink", "pink","pink","pink","pink")
+         "darkblue",
+         "darkgrey", "darkgrey","darkgrey","darkgrey","darkgrey")
 minZ <- 0
 ylm <- c(-1, 1) * max(abs(Z_rot))
 for (i in 1:mm) {
-  plot(c(1:N_ts)[abs(Z_rot[, i]) > minZ], as.vector(Z_rot[abs(Z_rot[, i]) > minZ, i]), 
-       type = "h", lwd = 2, xlab = "", ylab = "", 
+  plot(c(1:N_ts)[abs(Z_rot[, i]) > minZ], as.vector(Z_rot[abs(Z_rot[, i]) > minZ, i]),
+       type = "h", lwd = 2, xlab = "", ylab = "",
        xaxt = "n", ylim = ylm, xlim = c(0.5, N_ts + 0.5), col=clr)
   for (j in 1:N_ts) {
     if (Z_rot[j, i] > minZ) {
@@ -585,47 +604,95 @@ par(mai = c(0.9, 0.9, 0.1, 0.1))
 ccf(proc_rot[1, ], proc_rot[2, ], lag.max = 12, main = "")
 
 
+#section above rotates which is for when >1 trend, trying this instead based on Mike's example script
+
+#####from example script for 1 trend#############################################
+
+# and the late era
+# equal var covar one trend is the best for this era!
+model.list = list(A="zero", m=1, R="diagonal and equal")
+mod.late = MARSS(l.clim.dat, model=model.list, z.score=TRUE, form="dfa", control=cntl.list)
+
+# get CI and plot loadings...
+modCI.late <- MARSSparamCIs(mod.late)
+
+plot.CI.late <- data.frame(names=rownames(l.clim.dat), mean=modCI.late$par$Z, upCI=modCI.late$par.upCI$Z,
+                           lowCI=modCI.late$par.lowCI$Z)
+
+plot.CI.late <- arrange(plot.CI.late, mean)
+plot.CI.late$names.order <- reorder(plot.CI.late$names, plot.CI.late$mean)
+dodge <- position_dodge(width=0.9)
+
+# combine into one plot
+Z.rot$key <- rep(c("Trend 1", "Trend 2"), each=7)
+plot.CI.late$names.order <- reorder(plot.CI.late$names, plot.CI.late$mean)
+
+
+early.env <- ggplot(Z.rot, aes(plot.names, value, fill=key)) + geom_bar(stat="identity", position="dodge") +
+  theme_bw() + ylab("Loading") + xlab("") + ggtitle("1950-1988 environment") + 
+  scale_fill_manual(values=c("Trend 1" = cb[2], "Trend 2" = cb[3])) +
+  theme(legend.position = c(0.8,0.2), legend.title=element_blank()) + geom_hline(yintercept = 0) +
+  theme(axis.text.x  = element_text(angle=45, hjust=1, size=12)) + ylim(-0.6, 0.8)
+
+# reorder Z plot
+plot.CI.late$plot.names <- reorder(plot.CI.late$names, c(1,3,5,2,6,7,4))
+
+late.env <- ggplot(plot.CI.late, aes(x=plot.names, y=mean)) + geom_bar(position="dodge", stat="identity", fill=cb[2]) +
+  geom_errorbar(aes(ymax=upCI, ymin=lowCI), position=dodge, width=0.5) +
+  ylab("Loading") + xlab("") + theme_bw() + 
+  theme(axis.text.x  = element_text(angle=45, hjust=1,  size=12), axis.title.y = element_blank()) +
+  geom_hline(yintercept = 0) + ggtitle("1989-2012 environment") + ylim(-0.6, 0.8)
+
+
+
+##### end section from example script #############################################
+
+
+
+
 #plot obs vs fitted========
 
 #from online course "nwfsc-timeseries.github.io"
-
-get_DFA_fits <- function(MLEobj, dd = NULL, alpha = 0.05) {
+#editing this function to work with a single trend
+get_DFA_fits_1trend <- function(MLEobj, dd = NULL, alpha = 0.05) {
   ## empty list for results
-  fits <- list()
+  fits_ <- list()
   ## extra stuff for var() calcs
-  Ey <- MARSS:::MARSShatyt(MLEobj)
+  Ey_ <- MARSS:::MARSShatyt(mod.best)
   ## model params
-  ZZ <- coef(MLEobj, type = "matrix")$Z
+  ZZ_ <- coef(mod.best, type = "matrix")$Z
   ## number of obs ts
-  nn <- dim(Ey$ytT)[1]
+  nn_ <- dim(Ey_$ytT)[1]
   ## number of time steps
-  TT <- dim(Ey$ytT)[2]
+  TT_ <- dim(Ey_$ytT)[2]
   ## get the inverse of the rotation matrix
-  H_inv <- varimax(ZZ)$rotmat
+  H_inv_ <- ZZ_
   ## check for covars
   if (!is.null(dd)) {
-    DD <- coef(MLEobj, type = "matrix")$D
+    DD_ <- coef(mod.best, type = "matrix")$D
     ## model expectation
-    fits$ex <- ZZ %*% H_inv %*% MLEobj$states + DD %*% dd
+    #fits_$ex <- ZZ_ %*% H_inv_ %*% mod.best$states + DD_ %*% dd
+    fits_$ex <- ZZ_  %*% mod.best$states + DD_ %*% dd
   } else {
     ## model expectation
-    fits$ex <- ZZ %*% H_inv %*% MLEobj$states
+    #fits_$ex <- ZZ_ %*% H_inv_ %*% mod.best$states
+    fits_$ex <- ZZ_  %*% mod.best$states
   }
   ## Var in model fits
-  VtT <- MARSSkfss(MLEobj)$VtT
-  VV <- NULL
-  for (tt in 1:TT) {
-    RZVZ <- coef(MLEobj, type = "matrix")$R - ZZ %*% VtT[, 
-                                                         , tt] %*% t(ZZ)
-    SS <- Ey$yxtT[, , tt] - Ey$ytT[, tt, drop = FALSE] %*% 
-      t(MLEobj$states[, tt, drop = FALSE])
-    VV <- cbind(VV, diag(RZVZ + SS %*% t(ZZ) + ZZ %*% t(SS)))
+  VtT_ <- MARSSkfss(mod.best)$VtT
+  VV_ <- NULL
+  for (tt in 1:TT_) {
+    RZVZ_ <- coef(mod.best, type = "matrix")$R - ZZ_ %*% VtT_[, 
+                                                         , tt] %*% t(ZZ_)
+    SS_ <- Ey_$yxtT[, , tt] - Ey_$ytT[, tt, drop = FALSE] %*% 
+      t(mod.best$states[, tt, drop = FALSE])
+    VV_ <- cbind(VV_, diag(RZVZ_ + SS_ %*% t(ZZ_) + ZZ_ %*% t(SS_)))
   }
-  SE <- sqrt(VV)
+  SE_ <- sqrt(VV_)
   ## upper & lower (1-alpha)% CI
-  fits$up <- qnorm(1 - alpha/2) * SE + fits$ex
-  fits$lo <- qnorm(alpha/2) * SE + fits$ex
-  return(fits)
+  fits_$up <- qnorm(1 - alpha/2) * SE_ + fits_$ex
+  fits_$lo <- qnorm(alpha/2) * SE_ + fits_$ex
+  return(fits_)
 }
 
 #demean data
@@ -633,23 +700,23 @@ get_DFA_fits <- function(MLEobj, dd = NULL, alpha = 0.05) {
 # dat <- all.clim.dat - y_bar
 # rownames(dat) <- rownames(all.clim.dat)
 
-dat <- scale(e.clim.dat)
+dat <- scale(l.clim.dat)
 
-head(e.clim.dat)
+head(l.clim.dat)
 
-e.clim.dat.std <- e.clim.dat
+l.clim.dat.std <-dat
 
 i <- 1
-for(i in 1:nrow(e.clim.dat)) {
-  e.clim.dat.std[i,] <- (e.clim.dat[i,]-mean(e.clim.dat[i,], na.rm=TRUE))/sd(e.clim.dat[i,], na.rm=TRUE)  
+for(i in 1:nrow(l.clim.dat)) {
+  l.clim.dat.std[i,] <- (l.clim.dat[i,]-mean(l.clim.dat[i,], na.rm=TRUE))/sd(l.clim.dat[i,], na.rm=TRUE)  
 }
 #Double checking
-apply(e.clim.dat.std, 1, mean, na.rm=TRUE)
-apply(e.clim.dat.std, 1, sd, na.rm=TRUE)
-dat <- e.clim.dat.std
+apply(l.clim.dat.std, 1, mean, na.rm=TRUE)
+apply(l.clim.dat.std, 1, sd, na.rm=TRUE)
+dat <- l.clim.dat.std
 #plot demeaned data
 
-driv <- rownames(e.clim.dat)
+driv <- rownames(l.clim.dat)
 #clr <- c("brown", "blue", "darkgreen", "darkred", "purple")
 cnt <- 1
 par(mfrow = c(N_ts/4, 4), mar = c(1, 1,1.5,1), omi = c(0.1, 
@@ -657,15 +724,15 @@ par(mfrow = c(N_ts/4, 4), mar = c(1, 1,1.5,1), omi = c(0.1,
 for (i in driv) {
   plot(dat[i, ], xlab = "", ylab = "", bty = "L", 
        xaxt = "n", pch = 16, col = clr[cnt], type = "b")
-  axis(1,  (0:dim(e.clim.dat)[2]) + 1, yr_frst + 0:dim(e.clim.dat)[2])
+  axis(1,  (0:dim(l.clim.dat)[2]) + 1, yr_frst + 0:dim(l.clim.dat)[2])
   title(i)
   cnt <- cnt + 1
 }
 
 ## get model fits & CI's
-mod_fit <- get_DFA_fits(mod.best)
+mod_fit <- get_DFA_fits_1trend(mod.best)
 ## plot the fits
-par(mfrow = c(N_ts/4, 4), mar = c(1, 1, 1, 1), omi = c(0, 
+par(mfrow = c(6, 4), mar = c(2, 2, 1.5, 1.5), omi = c(0, 
                                                        0, 0, 0))
 for (i in 1:N_ts) {
   up <- mod_fit$up[i, ]
