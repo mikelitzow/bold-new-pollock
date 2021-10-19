@@ -2,6 +2,8 @@
 #models==
 library(fRegression)
 
+#datasets loaded in weight-age-exploration.R
+
 # age 1
 #age 1 has to be different because no previous year
 lag1 <- lag12[which(lag12$AGE==1),]
