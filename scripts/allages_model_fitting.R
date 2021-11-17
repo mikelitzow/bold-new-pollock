@@ -582,6 +582,14 @@ visreg(dropk_tek3corE$gam, xvar='bottemp_anom',
        overlay=FALSE, band=TRUE, scale='response', #xaxt='n', #yaxt='n',
        line.par = list(col = 'grey29'), rug=FALSE, data=periods_analysis_dat, ylim=c(1,6))
 
+cb1 <- draw(dropk_tek3corE[[2]], select=1,  continuous_fill = ggplot2::scale_fill_distiller(palette = "Spectral", type = "div", limits = c(-3,3)))
+
+vizsm <- getViz(dropk_tek3corE$gam)
+vsm <- plot(sm(vizsm, 1)) + labs(title = NULL) + 
+  scale_fill_distiller(palette = "Spectral", type = "div", limits = c(-3,3)) +
+  theme(legend.position = "none")+ theme(plot.margin = unit(c(0, 0, 0, 0.1), "cm"), plot.title = element_blank(),
+                                         axis.title.x = element_blank(),
+                                         axis.title.y = element_blank())
 
 
 viz_dropk_tek3corE <- getViz(dropk_tek3corE$gam)
@@ -638,6 +646,14 @@ plot_model(lin_tek3corE[[2]], type="int", title="",
 #anova(best_tek3corE$gam, dropk_tek3corE$gam, lin_tek3corE$gam)
 anova(dropk_tek3corE$lme, lin_tek3corE$lme)
 
+cb2 <- draw(lin_tek3corE[[2]], select=1,  continuous_fill = ggplot2::scale_fill_distiller(palette = "Spectral", type = "div", limits = c(-3,3)))
+
+vizint <- getViz(lin_tek3corE_2$gam)
+vint <- plot(sm(vizint, 1)) + labs(title = NULL) + 
+  scale_fill_distiller(palette = "Spectral", type = "div", limits = c(-3,3)) +
+  theme(legend.position = "none")+ theme(plot.margin = unit(c(0, 0, 0, 0.1), "cm"), plot.title = element_blank(),
+                                         axis.title.x = element_blank(),
+                                         axis.title.y = element_blank())
 
 #figure for manuscript
 par(mfrow=c(1,2), mai=c(0.5,0.4,0.5,0.1)) 
@@ -666,6 +682,22 @@ summary(linonly[[2]])
 gamlin <- linonly$gam
 
 draw(gamlin, select = 1)
+
+cb3 <- draw(linonly$gam, select=1,  continuous_fill = ggplot2::scale_fill_distiller(palette = "Spectral", type = "div", limits = c(-3,3)))
+
+vizlin <- getViz(linonly$gam)
+ vlin <- plot(sm(vizlin, 1)) + labs(title = NULL) + 
+      scale_fill_distiller(palette = "Spectral", type = "div", limits = c(-3,3)) +
+       theme(legend.position = "none")+ theme(plot.margin = unit(c(0, 0, 0, 0.1), "cm"), plot.title = element_blank(),
+                                   axis.title.x = element_blank(),
+                                 axis.title.y = element_blank())
+
+#plot three model's depth x bottemp
+plot_grid(cb1, cb2, cb3)
+
+gridPrint(vsm, vint, vlin,     #not working? Blank panels
+          #ncol = 3, 
+          bottom="Mean station bottom temperature", left="Bottom depth")
 
 #drop anom completely
 drop_anom <- gamm(logCPUE_Gadus_chalcogrammus ~  te(mean_station_bottemp, BOT_DEPTH, k=29),

@@ -2,6 +2,8 @@
 #models==
 library(fRegression)
 
+#datasets loaded in weight-age-exploration.R
+
 # age 1
 #age 1 has to be different because no previous year
 lag1 <- lag12[which(lag12$AGE==1),]
@@ -27,6 +29,9 @@ AIC(base.null1_ran$mer) #10396.8 so lower than without random
 
 
 vb1 <- visreg(base.null1, "sst.amj", scale="response",ylab="Scaled log(weight-at-age)", xlab="April-June SST", rug=1)
+
+base.null1_ran$gam$data <- lag1complete
+vr1 <- visreg(base.null1_ran$gam, "sst.amj", scale="response",ylab="Scaled log(weight-at-age)", xlab="April-June SST", rug=1)
 
 
 AICc(base.null1) #
@@ -109,6 +114,10 @@ AIC(base.null2_ran$mer) #4053.007 lower than without random
 
 vb2 <- visreg(base.null2, "sst.amj", scale="response",ylab="Scaled log(weight-at-age)", xlab="April-June SST", rug=1)
 
+base.null2_ran$gam$data <- lag2complete
+vr2 <- visreg(base.null2_ran$gam, "sst.amj", scale="response",ylab="Scaled log(weight-at-age)", xlab="April-June SST", rug=1)
+
+
 AICc(base.null2) #
 
 AICc_2base <- AICc(base.null2) #
@@ -186,6 +195,9 @@ AIC(base.null3_ran$mer) #4278.209 lower than without random
 
 vb3 <- visreg(base.null3, "sst.amj", scale="response",ylab="Scaled log(weight-at-age)", xlab="April-June SST", rug=1)
 
+base.null3_ran$gam$data <- lag3complete
+vr3 <- visreg(base.null3_ran$gam, "sst.amj", scale="response",ylab="Scaled log(weight-at-age)", xlab="April-June SST", rug=1)
+
 
 AICc_3base <- AICc(base.null3) #
 AICc_3base # 
@@ -259,6 +271,10 @@ AIC(base.null4_ran$mer) #5537.197 lower than without random
 #R-sq.(adj) =  0.248 lower than without random
 
 vb4 <- visreg(base.null4, "sst.amj", scale="response",ylab="Scaled log(weight-at-age)", xlab="April-June SST", rug=1)
+
+base.null4_ran$gam$data <- lag4complete
+vr4 <- visreg(base.null4_ran$gam, "sst.amj", scale="response",ylab="Scaled log(weight-at-age)", xlab="April-June SST", rug=1)
+
 
 AICc(base.null4) #
 
@@ -337,6 +353,10 @@ AIC(base.null5_ran$mer) #8091.068 lower than without random
 
 vb5 <- visreg(base.null5, "sst.amj", scale="response",ylab="Scaled log(weight-at-age)", xlab="April-June SST", rug=1)
 
+base.null5_ran$gam$data <- lag5complete
+vr5 <- visreg(base.null5_ran$gam, "sst.amj", scale="response",ylab="Scaled log(weight-at-age)", xlab="April-June SST", rug=1)
+
+
 AICc(base.null5) #
 
 AICc_5base <- AICc(base.null5) #
@@ -414,6 +434,10 @@ AIC(base.null6_ran$mer) #9820.327 lower than without random
 
 vb6 <- visreg(base.null6, "sst.amj", scale="response",ylab="Scaled log(weight-at-age)", xlab="April-June SST", rug=1)
 
+base.null6_ran$gam$data <- lag6complete
+vr6 <- visreg(base.null6_ran$gam, "sst.amj", scale="response",ylab="Scaled log(weight-at-age)", xlab="April-June SST", rug=1)
+
+
 AICc(base.null6) #
 
 AICc_6base <- AICc(base.null6) #
@@ -490,6 +514,10 @@ AIC(base.null7_ran$mer) #8404.48 lower than without random
 
 
 vb7 <- visreg(base.null7, "sst.amj", scale="response",ylab="Scaled log(weight-at-age)", xlab="April-June SST", rug=1)
+
+base.null7_ran$gam$data <- lag7complete
+vr7 <- visreg(base.null7_ran$gam, "sst.amj", scale="response",ylab="Scaled log(weight-at-age)", xlab="April-June SST", rug=1)
+
 
 AICc(base.null7) #
 
@@ -570,6 +598,10 @@ AIC(base.null8_ran$mer) #6114.361 lower than without random
 
 vb8 <- visreg(base.null8, "sst.amj", scale="response",ylab="Scaled log(weight-at-age)", xlab="April-June SST", rug=1)
 
+base.null8_ran$gam$data <- lag8complete
+vr8 <- visreg(base.null8_ran$gam, "sst.amj", scale="response",ylab="Scaled log(weight-at-age)", xlab="April-June SST", rug=1)
+
+
 AICc(base.null8) #
 
 AICc_8base <- AICc(base.null8) #
@@ -649,6 +681,10 @@ AIC(base.null9_ran$mer) #4921.163 lower than without random
 
 vb9 <- visreg(base.null9, "sst.amj", scale="response",ylab="Scaled log(weight-at-age)", xlab="April-June SST", rug=1)
 
+base.null9_ran$gam$data <- lag9complete
+vr9 <- visreg(base.null9_ran$gam, "sst.amj", scale="response",ylab="Scaled log(weight-at-age)", xlab="April-June SST", rug=1)
+
+
 AICc(base.null9) #
 
 AICc_9base <- AICc(base.null9) #
@@ -727,6 +763,10 @@ AIC(base.null10_ran$mer) #4160.911 lower than without random
 
 vb10 <- visreg(base.null10, "sst.amj", scale="response",ylab="Scaled log(weight-at-age)", xlab="April-June SST", rug=1)
 
+base.null10_ran$gam$data <- lag10complete
+vr10 <- visreg(base.null10_ran$gam, "sst.amj", scale="response",ylab="Scaled log(weight-at-age)", xlab="April-June SST", rug=1)
+
+
 AICc(base.null10) #
 
 AICc_10base <- AICc(base.null10) #
@@ -803,6 +843,10 @@ AIC(base.null11_ran$mer) #3426.587 lower than without random
 
 
 vb11 <- visreg(base.null11, "sst.amj", scale="response",ylab="Scaled log(weight-at-age)", xlab="April-June SST", rug=1)
+
+base.null11_ran$gam$data <- lag11complete
+vr11 <- visreg(base.null11_ran$gam, "sst.amj", scale="response",ylab="Scaled log(weight-at-age)", xlab="April-June SST", rug=1)
+
 
 AICc(base.null11) #
 
@@ -893,7 +937,20 @@ vvbg <- visregList( vb1, vb2, vb3,
 
 plot(vvb3,
      ylab="Scaled log (weight-at-age)",
-     xlab="April-June SST", rug=1)
+     xlab="April-June SST", rug=1) #for manuscript first round
+
+
+vvr3 <- visregList(vr8, vr9, vr10, vr11, 
+                   vr4, vr5, vr6,  vr7, 
+                   vr1, vr2, vr3, 
+                   collapse=TRUE,
+                   labels=c("Age 8", "Age 9",  "Age 10", "Age 11", 
+                            "Age 4", "Age 5", "Age 6", "Age 7",  
+                            "Age 1", "Age 2", "Age 3"))
+
+plot(vvr3,
+     ylab="Scaled log (weight-at-age)",
+     xlab="April-June SST", rug=1) #for manuscript but with random
 
 
 #add age 11
