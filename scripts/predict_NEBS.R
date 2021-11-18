@@ -10,6 +10,9 @@ library("rnaturalearth")
 library("rnaturalearthdata")
 library( "ggspatial" )
 library("sf")
+library(tidyverse)
+library(mgcv)
+library(cowplot)
 
 
 #import the model fit for the model with a linear interaction
@@ -57,6 +60,8 @@ pdat$shelf[which(pdat$STRATUM==50 |
 #set up data to 1) drop high mean stations temps and 2) set high mean station temps to highest observed in SEBS
 # all_analysis_dat from NEBS_depth_temp_plot.R
 #needs lat/long albers and period
+
+#MOST RECENT analyses are in section 'repeat with adjusted temps' right at end
 
 #what is highest mean station bottemp in early?
 maxmean_bottemp_early <- max(pdat$mean_station_bottemp[which(pdat$YEAR<2014 & pdat$region=="SEBS")])
@@ -115,7 +120,7 @@ p1 <- ggplot(data = world) +
 
 
 
-library(cowplot)
+
 
 
 
@@ -175,6 +180,9 @@ plot_grid(p5, p6, p7, labels=c("2010", "2017", "2018"), nrow=1)
 
 #pivot longer so that can plot on same scale!
 
+#MAKE SURE the below catched the predicted column! I think depending on what other scripts do
+#an extra column is sometimes added sometimes not
+
 # plot_pred_dat <- pdat_NEBS[,c(1:3, 5, 20, 24:26, 29, 31)] %>% pivot_longer(!c(LATITUDE, LONGITUDE, STATION, YEAR, region, period, shelf), 
 #                                                                        names_to="response_type", values_to="value")
 plot_pred_dat <- pdat_NEBS[,c(1:3, 5, 45, 50, 53:56)] %>% pivot_longer(!c(LATITUDE, LONGITUDE, STATION, YEAR,  region, period, shelf),
@@ -184,7 +192,7 @@ plot_pred_dat <- pdat_NEBS[,c(1:3, 5, 45, 50, 53:56)] %>% pivot_longer(!c(LATITU
 #                                                                        names_to="response_type", values_to="value")
 
 
-View(plot_pred_dat)
+table(plot_pred_dat$response_type) #should have 3 cols, logCPUE... , predicted, and smoothT_predicted
 
 
 
@@ -250,24 +258,24 @@ ggplot(data = world) +
 
 
 
-ggplot(pdat_NEBS, aes(predicted, logCPUE)) + geom_point() + geom_smooth(method="lm") + geom_abline(intercept=0)
+ggplot(pdat_NEBS, aes(predicted, logCPUE_Gadus_chalcogrammus)) + geom_point() + geom_smooth(method="lm") + geom_abline(intercept=0)
 
-ggplot(pdat_NEBS, aes(predicted, logCPUE, col=YEAR_factor)) + geom_point() + geom_smooth(method="lm") + geom_abline(intercept=0)
+ggplot(pdat_NEBS, aes(predicted, logCPUE_Gadus_chalcogrammus, col=YEAR_factor)) + geom_point() + geom_smooth(method="lm") + geom_abline(intercept=0)
 #OH this is interesting!!!!!
 
-ggplot(pdat_NEBS, aes(predicted, logCPUE, col=bottemp_anom)) + geom_point() + geom_smooth(method="lm") + geom_abline(intercept=0) +
+ggplot(pdat_NEBS, aes(predicted, logCPUE_Gadus_chalcogrammus, col=bottemp_anom)) + geom_point() + geom_smooth(method="lm") + geom_abline(intercept=0) +
   scale_colour_distiller(palette = "Spectral")
 
-ggplot(pdat_NEBS, aes(predicted, logCPUE, col=BOT_DEPTH)) + geom_point() + geom_smooth(method="lm") + geom_abline(intercept=0)+
+ggplot(pdat_NEBS, aes(predicted, logCPUE_Gadus_chalcogrammus, col=BOT_DEPTH)) + geom_point() + geom_smooth(method="lm") + geom_abline(intercept=0)+
   scale_colour_distiller(palette = "Spectral")
 
-ggplot(pdat_NEBS, aes(predicted, logCPUE, col=mean_station_bottemp)) + geom_point() + geom_smooth(method="lm") + geom_abline(intercept=0)+
+ggplot(pdat_NEBS, aes(predicted, logCPUE_Gadus_chalcogrammus, col=mean_station_bottemp)) + geom_point() + geom_smooth(method="lm") + geom_abline(intercept=0)+
   scale_colour_distiller(palette = "Spectral") #hmm maybe underestimates cold stations (blue band near top)
 
-ggplot(pdat_NEBS, aes(predicted, logCPUE, col=long_albers)) + geom_point() + geom_smooth(method="lm") + geom_abline(intercept=0)+
+ggplot(pdat_NEBS, aes(predicted, logCPUE_Gadus_chalcogrammus, col=long_albers)) + geom_point() + geom_smooth(method="lm") + geom_abline(intercept=0)+
   scale_colour_distiller(palette = "Spectral") #hmm maybe underestimates cold stations (blue band near top)
 
-ggplot(pdat_NEBS, aes(predicted, logCPUE, col=lat_albers)) + geom_point() + geom_smooth(method="lm") + geom_abline(intercept=0)+
+ggplot(pdat_NEBS, aes(predicted, logCPUE_Gadus_chalcogrammus, col=lat_albers)) + geom_point() + geom_smooth(method="lm") + geom_abline(intercept=0)+
   scale_colour_distiller(palette = "Spectral") #hmm maybe underestimates cold stations (blue band near top)
 
 
@@ -290,6 +298,7 @@ for(i in 1:length(pdat$mean_station_bottemp)){
 pdat_NEBS_Ad <- pdat[which(pdat$region=="NEBS"),]
 
 nebs_sel_adjusted <- pdat_NEBS_Ad[,c(7, 13, 14:15, 45, 50:55)]
+names(nebs_sel_adjusted)
 
 NEBSpred3 <- predict.gam(pmod$gam, newdata = nebs_sel_adjusted)
 length(NEBSpred3)
@@ -297,13 +306,16 @@ length(nebs_sel_adjusted$BOT_DEPTH) #same length
 
 pdat_NEBS_Ad$predicted_adjusted <- NEBSpred3
 
+#get difference
+pdat_NEBS_Ad$difference <- pdat_NEBS_Ad$predicted_adjusted - pdat_NEBS_Ad$logCPUE_Gadus_chalcogrammus
 
 #pivot longer so that can plot on same scale!
 
-plot_ad_pred_dat <- pdat_NEBS_Ad[,c(1:3, 5, 45, 50, 53:54, 56)] %>% pivot_longer(!c(LATITUDE, LONGITUDE, STATION, YEAR,  region, period, shelf), 
+plot_ad_pred_dat <- pdat_NEBS_Ad[,c(1:3, 5, 45, 50, 53:54, 56:57)] %>% pivot_longer(!c(LATITUDE, LONGITUDE, STATION, YEAR,  region, period, shelf), 
                                                                            names_to="response_type", values_to="value")
 
-View(plot_ad_pred_dat)
+names(plot_ad_pred_dat)
+table(plot_ad_pred_dat$response_type) #three coloumns, difference, logCPUE... and predicted_adjusted
 
 ggplot(data = world) +
   geom_sf() +
@@ -313,7 +325,7 @@ ggplot(data = world) +
   #                        pad_x = unit(0.75, "in"), pad_y = unit(0.5, "in"),
   #                        style = north_arrow_fancy_orienteering) +  
   stat_summary_2d(aes(LONGITUDE,LATITUDE,  z=value), bins = 20, fun = mean, data=plot_ad_pred_dat) + 
-  facet_wrap(~interaction( YEAR, response_type), nrow=2)  +
+  facet_wrap(~interaction( YEAR, response_type), nrow=3)  +
   scale_fill_distiller(palette = "Spectral")
 
 
@@ -326,8 +338,9 @@ plot_ad_pred_dat2$response_type2 <- plot_ad_pred_dat2$response_type
 
 plot_ad_pred_dat2$response_type2[which(plot_ad_pred_dat$response_type=="logCPUE_Gadus_chalcogrammus")] <- "Actual"
 plot_ad_pred_dat2$response_type2[which(plot_ad_pred_dat$response_type=="predicted_adjusted")] <- "Predicted"
+plot_ad_pred_dat2$response_type2[which(plot_ad_pred_dat$response_type=="difference")] <- "Predicted - actual"
 
-ggplot(data = world) +
+g1 <- ggplot(data = world) +
   geom_sf() +
   coord_sf(xlim = c(-178, -155), ylim = c(58, 66), expand = TRUE) +
   # annotation_scale(location = "bl", width_hint = 0.5) +
@@ -335,11 +348,19 @@ ggplot(data = world) +
   #                        pad_x = unit(0.75, "in"), pad_y = unit(0.5, "in"),
   #                        style = north_arrow_fancy_orienteering) +  
   stat_summary_2d(aes(LONGITUDE,LATITUDE,  z=value), bins = 20, fun = mean, data=plot_ad_pred_dat2) + 
-  facet_wrap(response_type2~YEAR, nrow=2)  +
+  facet_wrap(response_type2~YEAR, nrow=3)  +
   scale_fill_distiller(palette = "Spectral") + theme_bw() +
   theme( legend.position = c(0.97, 0.25), legend.key = element_blank(),
          legend.background=element_blank(), legend.title = element_blank()) 
 
 
+#NOW WITH DIFFERENCE
+
+g2 <- ggplot(pdat_NEBS_Ad, aes(difference)) + geom_histogram() + facet_wrap(~YEAR, nrow=1) + geom_vline(xintercept = 0)
+
+plot_grid(g1, g2)
+
+
+ggplot(pdat_NEBS, aes(predicted, logCPUE_Gadus_chalcogrammus, col=YEAR_factor)) + geom_point() + geom_smooth(method="lm") + geom_abline(intercept=0)
 
 
