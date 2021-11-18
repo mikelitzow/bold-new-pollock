@@ -306,6 +306,11 @@ length(nebs_sel_adjusted$BOT_DEPTH) #same length
 
 pdat_NEBS_Ad$predicted_adjusted <- NEBSpred3
 
+
+NEBSpred4 <- predict.gam(pmod$gam, newdata = nebs_sel_adjusted, type="response")
+#seems same, still neg
+
+
 #get difference
 pdat_NEBS_Ad$difference <- pdat_NEBS_Ad$predicted_adjusted - pdat_NEBS_Ad$logCPUE_Gadus_chalcogrammus
 
@@ -340,6 +345,23 @@ plot_ad_pred_dat2$response_type2[which(plot_ad_pred_dat$response_type=="logCPUE_
 plot_ad_pred_dat2$response_type2[which(plot_ad_pred_dat$response_type=="predicted_adjusted")] <- "Predicted"
 plot_ad_pred_dat2$response_type2[which(plot_ad_pred_dat$response_type=="difference")] <- "Predicted - actual"
 
+
+ggplot(data = world) +
+  geom_sf() +
+  coord_sf(xlim = c(-178, -155), ylim = c(58, 66), expand = TRUE) +
+  # annotation_scale(location = "bl", width_hint = 0.5) +
+  # annotation_north_arrow(location = "bl", which_north = "true", 
+  #                        pad_x = unit(0.75, "in"), pad_y = unit(0.5, "in"),
+  #                        style = north_arrow_fancy_orienteering) +  
+  stat_summary_2d(aes(LONGITUDE,LATITUDE,  z=value), bins = 20, fun = mean,
+                  data=plot_ad_pred_dat2[which(plot_ad_pred_dat2$response_type2!="Predicted - actual"),]) + 
+  facet_wrap(response_type2~YEAR, nrow=2)  +
+  scale_fill_distiller(palette = "Spectral") + theme_bw() +
+  theme( legend.position = c(0.97, 0.25), legend.key = element_blank(),
+         legend.background=element_blank(), legend.title = element_blank()) 
+
+#NOW WITH DIFFERENCE
+
 g1 <- ggplot(data = world) +
   geom_sf() +
   coord_sf(xlim = c(-178, -155), ylim = c(58, 66), expand = TRUE) +
@@ -353,14 +375,32 @@ g1 <- ggplot(data = world) +
   theme( legend.position = c(0.97, 0.25), legend.key = element_blank(),
          legend.background=element_blank(), legend.title = element_blank()) 
 
-
-#NOW WITH DIFFERENCE
-
 g2 <- ggplot(pdat_NEBS_Ad, aes(difference)) + geom_histogram() + facet_wrap(~YEAR, nrow=1) + geom_vline(xintercept = 0)
 
-plot_grid(g1, g2)
+plot_grid(g1, g2, nrow=2, rel_heights = c(4,1))
 
 
-ggplot(pdat_NEBS, aes(predicted, logCPUE_Gadus_chalcogrammus, col=YEAR_factor)) + geom_point() + geom_smooth(method="lm") + geom_abline(intercept=0)
+t1 <- ggplot(pdat_NEBS, aes(predicted, logCPUE_Gadus_chalcogrammus, col=as.factor(YEAR))) + geom_point() + geom_smooth(method="lm") + geom_abline(intercept=0)
+
+t2 <- ggplot(pdat_NEBS_Ad, aes(predicted_adjusted, logCPUE_Gadus_chalcogrammus, col=as.factor(YEAR))) + geom_point() + geom_smooth(method="lm") + geom_abline(intercept=0)
+
+plot_grid(t1, t2)
+
+#how do adjusted bts compare to SEBS bts
+ggplot(pdat_NEBS_Ad, aes(adjusted_bottom_temp, mean_station_bottemp, col=shelf)) + geom_point()
+
+compareTdat <- left_join(pdat_NEBS_Ad, pdat)
+
+ggplot(compareTdat, aes(adjusted_bottom_temp, mean_station_bottemp, col=shelf)) + geom_point()
+#no adjusted temps outside nebs
+
+l1 <- ggplot(compareTdat, aes(adjusted_bottom_temp)) + geom_histogram()
+
+l2 <- ggplot(compareTdat, aes(bottemp_anom)) + geom_histogram()
+
+plot_grid(l1, l2)
+
+
+
 
 
