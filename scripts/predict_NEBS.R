@@ -314,6 +314,33 @@ NEBSpred4 <- predict.gam(pmod$gam, newdata = nebs_sel_adjusted, type="response")
 #get difference
 pdat_NEBS_Ad$difference <- pdat_NEBS_Ad$predicted_adjusted - pdat_NEBS_Ad$logCPUE_Gadus_chalcogrammus
 
+#get RMSE----
+adjusted_mod_rsme <- sqrt(mean((pdat_NEBS_Ad$logCPUE_Gadus_chalcogrammus - pdat_NEBS_Ad$predicted_adjusted)^2, na.rm=TRUE))
+
+pdat2010ad <- pdat_NEBS_Ad[which(pdat_NEBS_Ad$YEAR=="2010"),]
+pdat2017ad <- pdat_NEBS_Ad[which(pdat_NEBS_Ad$YEAR=="2017"),]
+pdat2018ad <- pdat_NEBS_Ad[which(pdat_NEBS_Ad$YEAR=="2018"),]
+pdat2019ad <- pdat_NEBS_Ad[which(pdat_NEBS_Ad$YEAR=="2019"),]
+
+adjusted_2010_rsme <- sqrt(mean((pdat2010ad$logCPUE_Gadus_chalcogrammus - pdat2010ad$predicted_adjusted)^2, na.rm=TRUE))
+adjusted_2017_rsme <- sqrt(mean((pdat2017ad$logCPUE_Gadus_chalcogrammus - pdat2017ad$predicted_adjusted)^2, na.rm=TRUE))
+adjusted_2018_rsme <- sqrt(mean((pdat2018ad$logCPUE_Gadus_chalcogrammus - pdat2018ad$predicted_adjusted)^2, na.rm=TRUE))
+adjusted_2019_rsme <- sqrt(mean((pdat2019ad$logCPUE_Gadus_chalcogrammus - pdat2019ad$predicted_adjusted)^2, na.rm=TRUE))
+
+vanilla_mod_rsme <- sqrt(mean((pdat_NEBS$logCPUE_Gadus_chalcogrammus - pdat_NEBS$predicted)^2, na.rm=TRUE))
+
+pdat2010 <- pdat_NEBS[which(pdat_NEBS$YEAR=="2010"),]
+pdat2017 <- pdat_NEBS[which(pdat_NEBS$YEAR=="2017"),]
+pdat2018 <- pdat_NEBS[which(pdat_NEBS$YEAR=="2018"),]
+pdat2019 <- pdat_NEBS[which(pdat_NEBS$YEAR=="2019"),]
+
+vanilla_2010_rsme <- sqrt(mean((pdat2010$logCPUE_Gadus_chalcogrammus - pdat2010$predicted)^2, na.rm=TRUE))
+vanilla_2017_rsme <- sqrt(mean((pdat2017$logCPUE_Gadus_chalcogrammus - pdat2017$predicted)^2, na.rm=TRUE))
+vanilla_2018_rsme <- sqrt(mean((pdat2018$logCPUE_Gadus_chalcogrammus - pdat2018$predicted)^2, na.rm=TRUE))
+vanilla_2019_rsme <- sqrt(mean((pdat2019$logCPUE_Gadus_chalcogrammus - pdat2019$predicted)^2, na.rm=TRUE))
+
+
+#plot with adjusted----
 #pivot longer so that can plot on same scale!
 
 plot_ad_pred_dat <- pdat_NEBS_Ad[,c(1:3, 5, 45, 50, 53:54, 56:57)] %>% pivot_longer(!c(LATITUDE, LONGITUDE, STATION, YEAR,  region, period, shelf), 
@@ -385,6 +412,12 @@ t1 <- ggplot(pdat_NEBS, aes(predicted, logCPUE_Gadus_chalcogrammus, col=as.facto
 t2 <- ggplot(pdat_NEBS_Ad, aes(predicted_adjusted, logCPUE_Gadus_chalcogrammus, col=as.factor(YEAR))) + geom_point() + geom_smooth(method="lm") + geom_abline(intercept=0)
 
 plot_grid(t1, t2)
+
+#one-to-one plot-------
+ggplot(pdat_NEBS_Ad, aes(predicted_adjusted, logCPUE_Gadus_chalcogrammus, col=as.factor(YEAR))) + geom_point() + 
+  geom_smooth(method="lm") + geom_abline(intercept=0) + theme_bw() + ylab("log(CPUE+1)") + xlab("Predicted log(CPUE+1)") +
+  scale_color_manual(values=c("#b2df8a", "#66c2a5", "#fc8d62", "#8da0cb"))
+#should this be model fits or ggplot lm fits?
 
 #how do adjusted bts compare to SEBS bts
 ggplot(pdat_NEBS_Ad, aes(adjusted_bottom_temp, mean_station_bottemp, col=shelf)) + geom_point()
