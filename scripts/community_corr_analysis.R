@@ -17,14 +17,14 @@ full_wide$period_num[which(full_wide$YEAR<2014)]<-1
 full_wide$period_num[which(full_wide$YEAR>2013)]<-2
 full_wide$period <- as.factor(full_wide$period)
 
-
+yrs <- unique(full_wide$YEAR)
 #loop through species, loop through each year, get correlation and store
 
 yr_vec <- vector(mode="numeric", length=length(yrs)*10)
 sps_vec <- vector(mode="numeric", length=length(yrs)*10)
 cor_vec <- vector(mode="numeric", length=length(yrs)*10)
 
-yrs <- unique(full_wide$YEAR)
+#yrs <- unique(full_wide$YEAR)
 i <- 1
 counter <- 1
 for(i in 1:length(yrs)){
