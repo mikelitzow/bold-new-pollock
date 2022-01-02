@@ -815,3 +815,28 @@ model.list = list(A="zero", m=2, R="diagonal and unequal") # best model
 mod.best = MARSS(long.clim.dat, model=model.list, z.score=TRUE, form="dfa", control=cntl.list)
 
 saveRDS(mod.best, file="scripts/DFA_best_mod88-2019.RDS")
+
+#from MARSS documentation to get trends
+# get the inverse of the rotation matrix
+Z.est <- coef(mod.best, type = "matrix")$Z
+H.inv <- 1
+if (ncol(Z.est) > 1){
+  H.inv <- varimax(coef(mod.best, type = "matrix")$Z)$rotmat}
+
+# rotate factor loadings
+Z.rot <- Z.est %*% H.inv
+# rotate trends
+trends.rot <- solve(H.inv) %*% mod.best$states
+
+# Add CIs to marssMLE object
+the.fit <- MARSSparamCIs(mod.best)
+# Use coef() to get the upper and lower CIs
+Z.low <- coef(the.fit, type = "Z", what = "par.lowCI")
+Z.up <- coef(the.fit, type = "Z", what = "par.upCI")
+Z.rot.up <- Z.up %*% H.inv
+Z.rot.low <- Z.low %*% H.inv
+df <- data.frame(
+  est = as.vector(Z.rot),
+  conf.up = as.vector(Z.rot.up),
+  conf.low = as.vector(Z.rot.low)
+)
