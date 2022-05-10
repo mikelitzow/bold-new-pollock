@@ -658,12 +658,12 @@ vint <- plot(sm(vizint, 1)) + labs(title = NULL) +
 #figure for manuscript
 par(mfrow=c(1,2), mai=c(0.5,0.4,0.5,0.1)) 
 visreg(lin_tek3corE$gam, "bottemp_anom", by="period", data=periods_analysis_dat,
-       overlay=TRUE, partial=FALSE, rug=FALSE, ylim=c(1,6),
+       overlay=TRUE, partial=FALSE, rug=TRUE, ylim=c(1,6),
        line=list(col=(c("#0083c9", "red"))),
        fill=list(col=(c("#0083c980", "#FF4E3780"))))
 visreg(dropk_tek3corE$gam, xvar='bottemp_anom', 
        overlay=FALSE, band=TRUE, scale='response', #xaxt='n', #yaxt='n',
-       line.par = list(col = 'grey29'), rug=FALSE, data=periods_analysis_dat, ylim=c(1,6))
+       line.par = list(col = 'grey29'), rug=TRUE, data=periods_analysis_dat, ylim=c(1,6))
 
 
 
