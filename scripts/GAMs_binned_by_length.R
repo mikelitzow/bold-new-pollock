@@ -22,6 +22,21 @@ binmeta_clean_anom$CRUISE <- as.factor(binmeta_clean_anom$CRUISE)
 binmeta_clean_anom$HAUL <- as.factor(binmeta_clean_anom$HAUL)
 binmeta_clean_anom$bin <- as.factor(binmeta_clean_anom$bin)
 
+binmeta_clean_anom <- binmeta_clean_anom[which( binmeta_clean_anom$STRATUM!="70" &
+                                                  binmeta_clean_anom$STRATUM!="71" &
+                                                  binmeta_clean_anom$STRATUM!="81" ),]
+
+ggplot(data = world) +
+  geom_sf() +
+  coord_sf(xlim = c(-178, -155), ylim = c(53, 65), expand = TRUE) +
+  annotation_scale(location = "bl", width_hint = 0.5) +
+  # geom_point(aes(LONGITUDE, LATITUDE, colour=mean_station_bottemp), data=all_analysis_dat) +   
+  # scale_colour_gradient2(low="blue", high="red", guide="colorbar") + 
+  geom_point(aes(LONGITUDE, LATITUDE, 
+                 col=as.factor(STRATUM)), data=binmeta_clean_anom) + theme_bw() 
+
+binmeta_clean_anom$period <- as.factor(binmeta_clean_anom$period)
+
 ##exclusion criteria===============
 
 #how to exclude stations w few obs? Maybe n in a single bin? yeah do once split out
@@ -127,8 +142,8 @@ visreg(modbin1$gam, "bottemp_anom", by="period", data=bin1_analysis_dat,
        overlay=TRUE, partial=FALSE, rug=FALSE, ylim=c(-0.5,5))
 
 #bin 1 no interaction
-dropbin1 <- gamm(log_sum_WGTCPUE_LEN ~  te(mean_station_bottemp, BOT_DEPTH, k=29) +
-                         s(bottemp_anom, k=4), random=list(YEAR_factor=~1), 
+dropbin1 <- gamm(log_sum_WGTCPUE_LEN ~s(bottemp_anom, k=4) +
+                   te(mean_station_bottemp, BOT_DEPTH, k=29) , random=list(YEAR_factor=~1), 
                        correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE),
                        data=bin1_analysis_dat, method="ML")
 saveRDS(dropbin1, file="~/Dropbox/Work folder/Pollock Analyses/bold-new-pollock/scripts/smoothtemp_bin1_model.RDS")
@@ -173,22 +188,43 @@ appraise(droplinbin1$gam)
 anova(droplinbin1[[2]])
 plot(droplinbin1[[2]])
 
+smintbin1 <- gamm(log_sum_WGTCPUE_LEN ~s(bottemp_anom, by=period, k=4) +
+                   te(mean_station_bottemp, BOT_DEPTH, k=29) , random=list(YEAR_factor=~1), 
+                 correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE),
+                 data=bin1_analysis_dat, method="ML")
+saveRDS(smintbin1, file="~/Dropbox/Work folder/Pollock Analyses/bold-new-pollock/scripts/smoothint_bin1_model.RDS")
+gam.check(smintbin1[[2]]) 
+summary(smintbin1[[1]]) #   did not converge
+summary(smintbin1[[2]]) #rsq 0.
+smoothint1_aic <- AIC(smintbin1$lme)
+
+gamsmintbin1 <- smintbin1$gam
+
+draw(gamsmintbin1, select = 1)
+draw(gamsmintbin1, select = 1, dist=0.05)
+draw(gamsmintbin1, select = 1, dist=0.01)
+draw(gamsmintbin1, select = 2)
+
 #delta aic bin 1
 
-print(c(null1_aic, smooth1_aic, linint1_aic))
+#REDO HERE
+print(c(null1_aic, smooth1_aic, linint1_aic, smoothint1_aic))
+AIC(smintbin1$lme, droplinbin1$lme, modbin1$lme, dropbin1$lme)
+
 #null is lowest
 delta_null1 <- 0
 delta_smooth1 <- smooth1_aic - null1_aic
   delta_linint1 <- linint1_aic - null1_aic
+  delta_smoothint1 <- smoothint1_aic - null1_aic
 
 
 #bin 1 akaike weights
 
-sumbin1aic <- sum(exp(-0.5*delta_null1), exp(-0.5*delta_smooth1), exp(-0.5*delta_linint1)) 
-
-aw_null1 <- exp(-0.5*delta_null1)/sumbin1aic
-aw_smooth1 <- exp(-0.5*delta_smooth1)/sumbin1aic
-aw_linint1 <- exp(-0.5*delta_linint1)/sumbin1aic
+# sumbin1aic <- sum(exp(-0.5*delta_null1), exp(-0.5*delta_smooth1), exp(-0.5*delta_linint1)) 
+# 
+# aw_null1 <- exp(-0.5*delta_null1)/sumbin1aic
+# aw_smooth1 <- exp(-0.5*delta_smooth1)/sumbin1aic
+# aw_linint1 <- exp(-0.5*delta_linint1)/sumbin1aic
 
 
 
@@ -236,8 +272,8 @@ visreg(modbin2$gam, "bottemp_anom", by="period", data=bin2_analysis_dat,
 
 
 #bin 2 no interaction
-dropbin2 <- gamm(log_sum_WGTCPUE_LEN ~  te(mean_station_bottemp, BOT_DEPTH, k=29) +
-                   s(bottemp_anom, k=4), random=list(YEAR_factor=~1), 
+dropbin2 <- gamm(log_sum_WGTCPUE_LEN ~ s(bottemp_anom, k=4)  +
+                   te(mean_station_bottemp, BOT_DEPTH, k=29), random=list(YEAR_factor=~1), 
                  correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE),
                  data=bin2_analysis_dat, method="ML")
 saveRDS(dropbin2, file="~/Dropbox/Work folder/Pollock Analyses/bold-new-pollock/scripts/smoothtemp_bin2_model.RDS")
@@ -282,8 +318,25 @@ appraise(droplinbin2$gam)
 anova(droplinbin2[[2]])
 plot(droplinbin2[[2]])
 
-#delta aic bin 2
+smintbin2 <- gamm(log_sum_WGTCPUE_LEN ~s(bottemp_anom, by=period, k=4) +
+                    te(mean_station_bottemp, BOT_DEPTH, k=29) , random=list(YEAR_factor=~1), 
+                  correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE),
+                  data=bin2_analysis_dat, method="ML")
+saveRDS(smintbin2, file="~/Dropbox/Work folder/Pollock Analyses/bold-new-pollock/scripts/smoothint_bin2_model.RDS")
+gam.check(smintbin2[[2]]) 
+summary(smintbin2[[1]]) #  
+summary(smintbin2[[2]]) #rsq 0.
+smoothint2_aic <- AIC(smintbin2$lme)
 
+gamsmintbin2 <- smintbin2$gam
+
+draw(gamsmintbin2, select = 1)
+draw(gamsmintbin2, select = 1, dist=0.05)
+draw(gamsmintbin2, select = 1, dist=0.01)
+draw(gamsmintbin2, select = 2)
+
+#delta aic bin 2
+#REDO HERE
 print(c(null2_aic, smooth2_aic, linint2_aic))
 #null is lowest
 delta_null2 <- 0
@@ -346,8 +399,8 @@ visreg(modbin3$gam, "bottemp_anom", by="period", data=bin3_analysis_dat,
 
 
 #bin 3 no interaction
-dropbin3 <- gamm(log_sum_WGTCPUE_LEN ~  te(mean_station_bottemp, BOT_DEPTH, k=29) +
-                   s(bottemp_anom, k=4), random=list(YEAR_factor=~1), 
+dropbin3 <- gamm(log_sum_WGTCPUE_LEN ~ s(bottemp_anom, k=4) +
+                   te(mean_station_bottemp, BOT_DEPTH, k=29), random=list(YEAR_factor=~1), 
                  correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE),
                  data=bin3_analysis_dat, method="ML")
 saveRDS(dropbin3, file="~/Dropbox/Work folder/Pollock Analyses/bold-new-pollock/scripts/smoothtemp_bin3_model.RDS")
@@ -391,9 +444,27 @@ appraise(droplinbin3$gam)
 anova(droplinbin3[[2]])
 plot(droplinbin3[[2]])
 
+smintbin3 <- gamm(log_sum_WGTCPUE_LEN ~s(bottemp_anom, by=period, k=4) +
+                    te(mean_station_bottemp, BOT_DEPTH, k=29) , random=list(YEAR_factor=~1), 
+                  correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE),
+                  data=bin3_analysis_dat, method="ML")
+saveRDS(smintbin3, file="~/Dropbox/Work folder/Pollock Analyses/bold-new-pollock/scripts/smoothint_bin3_model.RDS")
+gam.check(smintbin3[[2]]) 
+summary(smintbin3[[1]]) #  
+summary(smintbin3[[2]]) #rsq 0.
+smoothint3_aic <- AIC(smintbin3$lme)
+
+gamsmintbin3 <- smintbin3$gam
+
+draw(gamsmintbin3, select = 1)
+draw(gamsmintbin3, select = 1, dist=0.05)
+draw(gamsmintbin3, select = 1, dist=0.01)
+draw(gamsmintbin3, select = 2)
+
+
 
 #delta aic bin 3
-
+#REDO HERE
 print(c(null3_aic, smooth3_aic, linint3_aic))
 #null is lowest
 delta_null3 <- 0
@@ -458,8 +529,8 @@ visreg(modbin4$gam, "bottemp_anom", by="period", data=bin4_analysis_dat,
 
 
 #bin 4 no interaction
-dropbin4 <- gamm(log_sum_WGTCPUE_LEN ~  te(mean_station_bottemp, BOT_DEPTH, k=29) +
-                   s(bottemp_anom, k=4), random=list(YEAR_factor=~1), 
+dropbin4 <- gamm(log_sum_WGTCPUE_LEN ~ s(bottemp_anom, k=4) +
+                   te(mean_station_bottemp, BOT_DEPTH, k=29), random=list(YEAR_factor=~1), 
                  correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE),
                  data=bin4_analysis_dat, method="ML")
 saveRDS(dropbin4, file="~/Dropbox/Work folder/Pollock Analyses/bold-new-pollock/scripts/smoothtemp_bin4_model.RDS")
@@ -504,8 +575,27 @@ anova(droplinbin4[[2]])
 plot(droplinbin4[[2]])
 
 
-#delta aic bin 4
+smintbin4 <- gamm(log_sum_WGTCPUE_LEN ~s(bottemp_anom, by=period, k=4) +
+                    te(mean_station_bottemp, BOT_DEPTH, k=29) , random=list(YEAR_factor=~1), 
+                  correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE),
+                  data=bin3_analysis_dat, method="ML")
+saveRDS(smintbin4, file="~/Dropbox/Work folder/Pollock Analyses/bold-new-pollock/scripts/smoothint_bin4_model.RDS")
+gam.check(smintbin4[[2]]) 
+summary(smintbin4[[1]]) #  
+summary(smintbin4[[2]]) #rsq 0.
+smoothint4_aic <- AIC(smintbin4$lme)
 
+gamsmintbin4 <- smintbin4$gam
+
+draw(gamsmintbin4, select = 1)
+draw(gamsmintbin4, select = 1, dist=0.05)
+draw(gamsmintbin4, select = 1, dist=0.01)
+draw(gamsmintbin4, select = 2)
+
+
+
+#delta aic bin 4
+#REDO HERE
 print(c(null4_aic, smooth4_aic, linint4_aic))
 #lin int is lowest
 delta_null4 <- null4_aic - linint4_aic
@@ -570,8 +660,8 @@ visreg(modbin5$gam, "bottemp_anom", by="period", data=bin5_analysis_dat,
 
 
 #bin 5 no interaction
-dropbin5 <- gamm(log_sum_WGTCPUE_LEN ~  te(mean_station_bottemp, BOT_DEPTH, k=29) +
-                   s(bottemp_anom, k=4), random=list(YEAR_factor=~1), 
+dropbin5 <- gamm(log_sum_WGTCPUE_LEN ~ s(bottemp_anom, k=4) +
+                   te(mean_station_bottemp, BOT_DEPTH, k=29), random=list(YEAR_factor=~1), 
                  correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE),
                  data=bin5_analysis_dat, method="ML")
 saveRDS(dropbin5, file="~/Dropbox/Work folder/Pollock Analyses/bold-new-pollock/scripts/smoothtemp_bin5_model.RDS")
@@ -619,8 +709,29 @@ anova(droplinbin5[[2]])
 plot(droplinbin5[[2]])
 
 
-#delta aic bin 5
 
+
+smintbin5 <- gamm(log_sum_WGTCPUE_LEN ~s(bottemp_anom, by=period, k=4) +
+                    te(mean_station_bottemp, BOT_DEPTH, k=29) , random=list(YEAR_factor=~1), 
+                  correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE),
+                  data=bin3_analysis_dat, method="ML")
+saveRDS(smintbin5, file="~/Dropbox/Work folder/Pollock Analyses/bold-new-pollock/scripts/smoothint_bin5_model.RDS")
+gam.check(smintbin5[[2]]) 
+summary(smintbin5[[1]]) #  
+summary(smintbin5[[2]]) #rsq 0.
+smoothint5_aic <- AIC(smintbin5$lme)
+
+gamsmintbin5 <- smintbin5$gam
+
+draw(gamsmintbin5, select = 1)
+draw(gamsmintbin5, select = 1, dist=0.05)
+draw(gamsmintbin5, select = 1, dist=0.01)
+draw(gamsmintbin5, select = 2)
+
+
+
+#delta aic bin 5
+#REDO HERE
 print(c(null5_aic, smooth5_aic, linint5_aic))
 #lin int is lowest
 delta_null5 <- null5_aic - linint5_aic
