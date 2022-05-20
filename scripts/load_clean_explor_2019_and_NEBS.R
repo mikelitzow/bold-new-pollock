@@ -75,6 +75,124 @@ ggplot(data = world) +
                 col=as.factor(STRATUM),
                 label=STATION), data=newdat[which(newdat$YEAR==2018),]) + theme_bw() + facet_wrap(~YEAR)
 
+newdat$STRATUM[which(newdat$STATION=="ZZ-23" & newdat$YEAR<1992|
+                       newdat$STATION=="Y-24" & newdat$YEAR<1992| 
+                       newdat$STATION=="X-25" & newdat$YEAR<1992| 
+                       newdat$STATION=="X-23" & newdat$YEAR<1992| 
+                       newdat$STATION=="T-23" & newdat$YEAR<1992| 
+                       newdat$STATION=="T-21" & newdat$YEAR<1992| 
+                       newdat$STATION=="R-21" & newdat$YEAR<1992| 
+                       newdat$STATION=="S-21" & newdat$YEAR<1992| 
+                       newdat$STATION=="W-26" & newdat$YEAR<1992| 
+                       newdat$STATION=="W-24" & newdat$YEAR<1992| 
+                       newdat$STATION=="V-23" & newdat$YEAR<1992| 
+                       newdat$STATION=="U-22" & newdat$YEAR<1992| 
+                       newdat$STATION=="AA-23" & newdat$YEAR<1992| 
+                       newdat$STATION=="U-24" & newdat$YEAR<1992 )] <- "81"
+
+newdat$STRATUM[which(newdat$STATION=="Y-22" & newdat$YEAR<1992|
+                       newdat$STATION=="Y-20" & newdat$YEAR<1992| 
+                       newdat$STATION=="X-21" & newdat$YEAR<1992| 
+                       newdat$STATION=="X-19" & newdat$YEAR<1992| 
+                       newdat$STATION=="W-22" & newdat$YEAR<1992| 
+                       newdat$STATION=="W-20" & newdat$YEAR<1992| 
+                       newdat$STATION=="V-21" & newdat$YEAR<1992| 
+                       newdat$STATION=="V-19" & newdat$YEAR<1992| 
+                       newdat$STATION=="U-20" & newdat$YEAR<1992| 
+                       newdat$STATION=="U-18" & newdat$YEAR<1992| 
+                       newdat$STATION=="T-19" & newdat$YEAR<1992| 
+                       newdat$STATION=="U-02" & newdat$YEAR<1992|
+                       newdat$STATION=="T-01" & newdat$YEAR<1992| 
+                       newdat$STATION=="T-03" & newdat$YEAR<1992| 
+                       newdat$STATION=="S-20" & newdat$YEAR<1992| 
+                       newdat$STATION=="S-18" & newdat$YEAR<1992| 
+                       newdat$STATION=="R-19" & newdat$YEAR<1992| 
+                       newdat$STATION=="R-01" & newdat$YEAR<1992| 
+                       newdat$STATION=="R-03" & newdat$YEAR<1992| 
+                       newdat$STATION=="V-03" & newdat$YEAR<1992| 
+                       newdat$STATION=="W-02" & newdat$YEAR<1992| 
+                       newdat$STATION=="X-03" & newdat$YEAR<1992| 
+                       newdat$STATION=="Y-18" & newdat$YEAR<1992| 
+                       newdat$STATION=="X-01" & newdat$YEAR<1992| 
+                       newdat$STATION=="W-18" & newdat$YEAR<1992| 
+                       newdat$STATION=="V-01" & newdat$YEAR<1992| 
+                       newdat$STATION=="S-02" & newdat$YEAR<1992| 
+                       newdat$STATION=="Y-02" & newdat$YEAR<1992 )] <- "70"
+
+newdat$STRATUM[which(newdat$STATION=="DD-19" & newdat$YEAR==2018|
+                       newdat$STATION=="CC-19" & newdat$YEAR==2018| 
+                       newdat$STATION=="AA-19" & newdat$YEAR==2018)] <- "71"
+
+
+newdat$BOT_TEMP[which(newdat$BOT_TEMP=="-9999")]<-NA
+newdat$SURF_TEMP[which(newdat$SURF_TEMP=="-9999")]<-NA
+newdat$WTCPUE[which(newdat$WTCPUE=="-9999")]<-NA
+newdat$NUMCPUE[which(newdat$NUMCPUE=="-9999")]<-NA
+
+#look at 2021 wider area
+
+ggplot(data = world) +
+  geom_sf() +
+  coord_sf(xlim = c(-178, -155), ylim = c(55, 65), expand = TRUE) +
+  annotation_scale(location = "bl", width_hint = 0.5) +
+  geom_text(aes(LONGITUDE, LATITUDE, 
+                col=as.factor(STRATUM),
+                label=STATION), data=newdat[which(newdat$YEAR==2021),]) + theme_bw() + facet_wrap(~YEAR)
+
+table(newdat$YEAR)
+
+#look at other years one at a time
+#82,85,88,91
+ggplot(data = world) +
+  geom_sf() +
+  coord_sf(xlim = c(-178, -155), ylim = c(60, 65), expand = TRUE) +
+  annotation_scale(location = "bl", width_hint = 0.5) +
+  geom_text(aes(LONGITUDE, LATITUDE, 
+                col=as.factor(STRATUM),
+                label=STATION), data=newdat[which(newdat$YEAR==2019),]) + theme_bw() + facet_wrap(~YEAR)
+
+
+#lets look at CPUE
+ggplot(data = world) +
+  geom_sf() +
+  coord_sf(xlim = c(-178, -155), ylim = c(60, 65), expand = TRUE) +
+  annotation_scale(location = "bl", width_hint = 0.5) +
+  geom_point(aes(LONGITUDE, LATITUDE, 
+                col=NUMCPUE,
+                label=STATION), data=newdat[which(newdat$SID==21740),]) + theme_bw() + facet_wrap(~YEAR)
+
+newdat$logCPUE <- log(newdat$WTCPUE + 1)
+
+ggplot(data = world) +
+  geom_sf() +
+  coord_sf(xlim = c(-178, -155), ylim = c(60, 65), expand = TRUE) +
+  annotation_scale(location = "bl", width_hint = 0.5) +
+  geom_point(aes(LONGITUDE, LATITUDE, 
+                 col=logCPUE,
+                 label=STATION), data=newdat[which(newdat$SID==21740),]) + 
+  scale_colour_distiller(palette = "Spectral") + theme_bw() + facet_wrap(~YEAR)
+
+#and temp
+ggplot(data = world) +
+  geom_sf() +
+  coord_sf(xlim = c(-178, -155), ylim = c(60, 65), expand = TRUE) +
+  annotation_scale(location = "bl", width_hint = 0.5) +
+  geom_point(aes(LONGITUDE, LATITUDE, 
+                 col=BOT_TEMP,
+                 label=STATION), data=newdat[which(newdat$SID==21740),]) + 
+  scale_colour_distiller(palette = "Spectral") + theme_bw() + facet_wrap(~YEAR)
+
+range(newdat$BOT_TEMP)
+
+#need julian day
+
+
+#check for duplicates
+unique(duplicated(newdat)) #doesn't find any duplicates
+
+
+
+
 
 
 
