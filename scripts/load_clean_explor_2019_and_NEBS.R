@@ -185,15 +185,31 @@ ggplot(data = world) +
 range(newdat$BOT_TEMP)
 
 #need julian day
+library(lubridate)
+#split date and time
+newdat <- separate(newdat, DATETIME, into = c("Date", "Time"), sep = " ")
 
+newdat$julian <- yday(parse_date_time(newdat$Date, orders = "mdy"))
 
 #check for duplicates
 unique(duplicated(newdat)) #doesn't find any duplicates
 
+#quick look
+ggplot(newdat, aes(julian, logCPUE)) + geom_point() +
+  facet_wrap(~YEAR)
 
+ggplot(newdat, aes(BOT_DEPTH, logCPUE)) + geom_point() +
+  facet_wrap(~YEAR)
 
+ggplot(newdat, aes(BOT_TEMP, logCPUE)) + geom_point() +
+  facet_wrap(~YEAR)
 
+ggplot(newdat, aes(SURF_TEMP, logCPUE)) + geom_point() +
+  facet_wrap(~YEAR)
 
+#write csv for cleaned new data 
+wd <- getwd()
+write_csv(newdat, file=paste(wd,"/data/survey data/cleaned_nebs_and_2021_bot_trawl_data.csv", sep=""))
 
 
 
