@@ -38,7 +38,7 @@ sebs_pollock$period <- as.factor(sebs_pollock$period)
 
 #fill in missing temps-----
 
-tempmod82 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers, k=8), data=sebs_pollock[which(sebs_pollock$YEAR==1982),] )
+tempmod82 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers), data=sebs_pollock[which(sebs_pollock$YEAR==1982),] )
 summary(tempmod82)
 gam.check(tempmod82)
 plot(tempmod82)
@@ -50,7 +50,7 @@ missing82 <- df82[which(is.na(df82$BOT_TEMP)==TRUE),]
 pred82 <- predict.gam(tempmod82, newdata=missing82, type="response")
 missing82$BOT_TEMP <- pred82
 
-tempmod83 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers, k=8), data=sebs_pollock[which(sebs_pollock$YEAR==1983),] )
+tempmod83 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers), data=sebs_pollock[which(sebs_pollock$YEAR==1983),] )
 summary(tempmod83)
 gam.check(tempmod83)
 plot(tempmod83)
@@ -63,7 +63,7 @@ pred83 <- predict.gam(tempmod83, newdata=missing83, type="response")
 missing83$BOT_TEMP <- pred83
 
 
-tempmod84 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers, k=8), data=sebs_pollock[which(sebs_pollock$YEAR==1984),] )
+tempmod84 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers), data=sebs_pollock[which(sebs_pollock$YEAR==1984),] )
 summary(tempmod84)
 gam.check(tempmod84)
 plot(tempmod84)
@@ -76,7 +76,7 @@ pred84 <- predict.gam(tempmod84, newdata=missing84, type="response")
 missing84$BOT_TEMP <- pred84
 
 
-tempmod85 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers, k=9), data=sebs_pollock[which(sebs_pollock$YEAR==1985),] )
+tempmod85 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers), data=sebs_pollock[which(sebs_pollock$YEAR==1985),] )
 summary(tempmod85)
 gam.check(tempmod85)
 plot(tempmod85)
@@ -89,7 +89,7 @@ pred85 <- predict.gam(tempmod85, newdata=missing85, type="response")
 missing85$BOT_TEMP <- pred85
 
 
-tempmod86 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers, k=9), data=sebs_pollock[which(sebs_pollock$YEAR==1986),] )
+tempmod86 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers), data=sebs_pollock[which(sebs_pollock$YEAR==1986),] )
 summary(tempmod86)
 gam.check(tempmod86)
 plot(tempmod86)
@@ -102,7 +102,7 @@ pred86 <- predict.gam(tempmod86, newdata=missing86, type="response")
 missing86$BOT_TEMP <- pred86
 
 
-tempmod87 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers, k=8), data=sebs_pollock[which(sebs_pollock$YEAR==1987),] )
+tempmod87 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers), data=sebs_pollock[which(sebs_pollock$YEAR==1987),] )
 summary(tempmod87)
 gam.check(tempmod87)
 plot(tempmod87)
@@ -116,7 +116,7 @@ missing87$BOT_TEMP <- pred87
 
 
 
-tempmod88 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers, k=8), data=sebs_pollock[which(sebs_pollock$YEAR==1988),] )
+tempmod88 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers), data=sebs_pollock[which(sebs_pollock$YEAR==1988),] )
 summary(tempmod88)
 gam.check(tempmod88)
 plot(tempmod88)
@@ -130,7 +130,7 @@ missing88$BOT_TEMP <- pred88
 
 
 
-tempmod89 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers, k=9), data=sebs_pollock[which(sebs_pollock$YEAR==1989),] )
+tempmod89 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers), data=sebs_pollock[which(sebs_pollock$YEAR==1989),] )
 summary(tempmod89)
 gam.check(tempmod89)
 plot(tempmod89)
@@ -144,7 +144,7 @@ missing89$BOT_TEMP <- pred89
 
 
 
-tempmod90 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers, k=9), data=sebs_pollock[which(sebs_pollock$YEAR==1990),] )
+tempmod90 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers), data=sebs_pollock[which(sebs_pollock$YEAR==1990),] )
 summary(tempmod90)
 gam.check(tempmod90)
 plot(tempmod90)
@@ -158,7 +158,7 @@ missing90$BOT_TEMP <- pred90
 
 
 
-tempmod91 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers, k=9), data=sebs_pollock[which(sebs_pollock$YEAR==1991),]  )
+tempmod91 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers), data=sebs_pollock[which(sebs_pollock$YEAR==1991),]  )
 summary(tempmod91)
 gam.check(tempmod91)
 plot(tempmod91)
@@ -172,7 +172,7 @@ missing91$BOT_TEMP <- pred91
 
 
 
-tempmod92 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers, k=9), data=sebs_pollock[which(sebs_pollock$YEAR==1992),]  )
+tempmod92 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers), data=sebs_pollock[which(sebs_pollock$YEAR==1992),]  )
 summary(tempmod92)
 gam.check(tempmod92)
 plot(tempmod92)
@@ -186,7 +186,7 @@ missing92$BOT_TEMP <- pred92
 
 
 
-tempmod93 <- gam(BOT_TEMP ~ s(BOT_DEPTH, k=17) + ti(long_albers, lat_albers, k=8), data=sebs_pollock[which(sebs_pollock$YEAR==1993),]  )
+tempmod93 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers), data=sebs_pollock[which(sebs_pollock$YEAR==1993),]  )
 summary(tempmod93)
 gam.check(tempmod93) #seems awfully high
 plot(tempmod93) 
@@ -200,7 +200,7 @@ missing93$BOT_TEMP <- pred93
 
 
 
-tempmod94 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers, k=7), data=sebs_pollock[which(sebs_pollock$YEAR==1994),]  )
+tempmod94 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers), data=sebs_pollock[which(sebs_pollock$YEAR==1994),]  )
 summary(tempmod94)
 gam.check(tempmod94)
 plot(tempmod94)
@@ -214,7 +214,7 @@ missing94$BOT_TEMP <- pred94
 
 
 
-tempmod95 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers, k=9), data=sebs_pollock[which(sebs_pollock$YEAR==1995),]  )
+tempmod95 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers), data=sebs_pollock[which(sebs_pollock$YEAR==1995),]  )
 summary(tempmod95)
 gam.check(tempmod95)
 plot(tempmod95)
@@ -228,7 +228,7 @@ missing95$BOT_TEMP <- pred95
 
 
 
-tempmod96 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers, k=9), data=sebs_pollock[which(sebs_pollock$YEAR==1996),]  )
+tempmod96 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers), data=sebs_pollock[which(sebs_pollock$YEAR==1996),]  )
 summary(tempmod96)
 gam.check(tempmod96)
 plot(tempmod96)
@@ -242,7 +242,7 @@ missing96$BOT_TEMP <- pred96
 
 
 
-tempmod97 <- gam(BOT_TEMP ~ s(BOT_DEPTH, k=8) + ti(long_albers, lat_albers, k=11), data=sebs_pollock[which(sebs_pollock$YEAR==1997),]  )
+tempmod97 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers), data=sebs_pollock[which(sebs_pollock$YEAR==1997),]  )
 summary(tempmod97)
 gam.check(tempmod97)
 plot(tempmod97)
@@ -256,7 +256,7 @@ missing97$BOT_TEMP <- pred97
 
 
 
-tempmod98 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers, k=9), data=sebs_pollock[which(sebs_pollock$YEAR==1998),]  )
+tempmod98 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers), data=sebs_pollock[which(sebs_pollock$YEAR==1998),]  )
 summary(tempmod98)
 gam.check(tempmod98)
 plot(tempmod98)
@@ -270,7 +270,7 @@ missing98$BOT_TEMP <- pred98
 
 
 
-tempmod99 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers, k=9), data=sebs_pollock[which(sebs_pollock$YEAR==1999),]  )
+tempmod99 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers), data=sebs_pollock[which(sebs_pollock$YEAR==1999),]  )
 summary(tempmod99)
 gam.check(tempmod99)
 plot(tempmod99)
@@ -284,7 +284,7 @@ missing99$BOT_TEMP <- pred99
 
 
 
-tempmod00 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers, k=7), data=sebs_pollock[which(sebs_pollock$YEAR==2000),]  )
+tempmod00 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers), data=sebs_pollock[which(sebs_pollock$YEAR==2000),]  )
 summary(tempmod00)
 gam.check(tempmod00)
 plot(tempmod00)
@@ -298,9 +298,9 @@ missing00$BOT_TEMP <- pred00
 
 
 
-tempmod01 <- gam(BOT_TEMP ~ s(BOT_DEPTH, k=16) + ti(long_albers, lat_albers, k=11), data=sebs_pollock[which(sebs_pollock$YEAR==2001),]  )
+tempmod01 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers), data=sebs_pollock[which(sebs_pollock$YEAR==2001),]  )
 summary(tempmod01)
-gam.check(tempmod01) #still a little low but close enough
+gam.check(tempmod01) #
 plot(tempmod01)
 
 pre01 <- predict.gam(tempmod01, type="response")
@@ -312,7 +312,7 @@ missing01$BOT_TEMP <- pred01
 
 
 
-tempmod02 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers, k=8), data=sebs_pollock[which(sebs_pollock$YEAR==2002),]  )
+tempmod02 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers), data=sebs_pollock[which(sebs_pollock$YEAR==2002),]  )
 summary(tempmod02)
 gam.check(tempmod02)
 plot(tempmod02)
@@ -326,7 +326,7 @@ missing02$BOT_TEMP <- pred02
 
 
 
-tempmod03 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers, k=10), data=sebs_pollock[which(sebs_pollock$YEAR==2003),]  )
+tempmod03 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers), data=sebs_pollock[which(sebs_pollock$YEAR==2003),]  )
 summary(tempmod03)
 gam.check(tempmod03)
 plot(tempmod03)
@@ -340,7 +340,7 @@ missing03$BOT_TEMP <- pred03
 
 
 
-tempmod04 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers, k=9), data=sebs_pollock[which(sebs_pollock$YEAR==2004),]  )
+tempmod04 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers), data=sebs_pollock[which(sebs_pollock$YEAR==2004),]  )
 summary(tempmod04)
 gam.check(tempmod04)
 plot(tempmod04)
@@ -354,7 +354,7 @@ missing04$BOT_TEMP <- pred04
 
 
 
-tempmod05 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers, k=9), data=sebs_pollock[which(sebs_pollock$YEAR==2005),]  )
+tempmod05 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers), data=sebs_pollock[which(sebs_pollock$YEAR==2005),]  )
 summary(tempmod05)
 gam.check(tempmod05)
 plot(tempmod05)
@@ -368,7 +368,7 @@ missing05$BOT_TEMP <- pred05
 
 
 
-tempmod06 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers, k=10), data=sebs_pollock[which(sebs_pollock$YEAR==2006),]  )
+tempmod06 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers), data=sebs_pollock[which(sebs_pollock$YEAR==2006),]  )
 summary(tempmod06)
 gam.check(tempmod06)
 plot(tempmod06)
@@ -382,7 +382,7 @@ missing06$BOT_TEMP <- pred06
 
 
 
-tempmod07 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers, k=9), data=sebs_pollock[which(sebs_pollock$YEAR==2007),]  )
+tempmod07 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers), data=sebs_pollock[which(sebs_pollock$YEAR==2007),]  )
 summary(tempmod07)
 gam.check(tempmod07)
 plot(tempmod07)
@@ -396,7 +396,7 @@ missing07$BOT_TEMP <- pred07
 
 
 
-tempmod08 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers, k=9), data=sebs_pollock[which(sebs_pollock$YEAR==2008),]  )
+tempmod08 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers), data=sebs_pollock[which(sebs_pollock$YEAR==2008),]  )
 summary(tempmod08)
 gam.check(tempmod08)
 plot(tempmod08)
@@ -410,7 +410,7 @@ missing08$BOT_TEMP <- pred08
 
 
 
-tempmod09 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers, k=10), data=sebs_pollock[which(sebs_pollock$YEAR==2009),]  )
+tempmod09 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers), data=sebs_pollock[which(sebs_pollock$YEAR==2009),]  )
 summary(tempmod09)
 gam.check(tempmod09)
 plot(tempmod09)
@@ -424,7 +424,7 @@ missing09$BOT_TEMP <- pred09
 
 
 
-tempmod10 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers, k=10), data=sebs_pollock[which(sebs_pollock$YEAR==2010),]  )
+tempmod10 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers), data=sebs_pollock[which(sebs_pollock$YEAR==2010),]  )
 summary(tempmod10)
 gam.check(tempmod10)
 plot(tempmod10)
@@ -438,7 +438,7 @@ missing10$BOT_TEMP <- pred10
 
 
 
-tempmod11 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers, k=10), data=sebs_pollock[which(sebs_pollock$YEAR==2011),] )
+tempmod11 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers), data=sebs_pollock[which(sebs_pollock$YEAR==2011),] )
 summary(tempmod11)
 gam.check(tempmod11)
 plot(tempmod11)
@@ -452,7 +452,7 @@ missing11$BOT_TEMP <- pred11
 
 
 
-tempmod12 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers, k=11), data=sebs_pollock[which(sebs_pollock$YEAR==2012),] )
+tempmod12 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers), data=sebs_pollock[which(sebs_pollock$YEAR==2012),] )
 summary(tempmod12)
 gam.check(tempmod12)
 plot(tempmod12)
@@ -466,7 +466,7 @@ missing12$BOT_TEMP <- pred12
 
 
 
-tempmod13 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers, k=9), data=sebs_pollock[which(sebs_pollock$YEAR==2013),] )
+tempmod13 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers), data=sebs_pollock[which(sebs_pollock$YEAR==2013),] )
 summary(tempmod13)
 gam.check(tempmod13)
 plot(tempmod13)
@@ -480,7 +480,7 @@ missing13$BOT_TEMP <- pred13
 
 
 
-tempmod14 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers, k=9), data=sebs_pollock[which(sebs_pollock$YEAR==2014),] )
+tempmod14 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers), data=sebs_pollock[which(sebs_pollock$YEAR==2014),] )
 summary(tempmod14)
 gam.check(tempmod14)
 plot(tempmod14)
@@ -494,7 +494,7 @@ missing14$BOT_TEMP <- pred14
 
 
 
-tempmod15 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers, k=10), data=sebs_pollock[which(sebs_pollock$YEAR==2015),] )
+tempmod15 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers), data=sebs_pollock[which(sebs_pollock$YEAR==2015),] )
 summary(tempmod15)
 gam.check(tempmod15)
 plot(tempmod15)
@@ -508,7 +508,7 @@ missing15$BOT_TEMP <- pred15
 
 
 
-tempmod16 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers, k=9), data=sebs_pollock[which(sebs_pollock$YEAR==2016),] )
+tempmod16 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers), data=sebs_pollock[which(sebs_pollock$YEAR==2016),] )
 summary(tempmod16)
 gam.check(tempmod16)
 plot(tempmod16)
@@ -522,7 +522,7 @@ missing16$BOT_TEMP <- pred16
 
 
 
-tempmod17 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers, k=9), data=sebs_pollock[which(sebs_pollock$YEAR==2017),] )
+tempmod17 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers), data=sebs_pollock[which(sebs_pollock$YEAR==2017),] )
 summary(tempmod17)
 gam.check(tempmod17)
 plot(tempmod17)
@@ -536,9 +536,9 @@ missing17$BOT_TEMP <- pred17
 
 
 
-tempmod18 <- gam(BOT_TEMP ~ s(BOT_DEPTH, k=16) + ti(long_albers, lat_albers, k=9), data=sebs_pollock[which(sebs_pollock$YEAR==2018),] )
+tempmod18 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers), data=sebs_pollock[which(sebs_pollock$YEAR==2018),] )
 summary(tempmod18)
-gam.check(tempmod18) #still a little low on depth but close enough
+gam.check(tempmod18) #
 plot(tempmod18)
 
 pre18 <- predict.gam(tempmod18, type="response")
@@ -550,7 +550,7 @@ missing18$BOT_TEMP <- pred18
 
 
 
-tempmod19 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers, k=9), data=sebs_pollock[which(sebs_pollock$YEAR==2019),] )
+tempmod19 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers), data=sebs_pollock[which(sebs_pollock$YEAR==2019),] )
 summary(tempmod19)
 gam.check(tempmod19)
 plot(tempmod19)
@@ -564,6 +564,18 @@ missing19$BOT_TEMP <- pred19
 
 
 
+tempmod21 <- gam(BOT_TEMP ~ s(BOT_DEPTH) + ti(long_albers, lat_albers), data=sebs_pollock[which(sebs_pollock$YEAR==2021),] )
+summary(tempmod21)
+gam.check(tempmod21)
+plot(tempmod21)
+
+pre21 <- predict.gam(tempmod21, type="response")
+df21 <- sebs_pollock[which(sebs_pollock$YEAR==2021),] 
+
+missing21 <- df21[which(is.na(df21$BOT_TEMP)==TRUE),]
+pred21 <- predict.gam(tempmod21, newdata=missing21, type="response")
+missing21$BOT_TEMP <- pred21
+
 #now bind together
 
 missingall <- rbind(missing82, missing83, missing84, missing85, missing86, missing87, missing88, missing89,
@@ -572,7 +584,7 @@ missingall <- rbind(missing82, missing83, missing84, missing85, missing86, missi
                     missing01, missing02, missing03, missing04, missing05,
                     missing06, missing07, missing08, missing09, missing10, 
                     missing11, missing12, missing13, missing14, missing15,
-                    missing16, missing17, missing18, missing19)
+                    missing16, missing17, missing18, missing19, missing21)
 
 
 nona <- sebs_pollock[which(is.na(sebs_pollock$BOT_TEMP)==FALSE),]
@@ -586,20 +598,17 @@ sebs_model_dat <- rbind(nona, missingall)
 
 startmod <- gamm4(logCPUE ~  s(BOT_DEPTH) +
                s(BOT_TEMP, by=period, bs="fs"),  random=~(1|YEAR/HAUL), 
-             data=sebs_pollock)
+             data=sebs_model_dat)
 gam.check(startmod$gam)
 summary(startmod[[1]]) 
 summary(startmod[[2]]) 
 anova(startmod[[2]])
 plot(startmod[[2]])
 #is there any spatial correlation though?
-plot(Variogram(startmod$lme, form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE, data=sebs_pollock))
-plot(Variogram(startmod$lme, form=~ long_albers + lat_albers|YEAR_factor, nugget=FALSE, data=sebs_pollock))
-#actually looks fairly minor, but what about plots?
 
-c_dat <- sebs_pollock[which(is.finite(sebs_pollock$BOT_DEPTH)==TRUE&
-                           is.finite(sebs_pollock$BOT_TEMP)==TRUE &
-                           is.finite(sebs_pollock$logCPUE)==TRUE ),]
+c_dat <- sebs_model_dat[which(is.finite(sebs_model_dat$BOT_DEPTH)==TRUE&
+                           is.finite(sebs_model_dat$BOT_TEMP)==TRUE &
+                           is.finite(sebs_model_dat$logCPUE)==TRUE ),]
 c_dat$r <- NA
 c_dat$r <- resid(startmod[[2]])   # Extract residuals
 sp:::bubble(c_dat[which(c_dat$YEAR==2010),], zcol="r")
@@ -609,11 +618,53 @@ ggplot(c_dat, aes(long_albers, lat_albers, col=r)) + geom_point() +
 
 gam.check(startmod[[2]]) 
 
-cmod1 <- gamm4(logCPUE ~  s(BOT_DEPTH) +
-                    s(BOT_TEMP, by=period, bs="fs"),  random=~(1|YEAR/HAUL), correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE),
-                  data=sebs_pollock)
+cmod1 <- gamm(logCPUE ~  s(BOT_DEPTH) +
+                    s(BOT_TEMP, by=period, bs="fs"),  random=list(YEAR_factor=~1), 
+               correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE), method="REML",
+                  data=sebs_model_dat)
+saveRDS(cmod1, file="~/Dropbox/Work folder/Pollock Analyses/bold-new-pollock/scripts/new_corexp_sm_int.RDS")
+
+summary(cmod1$gam)
+summary(cmod1$lme)
+
+cmod1S <- gamm(logCPUE ~  s(BOT_DEPTH) +
+                s(BOT_TEMP, by=period, bs="fs"),  random=list(YEAR_factor=~1), 
+              correlation = corSpher(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE), method="REML",
+              data=sebs_model_dat)
+
+cmod1G <- gamm(logCPUE ~  s(BOT_DEPTH) +
+                 s(BOT_TEMP, by=period, bs="fs"),  random=list(YEAR_factor=~1), 
+               correlation = corGaus(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE), method="REML",
+               data=sebs_model_dat)
+
+cmod1R <- gamm(logCPUE ~  s(BOT_DEPTH) +
+                 s(BOT_TEMP, by=period, bs="fs"),  random=list(YEAR_factor=~1), 
+               correlation = corRatio(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE), method="REML",
+               data=sebs_model_dat)
 
 
+AIC(cmod1R$lme, cmod1G$lme, cmod1S$lme, cmod1$lme) #exp is best
+
+#check nugget
+cmod1_nonug <- gamm(logCPUE ~  s(BOT_DEPTH) +
+                s(BOT_TEMP, by=period, bs="fs"),  random=list(YEAR_factor=~1), 
+              correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=FALSE), method="REML",
+              data=sebs_model_dat)
+
+AIC(cmod1$lme, cmod1_nonug$lme) #better w nugget
+
+clin_int <- gamm(logCPUE ~  s(BOT_DEPTH) +
+                      BOT_TEMP:period,  random=list(YEAR_factor=~1), 
+                    correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=FALSE), method="REML",
+                    data=sebs_model_dat)
+saveRDS(clin_int, file="~/Dropbox/Work folder/Pollock Analyses/bold-new-pollock/scripts/new_lin_int.RDS")
+
+
+cmod1_noint <- gamm(logCPUE ~  s(BOT_DEPTH) +
+                      s(BOT_TEMP),  random=list(YEAR_factor=~1), 
+                    correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=FALSE), method="REML",
+                    data=sebs_model_dat)
+saveRDS(cmod1_noint, file="~/Dropbox/Work folder/Pollock Analyses/bold-new-pollock/scripts/new_no_int.RDS")
 
 
 
