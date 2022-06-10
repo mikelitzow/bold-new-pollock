@@ -8,6 +8,8 @@
 
 library(mgcv)
 library(gamm4)
+library(visreg)
+library(gratia)
 
 #load data
 wd <- getwd()
@@ -591,6 +593,9 @@ nona <- sebs_pollock[which(is.na(sebs_pollock$BOT_TEMP)==FALSE),]
 
 sebs_model_dat <- rbind(nona, missingall)
 
+wd <- getwd()
+write_csv(sebs_model_dat, file=paste(wd,"/data/survey data/south_1982-2021_bot_trawl_data_for_sebs_models.csv", sep=""))
+
 
 
 #models------
@@ -627,6 +632,14 @@ saveRDS(cmod1, file="~/Dropbox/Work folder/Pollock Analyses/bold-new-pollock/scr
 summary(cmod1$gam)
 summary(cmod1$lme)
 
+c2_dat <- sebs_model_dat[which(is.finite(sebs_model_dat$BOT_DEPTH)==TRUE&
+                                is.finite(sebs_model_dat$BOT_TEMP)==TRUE &
+                                is.finite(sebs_model_dat$logCPUE)==TRUE ),]
+c2_dat$r <- NA
+c2_dat$r <- resid(cmod1[[2]])   # Extract residuals
+ggplot(c2_dat, aes(long_albers, lat_albers, col=r)) + geom_point() +
+  scale_colour_gradient(high="red", low="green") + facet_wrap(~YEAR)
+
 cmod1S <- gamm(logCPUE ~  s(BOT_DEPTH) +
                 s(BOT_TEMP, by=period, bs="fs"),  random=list(YEAR_factor=~1), 
               correlation = corSpher(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE), method="REML",
@@ -655,22 +668,50 @@ AIC(cmod1$lme, cmod1_nonug$lme) #better w nugget
 
 clin_int <- gamm(logCPUE ~  s(BOT_DEPTH) +
                       BOT_TEMP:period,  random=list(YEAR_factor=~1), 
-                    correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=FALSE), method="REML",
+                    correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE), method="REML",
                     data=sebs_model_dat)
 saveRDS(clin_int, file="~/Dropbox/Work folder/Pollock Analyses/bold-new-pollock/scripts/new_lin_int.RDS")
 
 
 cmod1_noint <- gamm(logCPUE ~  s(BOT_DEPTH) +
                       s(BOT_TEMP),  random=list(YEAR_factor=~1), 
-                    correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=FALSE), method="REML",
+                    correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE), method="REML",
                     data=sebs_model_dat)
 saveRDS(cmod1_noint, file="~/Dropbox/Work folder/Pollock Analyses/bold-new-pollock/scripts/new_no_int.RDS")
 
 
+#again w ML
+
+cmod1_ML <- gamm(logCPUE ~  s(BOT_DEPTH) +
+                s(BOT_TEMP, by=period, bs="fs"),  random=list(YEAR_factor=~1), 
+              correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE), method="ML",
+              data=sebs_model_dat)
+saveRDS(cmod1_ML, file="~/Dropbox/Work folder/Pollock Analyses/bold-new-pollock/scripts/new_corexp_sm_int_ML.RDS")
+
+#
+clin_int_ML <- gamm(logCPUE ~  s(BOT_DEPTH) +
+                   BOT_TEMP:period,  random=list(YEAR_factor=~1), 
+                 correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE), method="ML",
+                 data=sebs_model_dat)
+saveRDS(clin_int_ML, file="~/Dropbox/Work folder/Pollock Analyses/bold-new-pollock/scripts/new_lin_int_ML.RDS")
+
+
+cmod1_noint_ML <- gamm(logCPUE ~  s(BOT_DEPTH) +
+                      s(BOT_TEMP),  random=list(YEAR_factor=~1), 
+                    correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE), method="ML",
+                    data=sebs_model_dat)
+saveRDS(cmod1_noint_ML, file="~/Dropbox/Work folder/Pollock Analyses/bold-new-pollock/scripts/new_no_int_ML.RDS")
+
+AIC(clin_int_ML$lme, cmod1_ML$lme, cmod1_noint_ML$lme) #no int is best aic, smooth int close
 
 
 
+#look at best mod reml fit
+gam.check(cmod1_noint$gam)
+summary(cmod1_noint$lme)
+summary(cmod1_noint$gam)
+plot(cmod1_noint$gam)
+ v <- getViz(cmod1_noint$gam)
+ plot(sm(v, 2)) + l_fitLine(alpha = 0.6)
 
-
-
-
+draw(cmod1_noint$gam)
