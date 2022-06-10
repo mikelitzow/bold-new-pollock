@@ -207,3 +207,54 @@ ggplot(data = world) +
   theme( legend.position = c(0.97, 0.25), legend.key = element_blank(),
          legend.background=element_blank(), legend.title = element_blank()) 
 
+
+#look at bottom temp across both nebs and sebs
+ggplot(data = world) +
+  geom_sf() +
+  coord_sf(xlim = c(-178, -155), ylim = c(58, 66), expand = TRUE) +
+  # annotation_scale(location = "bl", width_hint = 0.5) +
+  # annotation_north_arrow(location = "bl", which_north = "true", 
+  #                        pad_x = unit(0.75, "in"), pad_y = unit(0.5, "in"),
+  #                        style = north_arrow_fancy_orienteering) +  
+  geom_point(aes(LONGITUDE,LATITUDE,  col=BOT_TEMP), 
+             data=NS_pollock) + 
+  facet_wrap(~YEAR)  +
+  scale_colour_distiller(palette = "Spectral") + theme_bw() +
+  theme( legend.position = c(0.97, 0.25), legend.key = element_blank(),
+         legend.background=element_blank(), legend.title = element_blank()) 
+
+
+#one-to-one plots========
+
+ggplot(pdat_NEBS, aes(predicted, logCPUE)) + geom_point() + geom_smooth(method="lm") + geom_abline(intercept=0)
+
+ggplot(pdat_NEBS, aes(predicted, logCPUE, col=as.factor(YEAR))) + geom_point() + geom_smooth(method="lm") + geom_abline(intercept=0)
+#OH this is interesting!!!!!
+
+ggplot(pdat_NEBS, aes(predicted, logCPUE, col=BOT_TEMP)) + geom_point() + geom_smooth(method="lm") + geom_abline(intercept=0) +
+  scale_colour_distiller(palette = "Spectral")
+
+ggplot(pdat_NEBS, aes(predicted, logCPUE, col=BOT_DEPTH)) + geom_point() + geom_smooth(method="lm") + geom_abline(intercept=0)+
+  scale_colour_distiller(palette = "Spectral")
+
+ggplot(pdat_NEBS, aes(predicted, logCPUE, col=long_albers)) + geom_point() + geom_smooth(method="lm") + geom_abline(intercept=0)+
+  scale_colour_distiller(palette = "Spectral") #
+
+ggplot(pdat_NEBS, aes(predicted, logCPUE, col=lat_albers)) + geom_point() + geom_smooth(method="lm") + geom_abline(intercept=0)+
+  scale_colour_distiller(palette = "Spectral") #
+
+ggplot(pdat_NEBS, aes(predicted, logCPUE, col=as.factor(YEAR))) + geom_point() + 
+  geom_smooth(method="lm") + geom_abline(intercept=0) + theme_bw() + ylab("log(CPUE+1)") + xlab("Predicted log(CPUE+1)") +
+ facet_wrap(~YEAR)
+  # scale_color_manual(values=c("#b2df8a", "#66c2a5", "#fc8d62", "#8da0cb"))
+
+
+
+
+
+
+
+
+
+
+
