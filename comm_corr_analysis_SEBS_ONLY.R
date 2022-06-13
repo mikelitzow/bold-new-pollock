@@ -30,7 +30,7 @@ wide_northsouth  <- northsouthselect[,-c(8:9, 10,12)] %>% pivot_wider(names_from
                                         values_from=logCPUE)
 #eek this causes some bad column names!
 wide_northsouth <- wide_northsouth %>% rename(logCPUE_Chionoecetes_bairdi = "Chionoecetes bairdi",            
-                                    logCPUE_Atheresthes_stomia = "Atheresthes stomias",             
+                                    logCPUE_Atheresthes_stomias = "Atheresthes stomias",             
                                     logCPUE_Hippoglossus_stenolepis = "Hippoglossus stenolepis",
                                     logCPUE_Limanda_aspera = "Limanda aspera",         
                                     logCPUE_Lepidopsetta_sp= "Lepidopsetta sp.",               
@@ -50,10 +50,20 @@ wide_northsouth$period[which(wide_northsouth$YEAR<2014)]<-"early"
 wide_northsouth$period[which(wide_northsouth$YEAR>2013)]<-"late"
 wide_northsouth$period <- as.factor(wide_northsouth$period)
 
-#leaving here Friday
-#SHould NAs be zeros?
 
-#need to limit to SEBS!
+#SHould NAs be zeros?
+wide_northsouth$logCPUE_Atheresthes_stomias[is.na(wide_northsouth$logCPUE_Atheresthes_stomias)==TRUE] <- 0
+wide_northsouth$logCPUE_Hippoglossus_stenolepis[is.na(wide_northsouth$logCPUE_Hippoglossus_stenolepis)==TRUE] <- 0
+wide_northsouth$logCPUE_Hippoglossoides_elassodon[is.na(wide_northsouth$logCPUE_Hippoglossoides_elassodon)==TRUE] <- 0
+wide_northsouth$logCPUE_Limanda_aspera[is.na(wide_northsouth$logCPUE_Limanda_aspera)==TRUE] <- 0
+wide_northsouth$logCPUE_Lepidopsetta_polyxystra[is.na(wide_northsouth$logCPUE_Lepidopsetta_polyxystra)==TRUE] <- 0
+wide_northsouth$logCPUE_Pleuronectes_quadrituberculatus[is.na(wide_northsouth$logCPUE_Pleuronectes_quadrituberculatus)==TRUE] <- 0
+wide_northsouth$logCPUE_Gadus_macrocephalus[is.na(wide_northsouth$logCPUE_Gadus_macrocephalus)==TRUE] <- 0
+wide_northsouth$logCPUE_Gadus_chalcogrammus[is.na(wide_northsouth$logCPUE_Gadus_chalcogrammus)==TRUE] <- 0
+wide_northsouth$logCPUE_Chionoecetes_bairdi[is.na(wide_northsouth$logCPUE_Chionoecetes_bairdi)==TRUE] <- 0
+wide_northsouth$logCPUE_Chionoecetes_opilio[is.na(wide_northsouth$logCPUE_Chionoecetes_opilio)==TRUE] <- 0
+wide_northsouth$logCPUE_Lepidopsetta_sp[is.na(wide_northsouth$logCPUE_Lepidopsetta_sp)==TRUE] <- 0
+
 
 yrs <- unique(wide_northsouth$YEAR)
 #loop through species, loop through each year, get correlation and store
@@ -93,7 +103,7 @@ cor_output$period[which(cor_output$yr_vec<2014)]<-"early"
 cor_output$period[which(cor_output$yr_vec>2013)]<- "late"
 cor_output$period <- as.factor(cor_output$period)
 
-write.csv(cor_output, file=paste(wd,"/data/community-correlations.csv", sep=""))
+write.csv(cor_output, file=paste(wd,"/data/community-correlations-v2.csv", sep=""))
 
 
 
@@ -127,39 +137,39 @@ anova(cormod)
 # being compared, are different. Therefore, Welch t-test is performed by default.
 
 t_As <- t.test(cor_vec ~ period, data = analysis_cor[which(analysis_cor$sps_vec=="logCPUE_Atheresthes_stomias"),])
-t_As #not sig p-value = 0.2016
+t_As #not sig p-value = 0.1615
 p_As <- t_As$p.value
 
 t_Hs <- t.test(cor_vec ~ period, data = analysis_cor[which(analysis_cor$sps_vec=="logCPUE_Hippoglossus_stenolepis"),])
-t_Hs #p=0.02326
+t_Hs #p=0.008242
 p_Hs <- t_Hs$p.value
 
 t_He <- t.test(cor_vec ~ period, data = analysis_cor[which(analysis_cor$sps_vec=="logCPUE_Hippoglossoides_elassodon"),])
-t_He #p=0.0.04584
+t_He #p=0.0.03729
 p_He <- t_He$p.value
 
 t_La <- t.test(cor_vec ~ period, data = analysis_cor[which(analysis_cor$sps_vec=="logCPUE_Limanda_aspera"),])
-t_La #not sig p-value = 0.1204
+t_La #not sig p-value = 0.1952
 p_La <- t_La$p.value
 
 t_Lp <- t.test(cor_vec ~ period, data = analysis_cor[which(analysis_cor$sps_vec=="logCPUE_Lepidopsetta_polyxystra"),])
-t_Lp #not sig p-value = 0.6489
+t_Lp #not sig p-value = 0.7689
 p_Lp <- t_Lp$p.value
 
 t_Pq <- t.test(cor_vec ~ period, data = analysis_cor[which(analysis_cor$sps_vec=="logCPUE_Pleuronectes_quadrituberculatus"),])
-t_Pq #p=0.3.15e-05
+t_Pq #p=0.0001435
 p_Pq <- t_Pq$p.value
 
 t_Gm <- t.test(cor_vec ~ period, data = analysis_cor[which(analysis_cor$sps_vec=="logCPUE_Gadus_macrocephalus"),])
-t_Gm #NOT SIG p=0.1737
+t_Gm #NOT SIG p=0.1561
 p_Gm <- t_Gm$p.value
 
 t_Cb <- t.test(cor_vec ~ period, data = analysis_cor[which(analysis_cor$sps_vec=="logCPUE_Chionoecetes_bairdi"),])
-t_Cb #Not sig p=0.05511
+t_Cb #sig p=0.01666
 p_Cb <- t_Cb$p.value
 
 t_Co <- t.test(cor_vec ~ period, data = analysis_cor[which(analysis_cor$sps_vec=="logCPUE_Chionoecetes_opilio"),])
-t_Co #not sig p-value = 0.8567
+t_Co #not sig p-value = 0.8072
 p_Co <- t_Co$p.value
 
 ggplot(cor_output, aes(yr_vec, cor_vec, colour=sps_vec)) + geom_point() + geom_smooth() + facet_wrap(~sps_vec) + 
@@ -185,7 +195,7 @@ for(i in 1:m){
   print(temp_value)
   print(temp_p < temp_value)
 }
-#Only p_Pq is significant
+#NOW FIRST THREE remain significant, p_Cb, p_Hs, p_Pq
 
 
 
