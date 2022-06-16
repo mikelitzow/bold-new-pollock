@@ -248,9 +248,40 @@ ggplot(pdat_NEBS, aes(predicted, logCPUE, col=as.factor(YEAR))) + geom_point() +
  facet_wrap(~YEAR)
   # scale_color_manual(values=c("#b2df8a", "#66c2a5", "#fc8d62", "#8da0cb"))
 
+#adding in random effects======================================
 
+#following examples from gamm() documentation
 
+refa <- ranef(cmod1_noint$lme,level=3) #extract random effect for year
+rownames(refa) <- substr(rownames(refa),start=5,stop=8) #rename names
 
+## make a prediction, with random effects zero...
+p0 <- predict(b$gam,data.frame(x0=.3,x1=.6,x2=.98,x3=.77))
+p0_21 <- predict(cmod1_noint$gam, newdata = nebs_sel[which(nebs_sel$YEAR=="2021"),])
+
+## add in effect for fa = "2" and fb="2/4"...
+p <- p0_21 + refa["2021",1] 
+
+#and loop through the years that we have nebs data for
+yrs <- unique(nebs_sel$YEAR)
+yr_list <- list()
+p_list <- list()
+i <- 1
+for(i in 1:length(yrs)){
+  temp_yr <- yrs[i]
+  yr_dat <- nebs_sel[which(nebs_sel$YEAR==temp_yr),]
+  
+  ## make a prediction, with random effects zero...
+  ptemp_0 <- predict(b$gam,data.frame(x0=.3,x1=.6,x2=.98,x3=.77))
+  ptemp <- predict(cmod1_noint$gam, newdata = nebs_sel[which(nebs_sel$YEAR==temp_yr),])
+  
+  ## add in effect for fa = "2" and fb="2/4"...
+  ptemp_wrand <- ptemp_0 + refa[temp_yr,1] 
+  
+  dftemp <- as.data.frame(ptemp_wrand)
+  dftemp$year <- temp_yr
+  
+}
 
 
 
