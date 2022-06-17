@@ -276,11 +276,12 @@ for(i in 1:length(yrs)){
   ptemp <- predict(cmod1_noint$gam, newdata = nebs_sel[which(nebs_sel$YEAR==temp_yr),])
   
   ## add in effect for fa = "2" and fb="2/4"...
-  ptemp_wrand <- ptemp_0 + refa[temp_yr,1] 
+  ptemp_wrand <- ptemp_0 + refa[print(temp_yr),1] 
   
   dftemp <- as.data.frame(ptemp_wrand)
   dftemp$year <- temp_yr
   
+  output_df <- rbind(output_df, dftemp)
 }
 
 
