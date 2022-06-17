@@ -262,21 +262,23 @@ p0_21 <- predict(cmod1_noint$gam, newdata = nebs_sel[which(nebs_sel$YEAR=="2021"
 ## add in effect for fa = "2" and fb="2/4"...
 p <- p0_21 + refa["2021",1] 
 
+refa$year <- rownames(refa)
+
 #and loop through the years that we have nebs data for
 yrs <- unique(nebs_sel$YEAR)
-yr_list <- list()
-p_list <- list()
+output_df <- data.frame(matrix(ncol = 2, nrow = 0))
+nms <- c("ptemp_wrand", "year")
+colnames(output_df) <- nms
 i <- 1
 for(i in 1:length(yrs)){
   temp_yr <- yrs[i]
   yr_dat <- nebs_sel[which(nebs_sel$YEAR==temp_yr),]
   
   ## make a prediction, with random effects zero...
-  ptemp_0 <- predict(b$gam,data.frame(x0=.3,x1=.6,x2=.98,x3=.77))
   ptemp <- predict(cmod1_noint$gam, newdata = nebs_sel[which(nebs_sel$YEAR==temp_yr),])
   
   ## add in effect for fa = "2" and fb="2/4"...
-  ptemp_wrand <- ptemp_0 + refa[print(temp_yr),1] 
+  ptemp_wrand <- ptemp + refa[which(refa$year==temp_yr),1] 
   
   dftemp <- as.data.frame(ptemp_wrand)
   dftemp$year <- temp_yr
@@ -284,7 +286,9 @@ for(i in 1:length(yrs)){
   output_df <- rbind(output_df, dftemp)
 }
 
-
+#ok nice the loop output seems to be working
+#need to double check
+#then need to add in metadata to loop df so that it can be used to plot etc
 
 
 
