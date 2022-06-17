@@ -297,11 +297,54 @@ for(i in 1:length(yrs)){
   output_df <- rbind(output_df, dftemp)
 }
 
+output_df <- rename(output_df, predicted_cond_on_random = ptemp_wrand)
+
 #ok nice the loop output seems to be working
 #need to double check
 #then need to add in metadata to loop df so that it can be used to plot etc
 
+#look at 1:1 plot
+#not conditional
+ggplot(output_df, aes(predicted_not_conditional, logCPUE, col=as.factor(year))) + geom_point() + 
+  geom_smooth(method="lm") + geom_abline(intercept=0) + theme_bw() + ylab("log(CPUE+1)") + xlab("Predicted log(CPUE+1)") +
+  facet_wrap(~year)
+
+#conditional on random year
+ggplot(output_df, aes(predicted_cond_on_random, logCPUE, col=as.factor(year))) + geom_point() + 
+  geom_smooth(method="lm") + geom_abline(intercept=0) + theme_bw() + ylab("log(CPUE+1)") + xlab("Predicted log(CPUE+1)") +
+  facet_wrap(~year)
+
+#plot----
+#pivot longer so that can plot on same scale!
+
+plot_out_dat <- output_df[,-c(7:9)] %>% pivot_longer(!c(lat_albers, long_albers, year,  region,  shelf), 
+                                              names_to="response_type", values_to="value")
 
 
+names(plot_out_dat)
+table(plot_out_dat$response_type) #three coloumns, difference, logCPUE... and predicted
 
+#match lat/long albers to lat long to plot
+lats_longs <- pdat_NEBS[,c(1,2,22,23)]
+
+pred_map_plot_dat <- left_join(plot_out_dat, lats_longs)
+length(plot_out_dat$long_albers)
+length(pred_map_plot_dat$long_albers) #same length
+
+#plot----
+world <- ne_countries(scale = "medium", returnclass = "sf")
+
+ggplot(data = world) +
+  geom_sf() +
+  coord_sf(xlim = c(-178, -155), ylim = c(58, 66), expand = TRUE) +
+  # annotation_scale(location = "bl", width_hint = 0.5) +
+  # annotation_north_arrow(location = "bl", which_north = "true", 
+  #                        pad_x = unit(0.75, "in"), pad_y = unit(0.5, "in"),
+  #                        style = north_arrow_fancy_orienteering) +  
+  geom_point(aes(LONGITUDE,LATITUDE,  col=value), 
+             data=pred_map_plot_dat) + 
+  facet_wrap(response_type~year, nrow=3)  +
+  scale_colour_distiller(palette = "Spectral") + theme_bw() +
+  theme( legend.position = c(0.97, 0.25), legend.key = element_blank(),
+         legend.background=element_blank(), legend.title = element_blank()) 
 
