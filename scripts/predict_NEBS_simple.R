@@ -266,8 +266,10 @@ refa$year <- rownames(refa)
 
 #and loop through the years that we have nebs data for
 yrs <- unique(nebs_sel$YEAR)
-output_df <- data.frame(matrix(ncol = 2, nrow = 0))
-nms <- c("ptemp_wrand", "year")
+output_df <- data.frame(matrix(ncol = 11, nrow = 0))
+nms <- c("ptemp_wrand", "year", "predicted_not_conditional",
+"long_albers", "lat_albers", "logCPUE", "BOT_DEPTH", "BOT_TEMP",
+"julian", "region", "shelf")
 colnames(output_df) <- nms
 i <- 1
 for(i in 1:length(yrs)){
@@ -275,13 +277,22 @@ for(i in 1:length(yrs)){
   yr_dat <- nebs_sel[which(nebs_sel$YEAR==temp_yr),]
   
   ## make a prediction, with random effects zero...
-  ptemp <- predict(cmod1_noint$gam, newdata = nebs_sel[which(nebs_sel$YEAR==temp_yr),])
+  ptemp <- predict(cmod1_noint$gam, newdata = yr_dat)
   
   ## add in effect for fa = "2" and fb="2/4"...
   ptemp_wrand <- ptemp + refa[which(refa$year==temp_yr),1] 
   
   dftemp <- as.data.frame(ptemp_wrand)
   dftemp$year <- temp_yr
+  dftemp$predicted_not_conditional <- ptemp
+  dftemp$long_albers <- yr_dat$long_albers
+  dftemp$lat_albers <- yr_dat$lat_albers
+  dftemp$logCPUE <- yr_dat$logCPUE
+  dftemp$BOT_DEPTH <- yr_dat$BOT_DEPTH
+  dftemp$BOT_TEMP <- yr_dat$BOT_TEMP
+  dftemp$julian <- yr_dat$julian
+  dftemp$region <- yr_dat$region
+  dftemp$shelf <- yr_dat$shelf
   
   output_df <- rbind(output_df, dftemp)
 }
