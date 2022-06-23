@@ -600,6 +600,8 @@ write_csv(sebs_model_dat, file=paste(wd,"/data/survey data/south_1982-2021_bot_t
 
 #models------
 
+sebs_model_dat <- read.csv( file=paste(wd,"/data/survey data/south_1982-2021_bot_trawl_data_for_sebs_models.csv", sep=""))
+
 
 startmod <- gamm4(logCPUE ~  s(BOT_DEPTH) +
                s(BOT_TEMP, by=period, bs="fs"),  random=~(1|YEAR/HAUL), 
@@ -686,25 +688,41 @@ cmod1_ML <- gamm(logCPUE ~  s(BOT_DEPTH) +
                 s(BOT_TEMP, by=period, bs="fs"),  random=list(YEAR_factor=~1), 
               correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE), method="ML",
               data=sebs_model_dat)
-saveRDS(cmod1_ML, file="~/Dropbox/Work folder/Pollock Analyses/bold-new-pollock/scripts/new_corexp_sm_int_ML.RDS")
+#saveRDS(cmod1_ML, file="~/Dropbox/Work folder/Pollock Analyses/bold-new-pollock/scripts/new_corexp_sm_int_ML.RDS")
+cmod1_ML <- readRDS(file="~/Dropbox/Work folder/Pollock Analyses/bold-new-pollock/scripts/new_corexp_sm_int_ML.RDS")
 
 #
 clin_int_ML <- gamm(logCPUE ~  s(BOT_DEPTH) +
                    BOT_TEMP:period,  random=list(YEAR_factor=~1), 
                  correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE), method="ML",
                  data=sebs_model_dat)
-saveRDS(clin_int_ML, file="~/Dropbox/Work folder/Pollock Analyses/bold-new-pollock/scripts/new_lin_int_ML.RDS")
+#saveRDS(clin_int_ML, file="~/Dropbox/Work folder/Pollock Analyses/bold-new-pollock/scripts/new_lin_int_ML.RDS")
+clin_int_ML <- readRDS( file="~/Dropbox/Work folder/Pollock Analyses/bold-new-pollock/scripts/new_lin_int_ML.RDS")
+
 
 
 cmod1_noint_ML <- gamm(logCPUE ~  s(BOT_DEPTH) +
                       s(BOT_TEMP),  random=list(YEAR_factor=~1), 
                     correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE), method="ML",
                     data=sebs_model_dat)
-saveRDS(cmod1_noint_ML, file="~/Dropbox/Work folder/Pollock Analyses/bold-new-pollock/scripts/new_no_int_ML.RDS")
+#saveRDS(cmod1_noint_ML, file="~/Dropbox/Work folder/Pollock Analyses/bold-new-pollock/scripts/new_no_int_ML.RDS")
+cmod1_noint_ML <- readRDS(file="~/Dropbox/Work folder/Pollock Analyses/bold-new-pollock/scripts/new_no_int_ML.RDS")
+
 
 AIC(clin_int_ML$lme, cmod1_ML$lme, cmod1_noint_ML$lme) #no int is best aic, smooth int close
 
 
+#add temp as linear for null
+
+cmod1_lin_ML <- gamm(logCPUE ~  s(BOT_DEPTH) +
+                         BOT_TEMP,  random=list(YEAR_factor=~1), 
+                       correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE), method="ML",
+                       data=sebs_model_dat)
+#saveRDS(cmod1_lin_ML, file="~/Dropbox/Work folder/Pollock Analyses/bold-new-pollock/scripts/new_lineartemp_ML.RDS")
+cmod1_lin_ML <- readRDS(file="~/Dropbox/Work folder/Pollock Analyses/bold-new-pollock/scripts/new_lineartemp_ML.RDS")
+
+
+AIC(clin_int_ML$lme, cmod1_ML$lme, cmod1_noint_ML$lme, cmod1_lin_ML$lme) #smooths still best, this one worse than lin int
 
 #look at best mod reml fit
 gam.check(cmod1_noint$gam)
