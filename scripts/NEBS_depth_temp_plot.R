@@ -167,7 +167,7 @@ ggplot(data = world) +
   # geom_point(aes(LONGITUDE, LATITUDE, colour=mean_station_bottemp), data=all_analysis_dat) +   
   # scale_colour_gradient2(low="blue", high="red", guide="colorbar") + 
   geom_point(aes(LONGITUDE, LATITUDE, 
-                 col=region), data=all_analysis_dat) + theme_bw() + 
+                 col=region), data=newdat) + theme_bw() + 
   scale_color_manual(name="Region", 
    labels = c("NEBS", "SEBS"),
    values = c("NEBS"="#d8b365", "SEBS"="#5ab4ac")) +
@@ -177,31 +177,56 @@ ggplot(data = world) +
   geom_path(aes(x_adj,y), data=contour.lines.adj$z200, col="navy blue") #+ geom_path(aes(x_adj,y), data=contour.lines.adj$z1000, col="dark green") 
 
 
+#poster
+ggplot(data = world) +
+  geom_sf() +
+  coord_sf(xlim = c(-178, -155), ylim = c(53, 65), expand = TRUE) +
+  annotation_scale(location = "bl", width_hint = 0.5) +
+  # geom_point(aes(LONGITUDE, LATITUDE, colour=mean_station_bottemp), data=all_analysis_dat) +   
+  # scale_colour_gradient2(low="blue", high="red", guide="colorbar") + 
+  geom_point(aes(LONGITUDE, LATITUDE, 
+                 col=region), data=newdat[which(newdat$STRATUM!="0"),], size=0.5) + theme_bw() + 
+  scale_color_manual(name="Region", 
+                     labels = c("NEBS", "SEBS"),
+                     values = c("NEBS"="#d8b365", "SEBS"="#5ab4ac")) +
+  theme( legend.position = c(0.85, 0.85), legend.key = element_blank(),
+         legend.background=element_blank()) + #geom_path(aes(x_adj,y), data=contour.lines.adj$z20, col="dark blue") +
+  geom_path(aes(x_adj,y), data=contour.lines.adj$z50, col="#9ecae1") + geom_path(aes(x_adj,y), data=contour.lines.adj$z100, col="#3182bd") +
+  geom_path(aes(x_adj,y), data=contour.lines.adj$z200, col="navy blue") #+ geom_path(aes(x_adj,y), data=contour.lines.adj$z1000, col="dark green") 
+
+#area of detail map
+ggplot(data = world) +
+  geom_sf() +
+  coord_sf(xlim = c(-177.5, -120), ylim = c(45, 69), expand = TRUE) + theme_bw() +
+  annotate("rect", xmin = -178, xmax = -155, ymin = 53, ymax = 65,
+           alpha = .1,fill = "blue") + annotate("text", x=-151, y=63, label= "Alaska", size=9) +
+  theme(axis.title.x=element_blank(),
+        axis.title.y=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank())
 
 
+newdat$period <- NA
 
+newdat$period[which(newdat$YEAR<2014)] <- "early"
+newdat$period[which(newdat$YEAR>2013)] <- "late"
 
-all_analysis_dat$period <- NA
-
-all_analysis_dat$period[which(all_analysis_dat$YEAR<2014)] <- "early"
-all_analysis_dat$period[which(all_analysis_dat$YEAR>2013)] <- "late"
-
-x <- mapproject(all_analysis_dat$LONGITUDE, all_analysis_dat$LATITUDE, "albers", param=c(55.9, 60.8))
-all_analysis_dat$long_albers <- x$x
-all_analysis_dat$lat_albers <- x$y
+x <- mapproject(newdat$LONGITUDE, newdat$LATITUDE, "albers", param=c(55.9, 60.8))
+newdat$long_albers <- x$x
+newdat$lat_albers <- x$y
 
 #plot temps * depth=================
 
-r1 <- ggplot(all_analysis_dat, aes(mean_station_bottemp, BOT_DEPTH))
+r1 <- ggplot(newdat, aes(mean_station_bottemp, BOT_DEPTH))
 r1 + geom_point() + facet_wrap(~region)
 
 
-r2 <- ggplot(all_analysis_dat, aes(mean_station_bottemp, BOT_DEPTH, col=region))
+r2 <- ggplot(newdat, aes(mean_station_bottemp, BOT_DEPTH, col=region))
 r2 + geom_point()
 
-r3 <- ggplot(all_analysis_dat, aes(mean_station_bottemp, BOT_DEPTH))
+r3 <- ggplot(newdat, aes(mean_station_bottemp, BOT_DEPTH))
 r3 + geom_point() + facet_wrap(~shelf)
 
-r4 <- ggplot(all_analysis_dat, aes(mean_station_bottemp, BOT_DEPTH, col=shelf))
+r4 <- ggplot(newdat, aes(mean_station_bottemp, BOT_DEPTH, col=shelf))
 r4 + geom_point() 
 
