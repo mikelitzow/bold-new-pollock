@@ -10,6 +10,10 @@ library(mgcv)
 library(gamm4)
 library(visreg)
 library(gratia)
+library("rnaturalearth")
+library("rnaturalearthdata")
+library( "ggspatial" )
+library("sf")
 
 #load data
 wd <- getwd()
@@ -19,6 +23,8 @@ newsebs <- northsouthdata_all[which(northsouthdata_all$STRATUM!="70" &
                                       northsouthdata_all$STRATUM!="71" &
                                       northsouthdata_all$STRATUM!="81" &
                                       northsouthdata_all$STRATUM!="0" ),]
+
+world <- ne_countries(scale = "medium", returnclass = "sf")
 
 ggplot(data = world) +
   geom_sf() +
@@ -680,7 +686,7 @@ cmod1_noint <- gamm(logCPUE ~  s(BOT_DEPTH) +
                     correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE), method="REML",
                     data=sebs_model_dat)
 saveRDS(cmod1_noint, file="~/Dropbox/Work folder/Pollock Analyses/bold-new-pollock/scripts/new_no_int.RDS")
-
+cmod1_noint <- readRDS( file="~/Dropbox/Work folder/Pollock Analyses/bold-new-pollock/scripts/new_no_int.RDS")
 
 #again w ML
 
@@ -732,4 +738,269 @@ plot(cmod1_noint$gam)
  v <- getViz(cmod1_noint$gam)
  plot(sm(v, 2)) + l_fitLine(alpha = 0.6)
 
-draw(cmod1_noint$gam)
+draw(cmod1_noint$gam, select=2) + theme_bw() + xlab("Bottom temperature (°C)") +
+  ylab("Partial effect on log(CPUE)") + ggtitle("")
+
+
+#repeat without deepest stations--------------------------
+
+#only stations up to depths 180
+#look at those deeper than 175
+ggplot(sebs_model_dat[which(sebs_model_dat$BOT_DEPTH>175),], aes(STATION, BOT_DEPTH)) + geom_point()
+
+table(sebs_model_dat$STATION[which(sebs_model_dat$BOT_DEPTH>175)])
+
+#each of these stations have many more observations that are shallower, I will remove just the 
+#rows with depths greater than 180 instead of those stations
+
+sebs_shallower_180 <- sebs_model_dat[which(sebs_model_dat$BOT_DEPTH<180),]
+
+#w ML
+
+cmod1_180_ML <- gamm(logCPUE ~  s(BOT_DEPTH) +
+                   s(BOT_TEMP, by=as.factor(period), bs="fs"),  random=list(YEAR_factor=~1), 
+                 correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE), method="ML",
+                 data=sebs_shallower_180)
+#saveRDS(cmod1_180_ML, file="~/Dropbox/Work folder/Pollock Analyses/bold-new-pollock/scripts/new_corexp_sm_int_ML_lessthan180.RDS")
+cmod1_180_ML <- readRDS(file="~/Dropbox/Work folder/Pollock Analyses/bold-new-pollock/scripts/new_corexp_sm_int_ML_lessthan180.RDS")
+aic_smint180 <- AIC(cmod1_180_ML$lme)
+
+#
+clin_int_180_ML <- gamm(logCPUE ~  s(BOT_DEPTH) +
+                      BOT_TEMP:period,  random=list(YEAR_factor=~1), 
+                    correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE), method="ML",
+                    data=sebs_shallower_180)
+#saveRDS(clin_int_180_ML, file="~/Dropbox/Work folder/Pollock Analyses/bold-new-pollock/scripts/new_lin_int_ML_lessthan180.RDS")
+clin_int_180_ML <- readRDS( file="~/Dropbox/Work folder/Pollock Analyses/bold-new-pollock/scripts/new_lin_int_ML_lessthan180.RDS")
+aic_linint180 <- AIC(clin_int_180_ML$lme)
+
+
+cmod1_noint_180_ML <- gamm(logCPUE ~  s(BOT_DEPTH) +
+                         s(BOT_TEMP),  random=list(YEAR_factor=~1), 
+                       correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE), method="ML",
+                       data=sebs_shallower_180)
+saveRDS(cmod1_noint_180_ML, file="~/Dropbox/Work folder/Pollock Analyses/bold-new-pollock/scripts/new_no_int_ML_lessthan180.RDS")
+cmod1_noint_180_ML <- readRDS( file="~/Dropbox/Work folder/Pollock Analyses/bold-new-pollock/scripts/new_no_int_ML_lessthan180.RDS")
+aic_sm180 <- AIC(cmod1_noint_180_ML$lme)
+
+AIC(cmod1_noint_180_ML$lme, clin_int_180_ML$lme, cmod1_180_ML$lme) #smooth no interaction still best
+
+
+#as reml
+
+cmod1_noint_180 <- gamm(logCPUE ~  s(BOT_DEPTH) +
+                             s(BOT_TEMP),  random=list(YEAR_factor=~1), 
+                           correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE), method="REML",
+                           data=sebs_shallower_180)
+saveRDS(cmod1_noint_180, file="~/Dropbox/Work folder/Pollock Analyses/bold-new-pollock/scripts/new_no_int_lessthan180.RDS")
+cmod1_noint_180 <- readRDS( file="~/Dropbox/Work folder/Pollock Analyses/bold-new-pollock/scripts/new_no_int_lessthan180.RDS")
+
+
+gam.check(cmod1_noint_180$gam)
+summary(cmod1_noint_180$lme)
+summary(cmod1_noint_180$gam)
+plot(cmod1_noint_180$gam)
+v <- getViz(cmod1_noint_180$gam)
+plot(sm(v, 2)) + l_fitLine(alpha = 0.6)
+
+draw(cmod1_noint_180$gam, select=2) + theme_bw() + xlab("Bottom temperature (°C)") +
+  ylab("Partial effect on log(CPUE)") + ggtitle("")
+
+draw(cmod1_noint_180$gam, select=1) + theme_bw() + xlab("Bottom depth (m)") +
+  ylab("Partial effect on log(CPUE)") + ggtitle("")
+
+
+#for comparision
+cmod1_180_REML <- gamm(logCPUE ~  s(BOT_DEPTH) +
+                       s(BOT_TEMP, by=as.factor(period), bs="fs"),  random=list(YEAR_factor=~1), 
+                     correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE), method="REML",
+                     data=sebs_shallower_180)
+#saveRDS(cmod1_180_REML, file="~/Dropbox/Work folder/Pollock Analyses/bold-new-pollock/scripts/new_corexp_sm_int_REML.RDS")
+cmod1_180_REML <- readRDS(file="~/Dropbox/Work folder/Pollock Analyses/bold-new-pollock/scripts/new_corexp_sm_int_REML_lessthan180.RDS")
+summary(cmod1_180_REML$gam)
+anova(cmod1_180_REML$gam)
+
+clin_int_180_REML <- gamm(logCPUE ~  s(BOT_DEPTH) +
+                          BOT_TEMP:period,  random=list(YEAR_factor=~1), 
+                        correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE), method="REML",
+                        data=sebs_shallower_180)
+#saveRDS(clin_int_180_REML, file="~/Dropbox/Work folder/Pollock Analyses/bold-new-pollock/scripts/new_lin_int_REML_lessthan180.RDS")
+clin_int_180_REML <- readRDS( file="~/Dropbox/Work folder/Pollock Analyses/bold-new-pollock/scripts/new_lin_int_REML_lessthan180.RDS")
+summary(clin_int_180_REML$gam)
+anova(clin_int_180_REML$gam)
+
+library(mgcViz)
+
+v <- getViz(cmod1_180_REML$gam)
+
+plot(sm(v, 2)) + l_fitLine(alpha = 0.6)
+
+
+#are these not plotting the interaction because of the as.factor?
+sebs_shallower_180$period <- as.factor(sebs_shallower_180$period)
+
+ptest_REML <- gamm(logCPUE ~  s(BOT_DEPTH) +
+                         s(BOT_TEMP, by=period, bs="fs"),  random=list(YEAR_factor=~1), 
+                       correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE), method="REML",
+                       data=sebs_shallower_180)
+#saveRDS(ptest_REML, file="~/Dropbox/Work folder/Pollock Analyses/bold-new-pollock/scripts/mod_test_period_factor.RDS")
+#ptest_REML <- readRDS(file="~/Dropbox/Work folder/Pollock Analyses/bold-new-pollock/scripts/mod_test_period_factor.RDS")
+
+vt <- getViz(ptest_REML$gam)
+
+plot(sm(vt, 2)) + l_fitLine(alpha = 0.6)
+
+library(itsadug)
+
+par(mfrow=c(1,2))
+
+plot_smooth(cmod1_noint_180$gam, view="BOT_TEMP",ylab="Partial effect on log(CPUE)", xlab="Bottom Temperature",
+            ylim=c(-1,5))
+
+plot_smooth(ptest_REML$gam, view="BOT_TEMP", plot_all=c("period"), ylab="Partial effect on log(CPUE)", xlab="Bottom Temperature",
+            ylim=c(-1,5), col=c("blue", "red")) #finally works!
+
+
+#akaike weights====
+
+
+AIC(cmod1_noint_180_ML$lme, clin_int_180_ML$lme, cmod1_180_ML$lme) #smooth no interaction still best
+
+#smooth is lowest
+delta_smooth <-  0
+delta_smint <- aic_smint180 - aic_sm180
+delta_linint <- aic_linint180 - aic_sm180
+
+
+# akaike weights
+sumbinaic <- sum(exp(-0.5*delta_smooth), exp(-0.5*delta_smint), exp(-0.5*delta_linint)) 
+# 
+aw_smoothint <- exp(-0.5*delta_smint)/sumbinaic
+aw_smooth <- exp(-0.5*delta_smooth)/sumbinaic
+aw_linint <- exp(-0.5*delta_linint)/sumbinaic
+
+
+
+
+
+#only overlap============================================================================
+
+#get percentiles
+
+min(sebs_shallower_180$BOT_TEMP[which(sebs_shallower_180$period=="early")])  
+min(sebs_shallower_180$BOT_TEMP[which(sebs_shallower_180$period=="late")])  
+
+max(sebs_shallower_180$BOT_TEMP[which(sebs_shallower_180$period=="early")])  
+max(sebs_shallower_180$BOT_TEMP[which(sebs_shallower_180$period=="late")])  
+
+ggplot(sebs_shallower_180, aes(period, BOT_TEMP)) + geom_boxplot() + geom_point(position="jitter")
+
+ggplot(sebs_shallower_180, aes(YEAR, BOT_TEMP)) + geom_point()
+
+tempsummary <- sebs_shallower_180 %>% group_by(period) %>%
+  summarize(mean_Btemp=mean(BOT_TEMP, na.rm=TRUE),
+            q_05=quantile(BOT_TEMP, 0.05, na.rm=TRUE),
+            q_95=quantile(BOT_TEMP, 0.95, na.rm=TRUE),
+            q_02=quantile(BOT_TEMP, 0.02, na.rm=TRUE),
+            q_98=quantile(BOT_TEMP, 0.98, na.rm=TRUE))
+
+
+
+#analyze only data that falls within the 5th and 95th quantile of both 
+overlapperiods <- sebs_shallower_180[which(sebs_shallower_180$BOT_TEMP<4.8 & sebs_shallower_180$BOT_TEMP>0),]
+broadoverlapperiods <- sebs_shallower_180[which(sebs_shallower_180$BOT_TEMP<5.6 & sebs_shallower_180$BOT_TEMP>-1),]
+
+#smaller overlap
+
+ovrlp_noint_180 <- gamm(logCPUE ~  s(BOT_DEPTH) +
+                          s(BOT_TEMP),  random=list(YEAR_factor=~1), 
+                        correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE), method="ML",
+                        data=overlapperiods)
+saveRDS(ovrlp_noint_180, file="~/Dropbox/Work folder/Pollock Analyses/bold-new-pollock/scripts/overlap_no_int_lessthan180.RDS")
+ovrlp_noint_180 <- readRDS( file="~/Dropbox/Work folder/Pollock Analyses/bold-new-pollock/scripts/overlap_no_int_lessthan180.RDS")
+
+ovrlp_smint_180 <- gamm(logCPUE ~  s(BOT_DEPTH) +
+                          s(BOT_TEMP, by=as.factor(period), bs="fs"),  random=list(YEAR_factor=~1), 
+                        correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE), method="ML",
+                        data=overlapperiods)
+saveRDS(ovrlp_smint_180, file="~/Dropbox/Work folder/Pollock Analyses/bold-new-pollock/scripts/overlap_smooth_int_lessthan180.RDS")
+ovrlp_smint_180 <- readRDS( file="~/Dropbox/Work folder/Pollock Analyses/bold-new-pollock/scripts/overlap_smooth_int_lessthan180.RDS")
+
+ovrlp_linint_180 <- gamm(logCPUE ~  s(BOT_DEPTH) +
+                          BOT_TEMP:period,  random=list(YEAR_factor=~1), 
+                        correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE), method="ML",
+                        data=overlapperiods)
+saveRDS(ovrlp_linint_180, file="~/Dropbox/Work folder/Pollock Analyses/bold-new-pollock/scripts/overlap_smooth_int_lessthan180.RDS")
+ovrlp_linint_180 <- readRDS( file="~/Dropbox/Work folder/Pollock Analyses/bold-new-pollock/scripts/overlap_smooth_int_lessthan180.RDS")
+
+AIC(ovrlp_linint_180$lme, ovrlp_smint_180$lme, ovrlp_noint_180$lme)
+
+plot(ovrlp_smint_180$gam)
+plot(ovrlp_noint_180$gam)
+
+#broader overlap
+
+bigovrlp_noint_180 <- gamm(logCPUE ~  s(BOT_DEPTH) +
+                          s(BOT_TEMP),  random=list(YEAR_factor=~1), 
+                        correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE), method="ML",
+                        data=broadoverlapperiods)
+saveRDS(bigovrlp_noint_180, file="~/Dropbox/Work folder/Pollock Analyses/bold-new-pollock/scripts/big-overlap_no_int_lessthan180.RDS")
+bigovrlp_noint_180 <- readRDS( file="~/Dropbox/Work folder/Pollock Analyses/bold-new-pollock/scripts/big-overlap_no_int_lessthan180.RDS")
+
+bigovrlp_smint_180 <- gamm(logCPUE ~  s(BOT_DEPTH) +
+                          s(BOT_TEMP, by=as.factor(period), bs="fs"),  random=list(YEAR_factor=~1), 
+                        correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE), method="ML",
+                        data=broadoverlapperiods)
+saveRDS(bigovrlp_smint_180, file="~/Dropbox/Work folder/Pollock Analyses/bold-new-pollock/scripts/overlap_smooth_int_lessthan180.RDS")
+bigovrlp_smint_180 <- readRDS( file="~/Dropbox/Work folder/Pollock Analyses/bold-new-pollock/scripts/overlap_smooth_int_lessthan180.RDS")
+
+bigovrlp_linint_180 <- gamm(logCPUE ~  s(BOT_DEPTH) +
+                           BOT_TEMP:period,  random=list(YEAR_factor=~1), 
+                         correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE), method="ML",
+                         data=broadoverlapperiods)
+saveRDS(bigovrlp_linint_180, file="~/Dropbox/Work folder/Pollock Analyses/bold-new-pollock/scripts/overlap_smooth_int_lessthan180.RDS")
+bigovrlp_linint_180 <- readRDS( file="~/Dropbox/Work folder/Pollock Analyses/bold-new-pollock/scripts/overlap_smooth_int_lessthan180.RDS")
+
+AIC(bigovrlp_linint_180$lme, bigovrlp_smint_180$lme, bigovrlp_noint_180$lme)
+
+plot(bigovrlp_smint_180$gam)
+plot(bigovrlp_noint_180$gam)
+
+
+#refit w reml
+
+ovrlp_noint_reml <- gamm(logCPUE ~  s(BOT_DEPTH) +
+                          s(BOT_TEMP),  random=list(YEAR_factor=~1), 
+                        correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE), method="REML",
+                        data=overlapperiods)
+saveRDS(ovrlp_noint_reml, file="~/Dropbox/Work folder/Pollock Analyses/bold-new-pollock/scripts/overlap_no_int_lessthan180_reml.RDS")
+ovrlp_noint_reml <- readRDS( file="~/Dropbox/Work folder/Pollock Analyses/bold-new-pollock/scripts/overlap_no_int_lessthan180_reml.RDS")
+
+overlapperiods$period <- as.factor(overlapperiods$period)
+
+ovrlp_smint_reml <- gamm(logCPUE ~  s(BOT_DEPTH) +
+                          s(BOT_TEMP, by=period, bs="fs"),  random=list(YEAR_factor=~1), 
+                        correlation = corExp(form=~ long_albers + lat_albers|YEAR_factor, nugget=TRUE), method="REML",
+                        data=overlapperiods)
+saveRDS(ovrlp_smint_reml, file="~/Dropbox/Work folder/Pollock Analyses/bold-new-pollock/scripts/overlap_smooth_int_lessthan180_reml.RDS")
+ovrlp_smint_reml <- readRDS( file="~/Dropbox/Work folder/Pollock Analyses/bold-new-pollock/scripts/overlap_smooth_int_lessthan180_reml.RDS")
+
+
+
+par(mfrow=c(1,2))
+
+plot_smooth(ovrlp_noint_reml$gam, view="BOT_TEMP",ylab="Partial effect on log(CPUE)", xlab="Bottom Temperature",
+            ylim=c(-1,5))
+
+plot_smooth(ovrlp_smint_reml$gam, view="BOT_TEMP", plot_all=c("period"), ylab="Partial effect on log(CPUE)", xlab="Bottom Temperature",
+            ylim=c(-1,5), col=c("blue", "red")) #finally works!
+
+
+AIC(ovrlp_smint_reml$lme, ovrlp_noint_reml$lme)
+
+
+
+
+
+
+

@@ -120,6 +120,7 @@ vanilla_2010_rsme
 vanilla_2017_rsme
 vanilla_2018_rsme 
 vanilla_2019_rsme
+vanilla_2021_rsme
 
 #plot----
 #pivot longer so that can plot on same scale!
@@ -256,7 +257,7 @@ refa <- ranef(cmod1_noint$lme,level=3) #extract random effect for year
 rownames(refa) <- substr(rownames(refa),start=5,stop=8) #rename names
 
 ## make a prediction, with random effects zero...
-p0 <- predict(b$gam,data.frame(x0=.3,x1=.6,x2=.98,x3=.77))
+#p0 <- predict(b$gam,data.frame(x0=.3,x1=.6,x2=.98,x3=.77))
 p0_21 <- predict(cmod1_noint$gam, newdata = nebs_sel[which(nebs_sel$YEAR=="2021"),])
 
 ## add in effect for fa = "2" and fb="2/4"...
@@ -314,6 +315,11 @@ ggplot(output_df, aes(predicted_cond_on_random, logCPUE, col=as.factor(year))) +
   geom_smooth(method="lm") + geom_abline(intercept=0) + theme_bw() + ylab("log(CPUE+1)") + xlab("Predicted log(CPUE+1)") +
   facet_wrap(~year)
 
+#manuscript
+ggplot(output_df, aes(predicted_cond_on_random, logCPUE)) + geom_point() + 
+  geom_smooth(method="lm") + geom_abline(intercept=0) + theme_bw() + ylab("log(CPUE+1)") + xlab("Predicted log(CPUE+1)") +
+  facet_wrap(~year)
+
 #plot----
 #pivot longer so that can plot on same scale!
 
@@ -347,4 +353,121 @@ ggplot(data = world) +
   scale_colour_distiller(palette = "Spectral") + theme_bw() +
   theme( legend.position = c(0.97, 0.25), legend.key = element_blank(),
          legend.background=element_blank(), legend.title = element_blank()) 
+
+#for ICES poster
+pred_map_plot_dat$response_type2 <- pred_map_plot_dat$response_type
+# 
+pred_map_plot_dat$response_type2[which(pred_map_plot_dat$response_type=="logCPUE")] <- "Actual"
+pred_map_plot_dat$response_type2[which(pred_map_plot_dat$response_type=="predicted_cond_on_random")] <- "Predicted"
+
+
+ggplot(data = world) +
+  geom_sf() +
+  coord_sf(xlim = c(-178, -155), ylim = c(58, 66), expand = TRUE) +
+  # annotation_scale(location = "bl", width_hint = 0.5) +
+  # annotation_north_arrow(location = "bl", which_north = "true", 
+  #                        pad_x = unit(0.75, "in"), pad_y = unit(0.5, "in"),
+  #                        style = north_arrow_fancy_orienteering) +  
+  geom_point(aes(LONGITUDE,LATITUDE,  col=value), 
+             data=pred_map_plot_dat[which(pred_map_plot_dat$response_type2!="predicted_not_conditional"),]) + 
+  facet_grid(response_type2~year)  +
+  scale_colour_distiller(palette = "Spectral") + theme_bw() +
+  theme( legend.position = c(0.97, 0.25), legend.key = element_blank(),
+         legend.background=element_blank(), legend.title = element_blank())
+
+#try two sets of columns
+library(cowplots)
+
+#NEED TO SET TO SAME SCALE IF PLOTTING LIKE THIS
+
+p1 <- ggplot(data = world) +
+  geom_sf() +
+  coord_sf(xlim = c(-178, -155), ylim = c(58, 66), expand = TRUE) +
+  # annotation_scale(location = "bl", width_hint = 0.5) +
+  # annotation_north_arrow(location = "bl", which_north = "true", 
+  #                        pad_x = unit(0.75, "in"), pad_y = unit(0.5, "in"),
+  #                        style = north_arrow_fancy_orienteering) +  
+  geom_point(aes(LONGITUDE,LATITUDE,  col=value), 
+             data=pred_map_plot_dat[which(pred_map_plot_dat$response_type2!="predicted_not_conditional"&
+                                         pred_map_plot_dat$year<2000 ),]) + 
+  facet_grid(year~response_type2)  +
+  scale_colour_distiller(palette = "Spectral", 
+  limits = c(min(pred_map_plot_dat$value, na.rm=TRUE), max(pred_map_plot_dat$value, na.rm=TRUE))) + theme_bw() +
+  theme( legend.position = "right", legend.key = element_blank(),
+         legend.background=element_blank(), legend.title = element_blank())
+
+p2 <- ggplot(data = world) +
+  geom_sf() +
+  coord_sf(xlim = c(-178, -155), ylim = c(58, 66), expand = TRUE) +
+  # annotation_scale(location = "bl", width_hint = 0.5) +
+  # annotation_north_arrow(location = "bl", which_north = "true", 
+  #                        pad_x = unit(0.75, "in"), pad_y = unit(0.5, "in"),
+  #                        style = north_arrow_fancy_orienteering) +  
+  geom_point(aes(LONGITUDE,LATITUDE,  col=value), 
+             data=pred_map_plot_dat[which(pred_map_plot_dat$response_type2!="predicted_not_conditional"&
+                                            pred_map_plot_dat$year>2000 ),]) + 
+  facet_grid(year~response_type2)  +
+  scale_colour_distiller(palette = "Spectral", 
+limits = c(min(pred_map_plot_dat$value, na.rm=TRUE), max(pred_map_plot_dat$value, na.rm=TRUE))) + theme_bw() +
+  theme( legend.position = "right", legend.key = element_blank(),
+         legend.background=element_blank(), legend.title = element_blank())
+
+plot_grid(p1, p2)
+
+
+#let's do only recent years for poster
+ggplot(data = world) +
+  geom_sf() +
+  coord_sf(xlim = c(-178, -155), ylim = c(58, 66), expand = TRUE) +
+  # annotation_scale(location = "bl", width_hint = 0.5) +
+  # annotation_north_arrow(location = "bl", which_north = "true", 
+  #                        pad_x = unit(0.75, "in"), pad_y = unit(0.5, "in"),
+  #                        style = north_arrow_fancy_orienteering) +  
+  geom_point(aes(LONGITUDE,LATITUDE,  col=value), 
+             data=pred_map_plot_dat[which(pred_map_plot_dat$response_type2!="predicted_not_conditional"&
+                                            pred_map_plot_dat$year>2000 ),]) + 
+  facet_grid(response_type2~year)  +
+  scale_colour_distiller(palette = "Spectral") + theme_bw() +
+  theme( legend.position = c(0.9, 0.07), legend.key = element_blank(),
+         legend.background=element_blank(), legend.title = element_blank(),
+         legend.direction = "horizontal")
+
+
+
+
+#get RMSE----
+cond_mod_rsme <- sqrt(mean((output_df$logCPUE - output_df$predicted_cond_on_random)^2, na.rm=TRUE))
+
+out1982 <- output_df[which(output_df$year=="1982"),]
+out1985 <- output_df[which(output_df$year=="1985"),]
+out1988 <- output_df[which(output_df$year=="1988"),]
+out1991 <- output_df[which(output_df$year=="1991"),]
+
+out2010 <- output_df[which(output_df$year=="2010"),]
+out2017 <- output_df[which(output_df$year=="2017"),]
+out2018 <- output_df[which(output_df$year=="2018"),]
+out2019 <- output_df[which(output_df$year=="2019"),]
+out2021 <- output_df[which(output_df$year=="2021"),]
+
+cond_1982_rsme <- sqrt(mean((out1982$logCPUE - out1982$predicted_cond_on_random)^2, na.rm=TRUE))
+cond_1985_rsme <- sqrt(mean((out1985$logCPUE - out1985$predicted_cond_on_random)^2, na.rm=TRUE))
+cond_1988_rsme <- sqrt(mean((out1988$logCPUE - out1988$predicted_cond_on_random)^2, na.rm=TRUE))
+cond_1991_rsme <- sqrt(mean((out1991$logCPUE - out1991$predicted_cond_on_random)^2, na.rm=TRUE))
+cond_2010_rsme <- sqrt(mean((out2010$logCPUE - out2010$predicted_cond_on_random)^2, na.rm=TRUE))
+cond_2017_rsme <- sqrt(mean((out2017$logCPUE - out2017$predicted_cond_on_random)^2, na.rm=TRUE))
+cond_2018_rsme <- sqrt(mean((out2018$logCPUE - out2018$predicted_cond_on_random)^2, na.rm=TRUE))
+cond_2019_rsme <- sqrt(mean((out2019$logCPUE - out2019$predicted_cond_on_random)^2, na.rm=TRUE))
+cond_2021_rsme <- sqrt(mean((out2021$logCPUE - out2021$predicted_cond_on_random)^2, na.rm=TRUE))
+
+cond_1982_rsme
+cond_1985_rsme
+cond_1988_rsme
+cond_1991_rsme
+cond_2010_rsme
+cond_2017_rsme
+cond_2018_rsme 
+cond_2019_rsme
+cond_2021_rsme
+
+
 
