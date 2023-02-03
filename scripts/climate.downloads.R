@@ -211,12 +211,14 @@ clim.dat$AO.jfm <- ao
 # now NCEP/NCAR winds
 # first U-wind (zonal / east-west winds)
 URL <- 
-  "http://apdrc.soest.hawaii.edu/erddap/griddap/hawaii_soest_e77d_1b03_9908.nc?uwnd[(1948-01-01):1:(2020-01-01T00:00:00Z)][(45):1:(75)][(150):1:(225)]"
+  "http://apdrc.soest.hawaii.edu/erddap/griddap/hawaii_soest_e77d_1b03_9908.nc?uwnd[(1948-01-01):1:(2022-12-01T00:00:00Z)][(45):1:(75)][(150):1:(225)]"
 
 download.file(URL, "data/NCEP.NCAR.u-wind.nc")
 
+
+
 # and test
-test <- nc_open("data/NCEP.NCAR.u-wind.nc")
+test <- nc_open("data/hawaii_soest_e77d_1b03_9908_cecc_99ce_66f0.nc")
 test
 
 x <- ncvar_get(test, "longitude")
@@ -233,16 +235,17 @@ image(x,y,z, col=tim.colors(64), xlab = "", ylab = "")
 
 contour(x,y,z, add=T, col="white",vfont=c("sans serif", "bold"))
 map('world2Hires', add=T, lwd=1)
+
 # looks good!
 
 # first V-wind (meridional / north-south winds)
 URL <- 
-  "http://apdrc.soest.hawaii.edu/erddap/griddap/hawaii_soest_aa14_316a_e154.nc?vwnd[(1948-01-01):1:(2020-01-01T00:00:00Z)][(45):1:(75)][(150):1:(225)]"
+  "http://apdrc.soest.hawaii.edu/erddap/griddap/hawaii_soest_aa14_316a_e154.nc?vwnd[(1948-01-01):1:(2022-12-01T00:00:00Z)][(45):1:(75)][(150):1:(225)]"
 
 download.file(URL, "data/NCEP.NCAR.v-wind.nc")
 
 # and test
-test <- nc_open("data/NCEP.NCAR.v-wind.nc")
+test <- nc_open("data/hawaii_soest_aa14_316a_e154_c290_8615_7685.nc")
 test
 
 x <- ncvar_get(test, "longitude")
@@ -264,12 +267,12 @@ map('world2Hires', add=T, lwd=1)
 #####################
 # now we need daily winds for 60ºN 170ºW to calculate proportion of NW/SE winds
 
-URL <- "http://apdrc.soest.hawaii.edu/erddap/griddap/hawaii_soest_a66c_3524_57cf.nc?uwnd[(1948-01-01):1:(2019-12-31T00:00:00Z)][(60):1:(60)][(190):1:(190)]"
+URL <- "http://apdrc.soest.hawaii.edu/erddap/griddap/hawaii_soest_a66c_3524_57cf.nc?uwnd[(1948-01-01):1:(2022-12-31T00:00:00Z)][(60):1:(60)][(190):1:(190)]"
 
 download.file(URL, "data/NCEP.NCAR.daily.u-wind.nc")
 
 # and load
-dat <- nc_open("data/NCEP.NCAR.daily.u-wind.nc")
+dat <- nc_open("data/hawaii_soest_a66c_3524_57cf_b7c6_1136_1f94.nc")
 
 uwnd <- ncvar_get(dat, "uwnd", verbose = F)
 
@@ -281,10 +284,10 @@ m <- months(d)
 yr <- as.numeric(as.character(years(d)))
 
 # add v-wind
-URL <- "http://apdrc.soest.hawaii.edu/erddap/griddap/hawaii_soest_3fcd_f037_d8fc.nc?vwnd[(1948-01-01):1:(2019-12-31T00:00:00Z)][(60):1:(60)][(190):1:(190)]"
+URL <- "http://apdrc.soest.hawaii.edu/erddap/griddap/hawaii_soest_3fcd_f037_d8fc.nc?vwnd[(1948-01-01):1:(2022-12-31T00:00:00Z)][(60):1:(60)][(190):1:(190)]"
 
 download.file(URL, "data/NCEP.NCAR.daily.v-wind.nc")
-dat <- nc_open("data/NCEP.NCAR.daily.v-wind.nc")
+dat <- nc_open("data/hawaii_soest_3fcd_f037_d8fc_f565_b186_7dc8.nc")
 vwnd <- ncvar_get(dat, "vwnd", verbose = F)
 
 # check that the dates are identical between the two data sets
@@ -354,6 +357,16 @@ winSE <- rowMeans(OctAprSE)
 plot(names(winSE), winSE, type="o") 
 
 # very unusual proportions of winter proportions in recent years! should double-check these!
+
+# save as standalone csv
+wind <- data.frame(year = 1948:2022,
+                   SE.wind.Oct.Apr = c(NA, winSE),
+                   NW.wind.Oct.Apr = c(NA, winNW),
+                   SE.wind.May.Sep = sumSE,
+                   NW.wind.May.Sep = sumNW)
+
+write.csv(wind, "./output/EBS_daily_SE_NW_wind.csv")
+
 
 # add to climate data
 
