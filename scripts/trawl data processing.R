@@ -8,8 +8,9 @@ library(mapdata)
 path <- paste(getwd(), "/data", sep="") # I know there's a better way to do this!
 files <- list.files(path=path)
 
-keep <- grep("ebs", files)
-files <- files[keep]
+keep1 <- grep("ebs1", files)
+keep2 <- grep("ebs2", files)
+files <- files[c(keep1,keep2)]
 
 # load and combine!
 
@@ -139,4 +140,9 @@ text(-160, 61, "2014-2019", col="white")
 
 dev.off()
 
-# NOT SURE ALL THE YEARS ARE IN NBS DATA!
+# 
+
+#save object
+
+wd <- getwd()
+write_csv(trawl.data, file=paste(wd,"/data/trawl_data_obj.csv", sep=""))
