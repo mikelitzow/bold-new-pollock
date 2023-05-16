@@ -12,6 +12,7 @@ library(corrplot)
 #for now using trawl.data from 'trawl data processing.R' just to get a feel for the data
 summary(trawl.data)
 
+
 unique(trawl.data$COMMON)
 unique(trawl.data$SCIENTIFIC) #WOW a lot of sps!!
 
