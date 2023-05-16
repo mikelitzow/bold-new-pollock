@@ -142,7 +142,3 @@ dev.off()
 
 # 
 
-#save object
-
-wd <- getwd()
-write_csv(trawl.data, file=paste(wd,"/data/trawl_data_obj.csv", sep=""))
